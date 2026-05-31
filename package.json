@@ -1,8 +1,8 @@
 {
-    "name": "equicord",
+    "name": "vault",
     "private": "true",
     "version": "1.14.13.1",
-    "description": "The other cutest Discord client mod",
+    "description": "Vault — a personal Discord client mod built on Equicord",
     "homepage": "https://github.com/Equicord/Equicord#readme",
     "bugs": {
         "url": "https://github.com/Equicord/Equicord/issues"
@@ -28,6 +28,7 @@
         "generateEquicordPluginJson": "tsx scripts/generatePluginList.ts --equicord",
         "generateVencordPluginJson": "tsx scripts/generatePluginList.ts --vencord",
         "generateTypes": "tspc --emitDeclarationOnly --declaration --outDir packages/vencord-types --allowJs false",
+        "update-vault": "node scripts/updateVault.mjs",
         "inject": "node scripts/runInstaller.mjs -- --install",
         "uninject": "node scripts/runInstaller.mjs -- --uninstall",
         "repair": "node scripts/runInstaller.mjs -- --repair",
