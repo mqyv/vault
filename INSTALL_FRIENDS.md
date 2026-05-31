@@ -13,8 +13,8 @@ Vault est un mod personnel pour le client Discord (basé sur la techno open-sour
 ## Installation
 
 ```bash
-# 1. Récupérer Vault (remplace l'URL par celle du repo)
-git clone <URL_DU_REPO_VAULT> Vault
+# 1. Récupérer Vault
+git clone https://github.com/mqyv/vault.git Vault
 cd Vault
 
 # 2. Installer les dépendances
