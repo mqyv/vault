@@ -1,45 +1,49 @@
 # Installer Vault
 
-Vault est un mod personnel pour le client Discord (basé sur la techno open-source Vencord/Equicord, sous licence GPL-3.0).
+Vault est un mod personnel pour le client Discord.
 
-> ⚠️ Modifier le client Discord va à l'encontre des conditions d'utilisation de Discord. Utilisation à tes risques. C'est pour un usage personnel entre amis.
+> ⚠️ Modifier le client Discord va à l'encontre des conditions d'utilisation de Discord. Usage personnel, à tes risques.
 
-## Prérequis (à installer une fois)
+---
 
-1. **Node.js** (version 18+) — https://nodejs.org
-2. **Git** — https://git-scm.com
-3. **pnpm** — ouvre un terminal et tape : `npm install -g pnpm`
+## 🚀 Installation automatique (recommandée)
 
-## Installation
+**Option A — Double-clic**
+1. Télécharge **[`install-vault.bat`](https://raw.githubusercontent.com/mqyv/vault/main/install-vault.bat)** (clic droit → « Enregistrer sous »).
+2. Double-clique dessus.
+3. Laisse faire : il installe tout (Git, Node, pnpm), télécharge Vault, le compile et l'injecte dans Discord.
+4. Rouvre Discord → Vault est dans les **Réglages** (onglet « Vault »).
 
-```bash
-# 1. Récupérer Vault
-git clone https://github.com/mqyv/vault.git Vault
-cd Vault
-
-# 2. Installer les dépendances
-pnpm install
-
-# 3. Compiler
-pnpm build
-
-# 4. Fermer complètement Discord, puis injecter Vault
-pnpm inject
+**Option B — Une seule commande**
+Ouvre **PowerShell** (touche Windows → tape `PowerShell` → Entrée) et colle :
+```powershell
+irm https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.ps1 | iex
 ```
 
-Rouvre Discord : Vault apparaît dans les **Réglages** (onglet « Vault »).
+L'installeur peut afficher une fenêtre Windows pour autoriser l'installation de Git/Node — clique **Oui**.
+
+---
 
 ## Mettre à jour
-
 Quand Discord se met à jour et casse quelque chose :
-
-```bash
-pnpm update-vault   # récupère les correctifs
-pnpm inject         # Discord fermé, ré-injecte
+```powershell
+pnpm -C "$HOME\Vault" update-vault
 ```
+Puis rouvre Discord (ré-injection seulement si Discord lui-même a été mis à jour : relance l'installeur).
 
 ## Désinstaller
+```powershell
+pnpm -C "$HOME\Vault" uninject
+```
 
+---
+
+## Installation manuelle (si tu préfères)
+Prérequis : [Node.js 18+](https://nodejs.org), [Git](https://git-scm.com), puis `npm install -g pnpm`.
 ```bash
-pnpm uninject
+git clone https://github.com/mqyv/vault.git Vault
+cd Vault
+pnpm install
+pnpm build
+pnpm inject   # Discord fermé
 ```
