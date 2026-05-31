@@ -5,9 +5,13 @@
     le compile et l'injecte dans Discord. Un seul fichier, zero config.
 #>
 
+param(
+    [string]$InstallDir = (Join-Path $HOME "Vault"),
+    [switch]$Yes  # auto-confirme (ferme Discord sans demander) - utilise par l'assistant .exe
+)
+
 $ErrorActionPreference = "Stop"
-$RepoUrl    = "https://github.com/mqyv/vault.git"
-$InstallDir = Join-Path $HOME "Vault"
+$RepoUrl = "https://github.com/mqyv/vault.git"
 
 function Step($m) { Write-Host "`n==> $m" -ForegroundColor Magenta }
 function Ok($m)   { Write-Host "    [ok] $m" -ForegroundColor Green }
@@ -91,8 +95,12 @@ Step "Injection dans Discord"
 $discord = Get-Process -Name "Discord", "DiscordPTB", "DiscordCanary" -ErrorAction SilentlyContinue
 if ($discord) {
     Warn "Discord doit etre ferme pour terminer l'installation."
-    $r = Read-Host "    Fermer Discord automatiquement maintenant ? (O/N)"
-    if ($r -match '^(o|y)') {
+    $close = $Yes
+    if (-not $close) {
+        $r = Read-Host "    Fermer Discord automatiquement maintenant ? (O/N)"
+        $close = ($r -match '^(o|y)')
+    }
+    if ($close) {
         $discord | Stop-Process -Force
         Start-Sleep -Seconds 2
         Ok "Discord ferme"
