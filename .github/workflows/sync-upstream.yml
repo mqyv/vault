@@ -1,0 +1,49 @@
+name: Sync with Equicord
+
+# Garde le repo Vault à jour avec les correctifs Equicord, automatiquement.
+# Chaque utilisateur récupère ensuite ces correctifs via l'updater intégré
+# (bouton « Restart »). Personne n'a rien à faire.
+
+on:
+  schedule:
+    - cron: "0 5 * * *" # tous les jours à 05:00 UTC
+  workflow_dispatch: {} # + bouton « Run workflow » manuel sur GitHub
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Merge upstream Equicord
+    runs-on: ubuntu-latest
+    # ne tourne que sur le fork, jamais sur Equicord lui-même
+    if: github.repository != 'Equicord/Equicord'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "vault-sync[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch Equicord
+        run: |
+          git remote add upstream https://github.com/Equicord/Equicord.git
+          git fetch upstream main
+
+      - name: Merge (fast-forward-friendly)
+        run: |
+          # merge classique : l'historique n'avance que vers l'avant, donc les
+          # utilisateurs peuvent toujours faire un pull en fast-forward.
+          git merge --no-edit upstream/main
+
+      - name: Push
+        run: git push origin HEAD:main
