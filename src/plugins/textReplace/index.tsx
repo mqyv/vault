@@ -354,7 +354,7 @@ function modifyIncomingMessage(message: Message) {
 
 const TEXT_REPLACE_RULES_EXEMPT_CHANNEL_IDS = [
     "1102784112584040479", // Vencord's Text Replace Rules Channel
-    "1419347113745059961", // Equicord's Requests Channel
+    "1419347113745059961", // Vault's Requests Channel
     ...SUPPORT_CHANNEL_IDS
 ];
 

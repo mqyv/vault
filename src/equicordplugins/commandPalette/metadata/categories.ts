@@ -127,12 +127,12 @@ export const BUILT_IN_CATEGORIES: CommandCategory[] = [
     {
         id: DEFAULT_CATEGORY_ID,
         label: "Quick Actions",
-        description: "Common Equicord shortcuts"
+        description: "Common Vault shortcuts"
     },
     {
         id: "plugins",
         label: "Plugins",
-        description: "Manage Equicord and Vencord plugins"
+        description: "Manage Vault and Vencord plugins"
     },
     {
         id: CONTEXT_PROVIDER_ID,
@@ -157,7 +157,7 @@ export const BUILT_IN_CATEGORIES: CommandCategory[] = [
     {
         id: "updates",
         label: "Updates",
-        description: "Stay up to date with Equicord"
+        description: "Stay up to date with Vault"
     },
     {
         id: "discord-settings",
