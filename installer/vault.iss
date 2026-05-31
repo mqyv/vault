@@ -43,5 +43,5 @@ Filename: "powershell.exe"; \
 [UninstallRun]
 ; Retire Vault de Discord proprement avant de supprimer les fichiers (best-effort).
 Filename: "powershell.exe"; \
-    Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""try {{ pnpm -C '{app}' uninject }} catch {{}}"""; \
+    Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""try {{ node '{app}\scripts\runInstaller.mjs' -- --uninstall --branch auto }} catch {{}}"""; \
     Flags: runhidden; RunOnceId: "VaultUninject"

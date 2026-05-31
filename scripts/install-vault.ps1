@@ -109,7 +109,8 @@ if ($discord) {
         return
     }
 }
-pnpm -C $InstallDir inject
+# injection non-interactive : -branch auto detecte Discord tout seul
+node "$InstallDir\scripts\runInstaller.mjs" -- --install --branch auto
 
 Write-Host ""
 Write-Host "  =======================================================" -ForegroundColor Green
