@@ -66,7 +66,3 @@ Discord est une marque de Discord Inc., mentionnée uniquement à titre descript
 Les modifications du client vont à l'encontre des conditions d'utilisation de Discord. Dans les faits, Discord est plutôt indifférent à leur égard et aucun bannissement n'est connu pour l'usage d'un client mod. Mais si ton compte est essentiel, par prudence, évite tout client mod. Évite aussi de poster des captures montrant Vault dans un serveur où ça pourrait poser problème.
 
 </details>
-
----
-
-<sub>Vault s'appuie sur les projets open-source Vencord et Equicord (GPL-3.0).</sub>
