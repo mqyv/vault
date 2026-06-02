@@ -6,7 +6,7 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
 import definePlugin from "@utils/types";
-import type { Channel, User } from "@vencord/discord-types";
+import type { Channel, Message, User } from "@vencord/discord-types";
 import { ChannelStore, Menu, MessageActions, RestAPI, Toasts, UserStore } from "@webpack/common";
 
 interface UserContextProps {
@@ -35,12 +35,16 @@ function toast(message: string, type = Toasts.Type.MESSAGE) {
     Toasts.show({ message, type, id: Toasts.genId(), options: { position: Toasts.Position.BOTTOM } });
 }
 
-async function clearMessages(channelId: string) {
+// fromMessageId: if set, only delete messages from that message onwards (the
+// targeted message itself + everything newer than it).
+async function clearMessages(channelId: string, fromMessageId?: string) {
     const myId = UserStore.getCurrentUser()?.id;
     if (!myId) return;
 
     clearing.add(channelId);
-    toast("Clearing your messages... (open the menu again to stop)");
+    toast(fromMessageId
+        ? "Clearing from this message... (open the user menu to stop)"
+        : "Clearing your messages... (open the menu again to stop)");
 
     let before: string | undefined;
     let deleted = 0;
@@ -63,9 +67,13 @@ async function clearMessages(channelId: string) {
             if (!Array.isArray(body) || body.length === 0) break;
 
             // body is newest-first, which is exactly the order we want to delete in
+            let reachedEnd = false;
             for (const msg of body) {
-                if (!clearing.has(channelId)) break;
+                if (!clearing.has(channelId)) { reachedEnd = true; break; }
                 before = msg.id; // advance cursor to ever-older messages
+
+                // stop once we go older than the target message (bounded mode)
+                if (fromMessageId && BigInt(msg.id) < BigInt(fromMessageId)) { reachedEnd = true; break; }
 
                 if (msg.author?.id !== myId) continue;
                 if (!DELETABLE_TYPES.includes(msg.type)) continue;
@@ -80,6 +88,7 @@ async function clearMessages(channelId: string) {
                 await sleep(350);
             }
 
+            if (reachedEnd) break;
             if (body.length < 100) break; // reached the oldest message
         }
     } finally {
@@ -119,12 +128,34 @@ const patchUserContext: NavContextMenuPatchCallback = (children, { user, channel
     );
 };
 
+const patchMessageContext: NavContextMenuPatchCallback = (children, { message }: { message?: Message; }) => {
+    if (!message) return;
+    const channelId = message.channel_id;
+
+    children.push(
+        <Menu.MenuItem
+            id="vault-clear-from-here"
+            label="Clear from this Message"
+            color="danger"
+            icon={TrashIcon}
+            action={() => {
+                if (clearing.has(channelId)) {
+                    toast("Already clearing this channel — open the user menu to stop.", Toasts.Type.FAILURE);
+                    return;
+                }
+                clearMessages(channelId, message.id);
+            }}
+        />
+    );
+};
+
 export default definePlugin({
     name: "ClearMessages",
-    description: "Adds a 'Clear Messages' option to the user menu that deletes your own messages in a DM one by one, newest to oldest. Re-open the menu and click 'Stop Clearing' to stop.",
+    description: "Deletes your own messages one by one (newest to oldest). 'Clear Messages' on a user clears a whole DM; 'Clear from this Message' on a message clears that message and everything after it. Re-open the user menu to stop.",
     authors: [{ name: "eqen", id: 1483151471183921346n }],
     tags: ["Utility", "Chat"],
     contextMenus: {
-        "user-context": patchUserContext
+        "user-context": patchUserContext,
+        "message": patchMessageContext
     }
 });
