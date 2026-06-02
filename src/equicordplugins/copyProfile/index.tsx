@@ -44,29 +44,58 @@ async function toDataUri(url: string): Promise<string> {
     });
 }
 
+async function patch(url: string, body: Record<string, any>): Promise<boolean> {
+    if (!body || !Object.keys(body).length) return false;
+    try {
+        await RestAPI.patch({ url, body } as any);
+        return true;
+    } catch (e) {
+        console.error("[CopyProfile]", url, e);
+        return false;
+    }
+}
+
 async function cloneProfile(user: User) {
     try {
         await fetchUserProfile(user.id);
         const profile: any = UserProfileStore.getUserProfile(user.id) ?? {};
+        const u: any = user;
 
-        // --- avatar / banner (account-level) ---
+        // --- avatar / banner image (account-level) ---
         const me: Record<string, any> = {};
-        if (user.avatar) me.avatar = await toDataUri(cdn("avatars", user.id, user.avatar));
-        if (profile.banner) me.banner = await toDataUri(cdn("banners", user.id, profile.banner));
-        if (Object.keys(me).length) await RestAPI.patch({ url: "/users/@me", body: me } as any);
+        try {
+            if (user.avatar) me.avatar = await toDataUri(cdn("avatars", user.id, user.avatar));
+            if (profile.banner) me.banner = await toDataUri(cdn("banners", user.id, profile.banner));
+        } catch { /* image fetch failed (e.g. banner needs Nitro) */ }
+        await patch("/users/@me", me);
 
-        // --- bio / pronouns / accent (profile-level) ---
+        // --- bio / pronouns / banner color (profile-level) ---
         const prof: Record<string, any> = {};
         if (profile.bio) prof.bio = profile.bio;
         if (profile.pronouns) prof.pronouns = profile.pronouns;
-        if (profile.accentColor != null) prof.accent_color = profile.accentColor;
-        if (Object.keys(prof).length) await RestAPI.patch({ url: "/users/@me/profile", body: prof } as any);
+        // accent color = the solid colour shown as the banner when there's no banner image
+        const accent = profile.accentColor ?? u.accentColor ?? profile.bannerColor;
+        if (accent != null) prof.accent_color = accent;
+        await patch("/users/@me/profile", prof);
 
-        showNotification({ title: "Copy Profile", body: `Cloned ${user.username}'s profile onto yours.` });
+        // --- profile theme colours (gradient) — attempted whether or not you have Nitro ---
+        const themeColors = profile.themeColors ?? profile.theme_colors;
+        const themeApplied = Array.isArray(themeColors) && themeColors.length
+            ? await patch("/users/@me/profile", { theme_colors: themeColors })
+            : false;
+
+        showNotification({
+            title: "Copy Profile",
+            body: `Cloned ${user.username}'s profile onto yours.` + (
+                (Array.isArray(themeColors) && themeColors.length && !themeApplied)
+                    ? " (profile theme needs Nitro on your account)"
+                    : ""
+            )
+        });
     } catch (e) {
         console.error("[CopyProfile]", e);
         Toasts.show({
-            message: "Failed to clone profile (animated avatar/banner needs Nitro).",
+            message: "Failed to clone profile.",
             type: Toasts.Type.FAILURE,
             id: Toasts.genId(),
             options: { position: Toasts.Position.BOTTOM }

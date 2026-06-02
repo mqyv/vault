@@ -23,17 +23,16 @@ function VaultIcon(props: any) {
     );
 }
 
-const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
-
 async function sendAll(channelId: string, messages: string[]) {
+    // Fire in order, back-to-back. RestAPI queues + auto-handles rate limits,
+    // so this goes as fast as Discord allows while preserving order.
     for (const content of messages) {
         if (!content.trim()) continue;
         try {
             await sendMessage(channelId, { content });
         } catch {
-            // RestAPI auto-handles rate limits; ignore individual failures
+            // ignore individual failures
         }
-        await sleep(300);
     }
 }
 
