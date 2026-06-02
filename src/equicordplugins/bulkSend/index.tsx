@@ -7,7 +7,6 @@ import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
 import { sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
-import { getVaultOwnerAvatarURL } from "@utils/vaultOwner";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Modal, openModal, Text, TextArea, TextInput, useState } from "@webpack/common";
 
@@ -20,9 +19,6 @@ const settings = definePluginSettings({
 });
 
 function VaultIcon(props: any) {
-    const url = getVaultOwnerAvatarURL();
-    if (url) return <img src={url} width={20} height={20} style={{ borderRadius: "50%" }} alt="Vault" {...props} />;
-    // fallback while the avatar isn't loaded yet
     return (
         <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
             <rect x="3" y="3" width="18" height="18" rx="4" />

@@ -7,7 +7,6 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
 import { fetchUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { getVaultOwnerAvatarURL } from "@utils/vaultOwner";
 import type { User } from "@vencord/discord-types";
 import { Alerts, Menu, RestAPI, Toasts, UserProfileStore } from "@webpack/common";
 
@@ -16,8 +15,6 @@ interface UserContextProps {
 }
 
 function VaultIcon(props: any) {
-    const url = getVaultOwnerAvatarURL();
-    if (url) return <img src={url} width={18} height={18} style={{ borderRadius: "50%" }} alt="Vault" {...props} />;
     return (
         <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
             <rect x="3" y="3" width="18" height="18" rx="4" />
