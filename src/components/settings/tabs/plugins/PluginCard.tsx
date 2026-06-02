@@ -106,8 +106,8 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         {
             condition: isEquicordPlugin,
             src: "https://equicord.org/assets/favicon.png",
-            alt: "Vault",
-            title: "Vault Plugin"
+            alt: "Equicord",
+            title: "Equicord Plugin"
         },
         {
             condition: isVencordPlugin,
@@ -140,7 +140,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         />
     ) : null;
 
-    const tooltip = vaultOwnerAvatar ? "Vault plugin by eqen" : (pluginDetails?.title || "Unknown Plugin");
+    const tooltip = vaultOwnerAvatar ? "Plugin by eqen" : (pluginDetails?.title || "Unknown Plugin");
 
     return (
         <AddonCard
