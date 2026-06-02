@@ -12,7 +12,7 @@ import { AddonCard } from "@components/settings/AddonCard";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { Plugin } from "@utils/types";
-import { React, showToast, Toasts } from "@webpack/common";
+import { React, showToast, Toasts, UserStore } from "@webpack/common";
 
 import { PluginMeta } from "~plugins";
 
@@ -36,6 +36,13 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
     const isVencordPlugin = pluginMeta.folderName.startsWith("src/plugins/") ?? false;
     const isUserPlugin = pluginMeta?.userPlugin ?? false;
     const isModifiedPlugin = plugin.isModified ?? false;
+
+    // Vault: plugins authored by the owner show their Discord avatar as the badge
+    const VAULT_OWNER_ID = "1483151471183921346";
+    const isVaultOwnPlugin = (plugin.authors ?? []).some(a => String(a.id) === VAULT_OWNER_ID);
+    const vaultOwnerAvatar = isVaultOwnPlugin
+        ? ((UserStore.getUser(VAULT_OWNER_ID) as any)?.getAvatarURL?.() ?? null)
+        : null;
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
@@ -118,7 +125,14 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
     const pluginDetails = pluginInfo.find(p => p.condition);
 
-    const sourceBadge = pluginDetails ? (
+    const sourceBadge = vaultOwnerAvatar ? (
+        <img
+            src={vaultOwnerAvatar}
+            alt="eqen"
+            className={cl("source")}
+            style={{ borderRadius: "50%" }}
+        />
+    ) : pluginDetails ? (
         <img
             src={pluginDetails.src}
             alt={pluginDetails.alt}
@@ -126,7 +140,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         />
     ) : null;
 
-    const tooltip = pluginDetails?.title || "Unknown Plugin";
+    const tooltip = vaultOwnerAvatar ? "Vault plugin by eqen" : (pluginDetails?.title || "Unknown Plugin");
 
     return (
         <AddonCard
