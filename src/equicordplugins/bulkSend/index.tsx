@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Modal, openModal, Text, TextArea, useState } from "@webpack/common";
+import { Modal, openModal, Text, TextArea, TextInput, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     delayMs: {
@@ -32,9 +32,9 @@ function VaultIcon(props: any) {
     );
 }
 
-async function sendAll(channelId: string, messages: string[]) {
+async function sendAll(channelId: string, messages: string[], delayMs: number) {
     // Fire in order. RestAPI queues + auto-handles rate limits.
-    const delay = Math.max(0, Number(settings.store.delayMs) || 0);
+    const delay = Math.max(0, delayMs || 0);
     for (const content of messages) {
         if (!content.trim()) continue;
         try {
@@ -48,7 +48,9 @@ async function sendAll(channelId: string, messages: string[]) {
 
 function BulkSendModal(props: RenderModalProps & { channelId: string; }) {
     const [text, setText] = useState("");
+    const [delay, setDelay] = useState(String(settings.store.delayMs ?? 0));
     const messages = text.split("\n").filter(l => l.trim());
+    const delayMs = Math.max(0, parseInt(delay, 10) || 0);
 
     return (
         <Modal
@@ -59,8 +61,9 @@ function BulkSendModal(props: RenderModalProps & { channelId: string; }) {
                     text: `Send all (${messages.length})`,
                     variant: "brand",
                     onClick() {
+                        settings.store.delayMs = delayMs; // remember for next time
                         props.onClose();
-                        sendAll(props.channelId, messages);
+                        sendAll(props.channelId, messages, delayMs);
                     }
                 },
                 { text: "Cancel", variant: "link", onClick: props.onClose }
@@ -72,10 +75,21 @@ function BulkSendModal(props: RenderModalProps & { channelId: string; }) {
             <TextArea
                 value={text}
                 onChange={setText}
-                rows={10}
+                rows={9}
                 placeholder={"First message\nSecond message\nThird message..."}
                 autoFocus
             />
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
+                <Text variant="text-sm/semibold" style={{ whiteSpace: "nowrap" }}>Delay between messages (ms)</Text>
+                <div style={{ width: 110 }}>
+                    <TextInput
+                        type="number"
+                        value={delay}
+                        onChange={(v: string) => setDelay(v)}
+                        placeholder="0"
+                    />
+                </div>
+            </div>
         </Modal>
     );
 }
