@@ -4,10 +4,19 @@
  */
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
+import { definePluginSettings } from "@api/Settings";
 import { sendMessage } from "@utils/discord";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Modal, openModal, Text, TextArea, useState } from "@webpack/common";
+
+const settings = definePluginSettings({
+    delayMs: {
+        type: OptionType.NUMBER,
+        description: "Delay between each message, in milliseconds (0 = as fast as possible).",
+        default: 0
+    }
+});
 
 function VaultIcon(props: any) {
     return (
@@ -24,8 +33,8 @@ function VaultIcon(props: any) {
 }
 
 async function sendAll(channelId: string, messages: string[]) {
-    // Fire in order, back-to-back. RestAPI queues + auto-handles rate limits,
-    // so this goes as fast as Discord allows while preserving order.
+    // Fire in order. RestAPI queues + auto-handles rate limits.
+    const delay = Math.max(0, Number(settings.store.delayMs) || 0);
     for (const content of messages) {
         if (!content.trim()) continue;
         try {
@@ -33,6 +42,7 @@ async function sendAll(channelId: string, messages: string[]) {
         } catch {
             // ignore individual failures
         }
+        if (delay > 0) await new Promise(r => setTimeout(r, delay));
     }
 }
 
@@ -83,6 +93,7 @@ export default definePlugin({
     name: "BulkSend",
     description: "Adds a chat bar button to queue several messages (one per line) and send them all at once, in order.",
     authors: [{ name: "eqen", id: 1483151471183921346n }],
+    settings,
     chatBarButton: {
         icon: VaultIcon,
         render: BulkSendButton
