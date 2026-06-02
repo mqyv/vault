@@ -12,7 +12,9 @@ import { AddonCard } from "@components/settings/AddonCard";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { Plugin } from "@utils/types";
-import { React, showToast, Toasts, UserStore } from "@webpack/common";
+import { React, showToast, Toasts } from "@webpack/common";
+
+import { getVaultOwnerAvatarURL, VAULT_OWNER_ID } from "@utils/vaultOwner";
 
 import { PluginMeta } from "~plugins";
 
@@ -38,11 +40,8 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
     const isModifiedPlugin = plugin.isModified ?? false;
 
     // Vault: plugins authored by the owner show their Discord avatar as the badge
-    const VAULT_OWNER_ID = "1483151471183921346";
     const isVaultOwnPlugin = (plugin.authors ?? []).some(a => String(a.id) === VAULT_OWNER_ID);
-    const vaultOwnerAvatar = isVaultOwnPlugin
-        ? ((UserStore.getUser(VAULT_OWNER_ID) as any)?.getAvatarURL?.() ?? null)
-        : null;
+    const vaultOwnerAvatar = isVaultOwnPlugin ? getVaultOwnerAvatarURL() : null;
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
