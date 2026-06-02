@@ -84,5 +84,8 @@ export default definePlugin({
     name: "BulkSend",
     description: "Adds a chat bar button to queue several messages (one per line) and send them all at once, in order.",
     authors: [{ name: "eqen", id: 1483151471183921346n }],
-    renderChatBarButton: BulkSendButton
+    chatBarButton: {
+        icon: VaultIcon,
+        render: BulkSendButton
+    }
 });
