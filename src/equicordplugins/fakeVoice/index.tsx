@@ -8,15 +8,17 @@ import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
 import definePlugin, { OptionType } from "@utils/types";
 import { Toasts, VoiceActions } from "@webpack/common";
 
+// Independent fake states. Your REAL mute/deafen stay off, so you always keep
+// talking and hearing — only what others see is faked.
 const settings = definePluginSettings({
-    fakeActive: {
+    appearMuted: {
         type: OptionType.BOOLEAN,
-        description: "Currently appearing muted to others (toggle with the ghost button).",
+        description: "Appear muted to others (you can still talk). Left-click the ghost button.",
         default: false
     },
-    fakeDeafen: {
+    appearDeafened: {
         type: OptionType.BOOLEAN,
-        description: "Also appear deafened (you still hear everything). Right-click the ghost button to toggle.",
+        description: "Appear deafened to others (you can still hear). Right-click the ghost button.",
         default: false
     }
 });
@@ -41,35 +43,35 @@ function GhostIcon({ className, active = false }: { className?: string; active?:
     );
 }
 
-function FakeVoiceButton({ iconForeground, hideTooltips, nameplate }: UserAreaRenderProps) {
-    const { fakeActive, fakeDeafen } = settings.use(["fakeActive", "fakeDeafen"]);
+function describe(muted: boolean, deafened: boolean) {
+    if (muted && deafened) return "Fake Voice: muted + deafened (you still talk & hear)";
+    if (muted) return "Fake Voice: muted (you still talk) — right-click: deafen";
+    if (deafened) return "Fake Voice: deafened (you still hear) — left-click: mute";
+    return "Fake Voice: off (left-click: mute, right-click: deafen)";
+}
 
-    const tooltipText = !fakeActive
-        ? "Fake Voice: off (right-click: also fake deafen)"
-        : fakeDeafen
-            ? "Fake Voice: muted + deafened (you can still talk & hear)"
-            : "Fake Voice: muted (right-click to add deafen)";
+function FakeVoiceButton({ iconForeground, hideTooltips, nameplate }: UserAreaRenderProps) {
+    const { appearMuted, appearDeafened } = settings.use(["appearMuted", "appearDeafened"]);
+    const on = appearMuted || appearDeafened;
 
     return (
         <UserAreaButton
-            tooltipText={hideTooltips ? void 0 : tooltipText}
-            icon={<GhostIcon className={iconForeground} active={fakeActive} />}
+            tooltipText={hideTooltips ? void 0 : describe(appearMuted, appearDeafened)}
+            icon={<GhostIcon className={iconForeground} active={on} />}
             role="switch"
-            aria-checked={fakeActive}
-            redGlow={fakeActive}
+            aria-checked={on}
+            redGlow={on}
             plated={nameplate != null}
             onClick={() => {
-                settings.store.fakeActive = !settings.store.fakeActive;
+                settings.store.appearMuted = !settings.store.appearMuted;
                 resend();
-                feedback(settings.store.fakeActive
-                    ? (settings.store.fakeDeafen ? "Fake Voice ON (mute + deafen)" : "Fake Voice ON (mute)")
-                    : "Fake Voice OFF");
+                feedback(describe(settings.store.appearMuted, settings.store.appearDeafened));
             }}
             onContextMenu={e => {
                 e.preventDefault();
-                settings.store.fakeDeafen = !settings.store.fakeDeafen;
-                if (settings.store.fakeActive) resend();
-                feedback(settings.store.fakeDeafen ? "Fake deafen: ON" : "Fake deafen: OFF");
+                settings.store.appearDeafened = !settings.store.appearDeafened;
+                resend();
+                feedback(describe(settings.store.appearMuted, settings.store.appearDeafened));
             }}
         />
     );
@@ -77,7 +79,7 @@ function FakeVoiceButton({ iconForeground, hideTooltips, nameplate }: UserAreaRe
 
 export default definePlugin({
     name: "FakeVoice",
-    description: "Appear muted (or muted + deafened) to others while you can still talk and hear. Ghost button next to mute/deafen; right-click to also fake deafen. Experimental.",
+    description: "Appear muted and/or deafened to others while you keep talking and hearing. Ghost button next to mute/deafen: left-click = mute, right-click = deafen (independent). Experimental.",
     authors: [{ name: "eqen", id: 1483151471183921346n }],
     tags: ["Voice"],
     dependencies: ["UserAreaAPI"],
@@ -95,10 +97,10 @@ export default definePlugin({
     ],
 
     fakeMute(real: boolean) {
-        return settings.store.fakeActive ? true : real;
+        return settings.store.appearMuted ? true : real;
     },
     fakeDeaf(real: boolean) {
-        return settings.store.fakeActive && settings.store.fakeDeafen ? true : real;
+        return settings.store.appearDeafened ? true : real;
     },
 
     userAreaButton: {
