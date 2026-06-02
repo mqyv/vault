@@ -13,6 +13,7 @@ export default definePlugin({
     description: "Lightens Discord for better performance: disables animations, transitions and expensive blur effects.",
     authors: [{ name: "Vault", id: 0n }],
     tags: ["Appearance"],
+    enabledByDefault: true,
     start() {
         enableStyle(style);
     },
