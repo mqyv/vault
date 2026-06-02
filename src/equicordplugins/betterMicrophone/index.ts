@@ -71,7 +71,7 @@ function onRtcState() {
 export default definePlugin({
     name: "BetterMicrophone",
     description: "Unlocks a higher microphone encoding bitrate for better voice quality. Experimental — toggle mute or rejoin the call to apply, and it may break with Discord updates.",
-    authors: [{ name: "eqen", id: 0n }],
+    authors: [{ name: "eqen", id: 1483151471183921346n }],
     tags: ["Voice"],
     settings,
 

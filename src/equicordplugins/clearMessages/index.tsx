@@ -122,7 +122,7 @@ const patchUserContext: NavContextMenuPatchCallback = (children, { user, channel
 export default definePlugin({
     name: "ClearMessages",
     description: "Adds a 'Clear Messages' option to the user menu that deletes your own messages in a DM one by one, newest to oldest. Re-open the menu and click 'Stop Clearing' to stop.",
-    authors: [{ name: "eqen", id: 0n }],
+    authors: [{ name: "eqen", id: 1483151471183921346n }],
     tags: ["Utility", "Chat"],
     contextMenus: {
         "user-context": patchUserContext
