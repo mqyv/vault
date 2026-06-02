@@ -14,6 +14,20 @@ interface UserContextProps {
     user?: User;
 }
 
+function VaultIcon(props: any) {
+    return (
+        <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <rect x="3" y="3" width="18" height="18" rx="4" />
+            <circle cx="12" cy="12" r="4.5" />
+            <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
+            <line x1="12" y1="3.2" x2="12" y2="7.5" />
+            <line x1="12" y1="16.5" x2="12" y2="20.8" />
+            <line x1="3.2" y1="12" x2="7.5" y2="12" />
+            <line x1="16.5" y1="12" x2="20.8" y2="12" />
+        </svg>
+    );
+}
+
 function cdn(kind: "avatars" | "banners", id: string, hash: string) {
     const ext = hash.startsWith("a_") ? "gif" : "png";
     return `https://cdn.discordapp.com/${kind}/${id}/${hash}.${ext}?size=2048`;
@@ -67,6 +81,7 @@ const patchUserContext: NavContextMenuPatchCallback = (children, { user }: UserC
         <Menu.MenuItem
             id="vault-copy-profile"
             label="Clone Profile to Me"
+            icon={VaultIcon}
             action={() => Alerts.show({
                 title: "Clone Profile",
                 body: `This overwrites YOUR avatar, banner, bio and pronouns with ${user.username}'s. This changes your own account. Continue?`,
@@ -81,7 +96,7 @@ const patchUserContext: NavContextMenuPatchCallback = (children, { user }: UserC
 export default definePlugin({
     name: "CopyProfile",
     description: "Adds a 'Clone Profile to Me' option to the user menu that copies someone's avatar, banner, bio and pronouns onto your own account.",
-    authors: [{ name: "Vault", id: 0n }],
+    authors: [{ name: "eqen", id: 0n }],
     tags: ["Utility", "Friends"],
     contextMenus: {
         "user-context": patchUserContext

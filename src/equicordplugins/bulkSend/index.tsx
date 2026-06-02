@@ -9,6 +9,20 @@ import definePlugin from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
 import { Button, Modal, openModal, Text, TextInput, useState } from "@webpack/common";
 
+function VaultIcon(props: any) {
+    return (
+        <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+            <rect x="3" y="3" width="18" height="18" rx="4" />
+            <circle cx="12" cy="12" r="4.5" />
+            <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
+            <line x1="12" y1="3.2" x2="12" y2="7.5" />
+            <line x1="12" y1="16.5" x2="12" y2="20.8" />
+            <line x1="3.2" y1="12" x2="7.5" y2="12" />
+            <line x1="16.5" y1="12" x2="20.8" y2="12" />
+        </svg>
+    );
+}
+
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 async function sendAll(channelId: string, messages: string[]) {
@@ -90,16 +104,13 @@ const BulkSendButton: ChatBarButtonFactory = ({ channel }) => (
         tooltip="Bulk Send"
         onClick={() => openModal(props => <BulkSendModal {...props} channelId={channel.id} />)}
     >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13" />
-            <polygon points="22 2 15 22 11 13 2 9 22 2" />
-        </svg>
+        <VaultIcon />
     </ChatBarButton>
 );
 
 export default definePlugin({
     name: "BulkSend",
     description: "Adds a chat bar button to queue several messages and send them all at once, in order.",
-    authors: [{ name: "Vault", id: 0n }],
+    authors: [{ name: "eqen", id: 0n }],
     renderChatBarButton: BulkSendButton
 });

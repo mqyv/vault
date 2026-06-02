@@ -11,7 +11,7 @@ import style from "./style.css?managed";
 export default definePlugin({
     name: "VaultPerformance",
     description: "Lightens Discord for better performance: disables animations, transitions and expensive blur effects.",
-    authors: [{ name: "Vault", id: 0n }],
+    authors: [{ name: "eqen", id: 0n }],
     tags: ["Appearance"],
     enabledByDefault: true,
     start() {
