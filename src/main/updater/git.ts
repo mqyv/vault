@@ -65,9 +65,45 @@ async function calculateGitChanges() {
     }) : [];
 }
 
+// HEAD avant le dernier pull : sert à revenir en arrière si l'installation des dépendances ou la compilation échoue.
+let previousHead: string | null = null;
+
+async function rollback() {
+    if (!previousHead) return;
+    try { await git("reset", "--hard", previousHead); } catch { /* best effort */ }
+    previousHead = null;
+}
+
+// Si une mise à jour change les dépendances, il faut les installer avant de compiler, sinon le build échoue.
+async function installDependenciesIfNeeded(from: string) {
+    const changed = (await git("diff", "--name-only", from, "HEAD", "--", "package.json", "pnpm-lock.yaml")).stdout.trim();
+    if (!changed) return;
+
+    const opts = { cwd: EQUICORD_DIR, shell: process.platform === "win32" };
+    const args = ["install", "--frozen-lockfile", "--prefer-offline"];
+    try {
+        if (isFlatpak) await execFile("flatpak-spawn", ["--host", "pnpm", ...args], opts);
+        else await execFile("pnpm", args, opts);
+    } catch {
+        // pnpm n'est pas dans le PATH de Discord : corepack est livré avec Node.
+        await execFile("corepack", ["pnpm", ...args], opts);
+    }
+}
+
 async function pull() {
+    const before = (await git("rev-parse", "HEAD")).stdout.trim();
     const res = await git("pull");
-    return res.stdout.includes("Fast-forward");
+    const updated = res.stdout.includes("Fast-forward");
+    if (!updated) return false;
+
+    previousHead = before;
+    try {
+        await installDependenciesIfNeeded(before);
+    } catch (err) {
+        await rollback();
+        throw err;
+    }
+    return true;
 }
 
 async function build() {
@@ -78,9 +114,18 @@ async function build() {
 
     if (IS_DEV) args.push("--dev");
 
-    const res = await execFile(command, args, opts);
+    let ok = false;
+    try {
+        const res = await execFile(command, args, opts);
+        ok = !res.stderr.includes("Build failed");
+    } catch {
+        ok = false;
+    }
 
-    return !res.stderr.includes("Build failed");
+    if (ok) previousHead = null;
+    else await rollback(); // on garde la version qui marche plutôt que du code non compilé
+
+    return ok;
 }
 
 const GitUpdater: Updater = {
