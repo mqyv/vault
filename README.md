@@ -12,7 +12,7 @@
 [![Licence](https://img.shields.io/badge/licence-GPL--3.0-blue?style=flat-square)](./LICENSE)
 [![Dernière version](https://img.shields.io/github/v/release/mqyv/vault?style=flat-square&label=installeur)](https://github.com/mqyv/vault/releases/latest)
 
-[Site](https://vault-site-kappa.vercel.app) · [Installation](#installation) · [Plugins exclusifs](#plugins-exclusifs) · [Développeurs](#développeurs)
+[Site](https://vaultmod.vercel.app) · [Installation](#installation) · [Plugins exclusifs](#plugins-exclusifs) · [Développeurs](#développeurs)
 
 </div>
 

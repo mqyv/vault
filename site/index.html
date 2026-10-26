@@ -14,7 +14,7 @@
 :root{
   --bg:#07070a; --bg2:#0c0c11; --panel:#101016; --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.12);
   --text:#ecebe6; --muted:#8e8d96; --gold:#d8b46a; --gold2:#f3dca6; --goldd:#8f7236;
-  --radius:18px; --ease:cubic-bezier(.2,.7,.2,1);
+  --radius:18px; --gold-rgb:216,180,106; --ease:cubic-bezier(.2,.7,.2,1);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -29,7 +29,7 @@ a{color:inherit;text-decoration:none}
 
 /* ambient */
 .ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;background:
-  radial-gradient(900px 500px at 78% -10%,rgba(216,180,106,.13),transparent 60%),
+  radial-gradient(900px 500px at 78% -10%,rgba(var(--gold-rgb),.13),transparent 60%),
   radial-gradient(700px 500px at 5% 20%,rgba(120,100,200,.07),transparent 60%),var(--bg)}
 .grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
@@ -44,8 +44,8 @@ nav{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;width
 .links a{transition:color .2s}.links a:hover{color:var(--text)}
 .btn{display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border-radius:999px;font:500 14px Inter;border:1px solid var(--line2);transition:.3s var(--ease);cursor:pointer;background:transparent;color:var(--text)}
 .btn:hover{border-color:var(--gold);transform:translateY(-1px)}
-.btn.primary{background:linear-gradient(135deg,var(--gold2),var(--gold) 55%,#b8913f);color:#15110a;border:0;box-shadow:0 8px 30px -8px rgba(216,180,106,.55),inset 0 1px 0 rgba(255,255,255,.5)}
-.btn.primary:hover{box-shadow:0 12px 40px -6px rgba(216,180,106,.75),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn.primary{background:linear-gradient(135deg,var(--gold2),var(--gold) 55%,#b8913f);color:#15110a;border:0;box-shadow:0 8px 30px -8px rgba(var(--gold-rgb),.55),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn.primary:hover{box-shadow:0 12px 40px -6px rgba(var(--gold-rgb),.75),inset 0 1px 0 rgba(255,255,255,.5)}
 .btn.sm{padding:9px 18px}
 
 /* hero */
@@ -62,7 +62,7 @@ h1 em{font-style:italic}
 /* mock window */
 .stage{margin:80px auto 0;width:min(980px,100%);perspective:1600px}
 .window{border:1px solid var(--line2);border-radius:20px;background:linear-gradient(180deg,#14141b,#0d0d12);overflow:hidden;
-  box-shadow:0 60px 120px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.02),0 0 120px -20px rgba(216,180,106,.18);
+  box-shadow:0 60px 120px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.02),0 0 120px -20px rgba(var(--gold-rgb),.18);
   transform:rotateX(7deg);transition:transform .8s var(--ease);text-align:left}
 .stage:hover .window{transform:rotateX(0)}
 .bar{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line)}
@@ -70,7 +70,7 @@ h1 em{font-style:italic}
 .bar span{margin-left:auto;font:12px 'JetBrains Mono';color:var(--muted)}
 .win-body{display:grid;grid-template-columns:200px 1fr;min-height:340px}
 .side{border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
-.side div{padding:9px 12px;border-radius:9px}.side .on{background:rgba(216,180,106,.1);color:var(--gold2)}
+
 .main{padding:22px}
 .search{display:flex;gap:10px;align-items:center;padding:11px 14px;border:1px solid var(--line2);border-radius:11px;color:var(--muted);font-size:14px;margin-bottom:16px}
 .rows{display:grid;gap:10px}
@@ -79,6 +79,37 @@ h1 em{font-style:italic}
 .tg{width:38px;height:22px;border-radius:99px;background:#26262e;position:relative;flex:none}
 .tg::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#777;transition:.3s var(--ease)}
 .tg.on{background:linear-gradient(135deg,var(--gold2),var(--goldd))}.tg.on::after{left:19px;background:#15110a}
+
+/* interactive window */
+.side button{all:unset;box-sizing:border-box;cursor:pointer;padding:9px 12px;border-radius:9px;transition:.2s;font-size:14px;color:var(--muted)}
+.side button:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.side button.on{background:rgba(var(--gold-rgb),.1);color:var(--gold2)}
+.side button:focus-visible,.tg:focus-visible,.seg button:focus-visible,.theme:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.main{min-width:0}
+.tp{display:none;animation:fin .35s var(--ease)}.tp.on{display:block}
+@keyframes fin{from{opacity:0;transform:translateY(6px)}}
+.search input{all:unset;flex:1;min-width:0;color:var(--text)}.search input::placeholder{color:var(--muted)}
+.search em{font:normal 12px 'JetBrains Mono';color:var(--gold);white-space:nowrap}
+.search:focus-within{border-color:var(--gold)}
+.row{transition:border-color .2s,background .2s}.row:hover{border-color:var(--line2);background:rgba(255,255,255,.03)}
+.tg{border:0;padding:0;cursor:pointer}
+.empty,.sub{color:var(--muted);font-size:14px}.ttl{font-weight:500;margin-bottom:4px}.sub{margin-bottom:16px}
+.themes{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.theme{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.015);transition:.25s var(--ease)}
+.theme:hover{border-color:var(--line2);transform:translateY(-2px)}.theme[aria-pressed=true]{border-color:var(--gold);background:rgba(var(--gold-rgb),.07)}
+.theme i{width:34px;height:34px;border-radius:50%;flex:none;box-shadow:0 0 22px -4px currentColor}.theme p{font-size:14px}.theme small{display:block;color:var(--muted);font-size:12.5px}
+.upd{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;border:1px solid rgba(var(--gold-rgb),.3);border-radius:12px;background:rgba(var(--gold-rgb),.05);margin-bottom:12px}
+.upd small{color:var(--muted);font-size:12.5px}.upd p{font-size:15px}
+.seg{display:flex;gap:6px;padding:5px;border:1px solid var(--line2);border-radius:12px;margin:10px 0 22px}
+.seg button{all:unset;box-sizing:border-box;flex:1;text-align:center;padding:10px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--muted);transition:.25s}
+.seg button.on{background:linear-gradient(135deg,var(--gold2),var(--goldd));color:#15110a;font-weight:500}
+.bars{display:grid;gap:16px}.bars>div{display:grid;grid-template-columns:90px 1fr 70px;align-items:center;gap:14px;font-size:14px;color:var(--muted)}
+.bars i{height:8px;border-radius:9px;background:#1b1b22;overflow:hidden}.bars b{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--goldd),var(--gold2));transition:width .7s var(--ease)}
+.bars em{font:normal 12.5px 'JetBrains Mono';color:var(--text);text-align:right}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:rot .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes rot{to{transform:rotate(1turn)}}
+@media(max-width:620px){.themes{grid-template-columns:1fr}.bars>div{grid-template-columns:70px 1fr 56px}
+  .side{display:flex!important;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:10px}.side button{white-space:nowrap}.win-body{grid-template-columns:1fr}}
 
 /* sections */
 section{padding:110px 0}
@@ -92,14 +123,14 @@ section{padding:110px 0}
 
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .card{position:relative;padding:30px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden;transition:border-color .3s,transform .4s var(--ease)}
-.card::before{content:"";position:absolute;inset:0;background:radial-gradient(380px circle at var(--mx,50%) var(--my,0%),rgba(216,180,106,.13),transparent 60%);opacity:0;transition:opacity .3s}
-.card:hover{border-color:rgba(216,180,106,.35);transform:translateY(-4px)}.card:hover::before{opacity:1}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(380px circle at var(--mx,50%) var(--my,0%),rgba(var(--gold-rgb),.13),transparent 60%);opacity:0;transition:opacity .3s}
+.card:hover{border-color:rgba(var(--gold-rgb),.35);transform:translateY(-4px)}.card:hover::before{opacity:1}
 .card>*{position:relative}
-.ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line2);color:var(--gold);margin-bottom:22px;background:rgba(216,180,106,.05)}
+.ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line2);color:var(--gold);margin-bottom:22px;background:rgba(var(--gold-rgb),.05)}
 .ic svg{width:21px;height:21px}
 .card h3{font:500 18px Inter;margin-bottom:8px}
 .card p{color:var(--muted);font-size:14.5px}
-.tag{display:inline-block;margin-top:18px;font:11px 'JetBrains Mono';letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(216,180,106,.3);border-radius:99px;padding:4px 10px}
+.tag{display:inline-block;margin-top:18px;font:11px 'JetBrains Mono';letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(var(--gold-rgb),.3);border-radius:99px;padding:4px 10px}
 
 /* marquee */
 .marq{overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
@@ -135,7 +166,7 @@ summary::after{content:"+";color:var(--gold);font:300 26px/1 Inter;transition:tr
 details[open] summary::after{transform:rotate(45deg)}
 details p{margin-top:14px;color:var(--muted);max-width:62ch}
 
-.final{text-align:center;border:1px solid var(--line2);border-radius:28px;padding:90px 24px;background:radial-gradient(600px 300px at 50% 0%,rgba(216,180,106,.16),transparent 70%),var(--bg2)}
+.final{text-align:center;border:1px solid var(--line2);border-radius:28px;padding:90px 24px;background:radial-gradient(600px 300px at 50% 0%,rgba(var(--gold-rgb),.16),transparent 70%),var(--bg2)}
 .final h2{font-size:clamp(36px,6vw,70px);line-height:1.02;margin:14px auto 30px;max-width:14ch}
 footer{padding:50px 0 60px;color:var(--muted);font-size:13px}
 footer .row2{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}
@@ -179,19 +210,46 @@ footer a:hover{color:var(--text)}
     </div>
     <p class="meta">Gratuit · Open source GPL-3.0 · Windows 10 &amp; 11</p>
 
-    <div class="stage rv">
+    <p class="meta" style="margin-top:56px">Essaie : active des plugins, change de thème, lance une mise à jour.</p>
+    <div class="stage rv" style="margin-top:20px">
       <div class="window">
         <div class="bar"><b></b><b></b><b></b><span>Réglages › Vault › Plugins</span></div>
         <div class="win-body">
-          <div class="side"><div class="on">Plugins</div><div>Thèmes</div><div>Mises à jour</div><div>Cloud</div><div>Performance</div></div>
+          <div class="side" role="tablist" aria-label="Réglages Vault">
+            <button class="on" role="tab" aria-selected="true" data-tab="plugins">Plugins</button>
+            <button role="tab" aria-selected="false" data-tab="themes">Thèmes</button>
+            <button role="tab" aria-selected="false" data-tab="updates">Mises à jour</button>
+            <button role="tab" aria-selected="false" data-tab="cloud">Cloud</button>
+            <button role="tab" aria-selected="false" data-tab="perf">Performance</button>
+          </div>
           <div class="main">
-            <div class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Rechercher parmi 370+ plugins…</div>
-            <div class="rows">
-              <div class="row"><div><p>BulkSend</p><small>Envoie plusieurs messages d'un coup, délai réglable</small></div><div class="tg on"></div></div>
-              <div class="row"><div><p>VaultPerformance</p><small>Préréglage pour un Discord plus fluide</small></div><div class="tg on"></div></div>
-              <div class="row"><div><p>CopyProfile</p><small>Clone un profil complet : bannière, couleurs, thème</small></div><div class="tg on"></div></div>
-              <div class="row"><div><p>ClearMessages</p><small>Supprime tes messages depuis n'importe quel point</small></div><div class="tg"></div></div>
-            </div>
+            <section class="tp on" id="tp-plugins">
+              <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Rechercher parmi 370+ plugins…" autocomplete="off" aria-label="Rechercher un plugin"><em id="cnt"></em></label>
+              <div class="rows" id="rows"></div>
+              <p class="empty" id="empty" hidden>Aucun plugin ne correspond. Il y en a 370+ dans la vraie version.</p>
+            </section>
+            <section class="tp" id="tp-themes">
+              <p class="ttl">Thème</p><p class="sub">Choisis une couleur : tout le site s'adapte.</p>
+              <div class="themes" id="themes"></div>
+            </section>
+            <section class="tp" id="tp-updates">
+              <div class="upd"><div><p>Vault <b id="ver">1.15.13.0</b></p><small id="updmsg">Dernière vérification : à l'instant</small></div><button class="btn sm" id="chk">Rechercher</button></div>
+              <div class="rows">
+                <div class="row"><div><p>Mises à jour automatiques</p><small>Télécharge les correctifs en arrière-plan</small></div><button class="tg on" role="switch" aria-checked="true" aria-label="Mises à jour automatiques"></button></div>
+                <div class="row"><div><p>Me prévenir une fois terminée</p><small>Notification « Restart » comme Discord</small></div><button class="tg on" role="switch" aria-checked="true" aria-label="Notification de mise à jour"></button></div>
+              </div>
+            </section>
+            <section class="tp" id="tp-cloud">
+              <div class="rows">
+                <div class="row"><div><p>Synchronisation cloud</p><small id="cloudmsg">Tes réglages sont sauvegardés et partagés entre tes appareils</small></div><button class="tg on" id="cloudtg" role="switch" aria-checked="true" aria-label="Synchronisation cloud"></button></div>
+                <div class="row"><div><p>Exporter mes réglages</p><small>Fichier JSON, à restaurer quand tu veux</small></div><button class="btn sm" id="exp">Exporter</button></div>
+              </div>
+            </section>
+            <section class="tp" id="tp-perf">
+              <p class="ttl">Préréglage</p>
+              <div class="seg" id="seg" role="radiogroup" aria-label="Préréglage de performance"><button role="radio" data-p="0" aria-checked="false">Équilibré</button><button role="radio" data-p="1" aria-checked="true" class="on">Performance</button><button role="radio" data-p="2" aria-checked="false">Maximum</button></div>
+              <div class="bars"><div><span>Mémoire</span><i><b id="b1"></b></i><em id="v1"></em></div><div><span>Processeur</span><i><b id="b2"></b></i><em id="v2"></em></div><div><span>Fluidité</span><i><b id="b3"></b></i><em id="v3"></em></div></div>
+            </section>
           </div>
         </div>
       </div>
@@ -302,6 +360,42 @@ document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e
 // counter
 const cn=document.querySelector('[data-count]'),co=new IntersectionObserver(([e])=>{if(!e.isIntersecting)return;co.disconnect();const t=+cn.dataset.count,s=performance.now();
   (function f(n){const p=Math.min((n-s)/1400,1);cn.textContent=Math.round(t*(1-Math.pow(1-p,4)))+'+';if(p<1)requestAnimationFrame(f)})(s)});co.observe(cn);
+// ---- interactive settings window ----
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const PL=[["BulkSend","Envoie plusieurs messages d'un coup, délai réglable",1],["VaultPerformance","Préréglage pour un Discord plus fluide",1],["CopyProfile","Clone un profil complet : bannière, couleurs, thème",1],["ClearMessages","Supprime tes messages depuis n'importe quel point",0],["FakeVoice","Faux mute / sourd indépendants",0],["BetterMicrophone","Débloque le bitrate du micro (expérimental)",0],["MessageLogger","Garde une trace des messages supprimés ou modifiés",1],["ShowHiddenChannels","Affiche les salons que tu ne peux pas voir",0],["ViewIcons","Ouvre avatars, bannières et icônes en grand",1],["Translate","Traduis n'importe quel message en un clic",0]];
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const setTg=(b,on)=>{b.classList.toggle('on',on);b.setAttribute('aria-checked',on)};
+const count=()=>{$('#cnt').textContent=PL.filter(p=>p[2]).length+' actifs'};
+function renderPlugins(){const q=$('#q').value.trim().toLowerCase();let n=0;
+  $('#rows').innerHTML=PL.map((p,i)=>({p,i})).filter(({p})=>!q||(p[0]+p[1]).toLowerCase().includes(q)).map(({p,i})=>{n++;return `<div class="row"><div><p>${esc(p[0])}</p><small>${esc(p[1])}</small></div><button class="tg${p[2]?' on':''}" role="switch" aria-checked="${!!p[2]}" aria-label="${esc(p[0])}" data-i="${i}"></button></div>`}).join('');
+  $('#empty').hidden=n>0;count()}
+$('#rows').addEventListener('click',e=>{const b=e.target.closest('.tg');if(!b)return;const p=PL[+b.dataset.i];p[2]=p[2]?0:1;setTg(b,!!p[2]);count()});
+$('#q').addEventListener('input',renderPlugins);renderPlugins();
+// tabs
+const sideBtns=$$('.side button');
+function openTab(t){sideBtns.forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});$$('.tp').forEach(p=>p.classList.toggle('on',p.id==='tp-'+t));if(t==='perf')perf(+$('#seg .on').dataset.p)}
+sideBtns.forEach((b,i)=>{b.onclick=()=>openTab(b.dataset.tab);b.onkeydown=e=>{const d={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[e.key];if(!d)return;e.preventDefault();const n=sideBtns[(i+d+sideBtns.length)%sideBtns.length];n.focus();openTab(n.dataset.tab)}});
+// themes
+const TH=[["Or","Le classique",["#f3dca6","#d8b46a","#8f7236"]],["Saphir","Bleu profond",["#b9d4ff","#6aa2f2","#2f5da8"]],["Rubis","Rouge intense",["#ffc2c2","#ec6b6b","#9c3030"]],["Émeraude","Vert profond",["#bff3d3","#5fd49b","#2a7a55"]]];
+const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(',');
+function applyTheme(i){const c=TH[i][2],r=document.documentElement.style;r.setProperty('--gold2',c[0]);r.setProperty('--gold',c[1]);r.setProperty('--goldd',c[2]);r.setProperty('--gold-rgb',hex2rgb(c[1]));$$('.theme').forEach((b,j)=>b.setAttribute('aria-pressed',j===i));try{localStorage.setItem('vault-theme',i)}catch{}}
+$('#themes').innerHTML=TH.map((t,i)=>`<button class="theme" aria-pressed="false" data-i="${i}"><i style="background:${t[2][1]};color:${t[2][1]}"></i><div><p>${t[0]}</p><small>${t[1]}</small></div></button>`).join('');
+$('#themes').addEventListener('click',e=>{const b=e.target.closest('.theme');if(b)applyTheme(+b.dataset.i)});
+let saved=0;try{saved=+localStorage.getItem('vault-theme')||0}catch{}
+applyTheme(TH[saved]?saved:0);
+// generic switches
+$$('#tp-updates .tg,#cloudtg').forEach(b=>b.addEventListener('click',()=>setTg(b,!b.classList.contains('on'))));
+$('#cloudtg').addEventListener('click',e=>{$('#cloudmsg').textContent=e.currentTarget.classList.contains('on')?'Tes réglages sont sauvegardés et partagés entre tes appareils':'Synchronisation désactivée : tes réglages restent sur cet appareil'});
+// update check
+$('#chk').onclick=function(){const b=this;b.disabled=true;b.innerHTML='<span class="spin"></span>Recherche…';$('#updmsg').textContent='Contact du serveur…';
+  setTimeout(()=>{b.disabled=false;b.textContent='Rechercher';$('#updmsg').textContent='Tu utilises la dernière version ✓'},1400)};
+// export
+$('#exp').onclick=function(){const b=this;b.textContent='Exporté ✓';setTimeout(()=>{b.textContent='Exporter'},1800);
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({vault:"1.15.13.0",plugins:Object.fromEntries(PL.map(p=>[p[0],!!p[2]]))},null,2)],{type:'application/json'}));a.download='vault-settings.json';a.click()}catch{}};
+// performance
+const PERF=[[[64,48,70],["480 Mo","18 %","60 fps"]],[[42,30,88],["320 Mo","11 %","120 fps"]],[[28,20,96],["240 Mo","7 %","144 fps"]]];
+function perf(i){[1,2,3].forEach((n,k)=>{$('#b'+n).style.width=PERF[i][0][k]+'%';$('#v'+n).textContent=PERF[i][1][k]})}
+$$('#seg button').forEach(b=>b.onclick=()=>{$$('#seg button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)});perf(+b.dataset.p)});
 // marquee
 const P="BulkSend,ClearMessages,CopyProfile,FakeVoice,BetterMicrophone,VaultPerformance,MessageLogger,ClipUpload,PlatformIndicators,TextReplace,GameActivityToggle,BetterGifLoad,ShowHiddenChannels,ViewIcons,Translate,FakeNitro,Experiments,SpotifyControls,CustomRPC,BetterFolders,ImageZoom,ReadAllNotificationsButton,PinDMs,MemberCount,NoTrack,SilentTyping,Decor,VoiceMessages,UserVoiceShow,WebContextMenus".split(',');
 const fill=(id,a)=>{document.getElementById(id).innerHTML=[...a,...a].map(n=>`<span class="chip">${n}</span>`).join('')};
