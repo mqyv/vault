@@ -1,14 +1,24 @@
 name: Sync with Equicord
 
-# Prépare une mise à jour Equicord sur la branche `sync/equicord` (jamais directement sur main :
-# du code externe non relu ne doit pas partir chez tous les utilisateurs via l updater).
-# Si le merge a des conflits, le job échoue : résous-les en local puis ouvre une PR.
+# Garde Vault à jour avec Equicord (qui suit lui-même Vencord) : dès qu'Equicord publie un changement,
+# on le fusionne dans main. Les utilisateurs le reçoivent ensuite via l'updater intégré.
+#
+# Garde-fou : la fusion est d'abord testée (build, types, lint, patchs). Si elle a des conflits
+# ou si les tests échouent, RIEN n'arrive sur main : le résultat est poussé sur la branche
+# `sync/equicord` et une issue est ouverte pour que tu règles ça toi-même.
+#
+# Secret optionnel : SYNC_TOKEN (PAT fine-grained, droits Contents + Workflows en lecture/écriture).
+# Sans lui, GitHub refuse de pousser une fusion qui modifie des fichiers .github/workflows
+# (le job échoue alors proprement et l'issue l'explique).
 
 on:
-  workflow_dispatch: {} # bouton « Run workflow » manuel sur GitHub
+  schedule:
+    - cron: "17 */3 * * *" # toutes les 3 heures
+  workflow_dispatch: {}
 
 permissions:
   contents: write
+  issues: write
 
 concurrency:
   group: sync-upstream
@@ -20,12 +30,15 @@ jobs:
     runs-on: ubuntu-latest
     # ne tourne que sur le fork, jamais sur Equicord lui-même
     if: github.repository != 'Equicord/Equicord'
+    env:
+      GH_TOKEN: ${{ secrets.SYNC_TOKEN || github.token }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
+          token: ${{ secrets.SYNC_TOKEN || github.token }}
 
       - name: Configure git
         run: |
@@ -33,15 +46,78 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
       - name: Fetch Equicord
+        id: fetch
         run: |
           git remote add upstream https://github.com/Equicord/Equicord.git
           git fetch upstream main
+          behind=$(git rev-list --count HEAD..upstream/main)
+          echo "behind=$behind" >> "$GITHUB_OUTPUT"
+          echo "Vault a $behind commit(s) de retard sur Equicord."
 
-      - name: Merge (fast-forward-friendly)
+      - name: Merge
+        id: merge
+        if: steps.fetch.outputs.behind != '0'
         run: |
-          # merge classique : l'historique n'avance que vers l'avant, donc les
-          # utilisateurs peuvent toujours faire un pull en fast-forward.
-          git merge --no-edit upstream/main
+          # Workflows propres à Vault : tout le reste de .github/workflows vient d'Equicord et ne nous concerne pas.
+          KEEP="autofix.yml installer.yml sync-upstream.yml test.yml"
+          before=$(git rev-parse HEAD)
 
-      - name: Push (branche de revue)
-        run: git push --force-with-lease origin HEAD:refs/heads/sync/equicord
+          git merge --no-commit --no-ff upstream/main || true
+
+          # Conflits dans .github/workflows : on garde notre version (ou on supprime le fichier d'Equicord).
+          for f in $(git diff --name-only --diff-filter=U -- .github/workflows); do
+            if echo " $KEEP " | grep -q " $(basename "$f") "; then git checkout --ours -- "$f" && git add "$f"; else git rm -q -f "$f"; fi
+          done
+          # Workflows ajoutés par Equicord : on les retire. Les nôtres restent identiques.
+          for f in .github/workflows/*; do
+            [ -e "$f" ] || continue
+            echo " $KEEP " | grep -q " $(basename "$f") " || git rm -q -f "$f"
+          done
+          for k in $KEEP; do git checkout "$before" -- ".github/workflows/$k"; done
+
+          if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
+            echo "Conflits :"; git diff --name-only --diff-filter=U
+            git diff --name-only --diff-filter=U > conflicts.txt
+            echo "status=conflict" >> "$GITHUB_OUTPUT"
+            git merge --abort
+          else
+            git commit -q -m "Merge Equicord upstream ($(git rev-parse --short upstream/main))"
+            echo "status=merged" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup PNPM
+        if: steps.merge.outputs.status == 'merged'
+        uses: pnpm/setup@v2.1.0
+        with:
+          runtime: node@v24
+          require-lockfile: true
+
+      - name: Test the merge
+        id: test
+        if: steps.merge.outputs.status == 'merged'
+        run: pnpm test && pnpm buildWeb && pnpm generatePluginJson > /dev/null
+
+      - name: Push to main
+        if: steps.merge.outputs.status == 'merged' && steps.test.outcome == 'success'
+        run: git push origin HEAD:main
+
+      - name: Push to review branch
+        id: review
+        if: always() && steps.fetch.outputs.behind != '0' && (steps.merge.outputs.status == 'conflict' || (steps.merge.outputs.status == 'merged' && steps.test.outcome != 'success'))
+        run: |
+          if [ "${{ steps.merge.outputs.status }}" = "merged" ]; then
+            git push --force origin HEAD:refs/heads/sync/equicord
+            echo "reason=Les tests échouent après la fusion. La fusion est sur la branche \`sync/equicord\` (voir les logs de ce run pour l'erreur)." >> "$GITHUB_OUTPUT"
+          else
+            echo "reason=La fusion a des conflits dans : $(tr '\n' ' ' < conflicts.txt). Règle-les en local : \`git fetch upstream && git merge upstream/main\`." >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open an issue
+        if: always() && steps.review.outcome == 'success'
+        env:
+          REASON: ${{ steps.review.outputs.reason }}
+        run: |
+          title="Synchro Equicord à régler à la main"
+          body="$REASON"$'\n\n'"Run : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          existing=$(gh issue list --state open --search "$title in:title" --json number -q '.[0].number')
+          if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
