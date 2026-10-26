@@ -20,7 +20,7 @@
 
 ## Pourquoi Vault
 
-| | |
+| Atout | Détail |
 |---|---|
 | **370+ plugins** | La base d'[Equicord](https://github.com/Equicord/Equicord) et [Vencord](https://github.com/Vendicated/Vencord), plus des plugins exclusifs. |
 | **Mises à jour invisibles** | Au lancement, Vault récupère les correctifs et affiche une notification **Restart**. Un clic et c'est à jour. |
