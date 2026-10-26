@@ -21,7 +21,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: sync-upstream
+  group: sync-upstream-v2
   cancel-in-progress: false
 
 jobs:
