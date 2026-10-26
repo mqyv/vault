@@ -34,11 +34,23 @@ FinishedLabel=Vault est installé ! Rouvre Discord : Vault apparaît dans tes R�
 ; Le script de bootstrap est exécuté pendant l'installation puis supprimé.
 Source: "..\scripts\install-vault.ps1"; DestDir: "{tmp}"; Flags: ignoreversion deleteafterinstall
 
-[Run]
-Filename: "powershell.exe"; \
-    Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{tmp}\install-vault.ps1"" -InstallDir ""{app}"" -Yes"; \
-    StatusMsg: "Installation de Vault (Git, Node.js, plugins, Discord)... cela peut prendre quelques minutes."; \
-    Flags: runhidden waituntilterminated
+[Code]
+// Execute le script de bootstrap et affiche une erreur claire s'il echoue (au lieu de dire "installe" a tort).
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ResultCode: Integer;
+  Params: String;
+begin
+  if CurStep = ssPostInstall then
+  begin
+    WizardForm.StatusLabel.Caption := 'Installation de Vault (Git, Node.js, plugins, Discord)... cela peut prendre quelques minutes.';
+    Params := '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{tmp}\install-vault.ps1') + '" -InstallDir "' + ExpandConstant('{app}') + '" -Yes';
+    if (not Exec('powershell.exe', Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode)) or (ResultCode <> 0) then
+      MsgBox('L''installation de Vault a echoue.' + #13#10 + #13#10 +
+        'Journal : ' + ExpandConstant('{%TEMP}\vault-install.log') + #13#10 +
+        'Tu peux aussi lancer la commande PowerShell du README pour voir les details.', mbError, MB_OK);
+  end;
+end;
 
 [UninstallRun]
 ; Retire Vault de Discord proprement avant de supprimer les fichiers (best-effort).
