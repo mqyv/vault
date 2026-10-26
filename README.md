@@ -1,6 +1,6 @@
 # Vault
 
-**Vault** est un mod personnel pour le client Discord : plus de **360 plugins**, des thèmes sur-mesure, et des mises à jour automatiques qui suivent Discord.
+**Vault** est un mod personnel pour le client Discord : plus de **370 plugins**, des thèmes sur-mesure, et des mises à jour automatiques qui suivent Discord.
 
 🌐 **Site** : https://vault-site-mu.vercel.app
 
@@ -37,6 +37,14 @@ pnpm -C "$HOME\Vault" uninject
 
 ---
 
+## Mettre à jour à la main
+```powershell
+pnpm -C "$HOMEVault" update-vault
+```
+Puis relance Discord.
+
+---
+
 ## Build manuel (développeurs)
 
 Prérequis : [Git](https://git-scm.com/download) et [Node.js LTS](https://nodejs.org). Puis :
@@ -49,6 +57,10 @@ pnpm install
 pnpm build
 pnpm inject        # Discord fermé
 ```
+
+Pour mettre à jour : `pnpm update-vault`. Le site vitrine est dans [`site/`](./site) (HTML statique, déployé sur Vercel).
+
+Base : [Equicord](https://github.com/Equicord/Equicord) / [Vencord](https://github.com/Vendicated/Vencord).
 
 ---
 

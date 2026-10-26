@@ -1,13 +1,11 @@
 name: Sync with Equicord
 
-# Garde le repo Vault à jour avec les correctifs Equicord, automatiquement.
-# Chaque utilisateur récupère ensuite ces correctifs via l'updater intégré
-# (bouton « Restart »). Personne n'a rien à faire.
+# Prépare une mise à jour Equicord sur la branche `sync/equicord` (jamais directement sur main :
+# du code externe non relu ne doit pas partir chez tous les utilisateurs via l updater).
+# Si le merge a des conflits, le job échoue : résous-les en local puis ouvre une PR.
 
 on:
-  schedule:
-    - cron: "0 5 * * *" # tous les jours à 05:00 UTC
-  workflow_dispatch: {} # + bouton « Run workflow » manuel sur GitHub
+  workflow_dispatch: {} # bouton « Run workflow » manuel sur GitHub
 
 permissions:
   contents: write
@@ -45,5 +43,5 @@ jobs:
           # utilisateurs peuvent toujours faire un pull en fast-forward.
           git merge --no-edit upstream/main
 
-      - name: Push
-        run: git push origin HEAD:main
+      - name: Push (branche de revue)
+        run: git push --force-with-lease origin HEAD:refs/heads/sync/equicord

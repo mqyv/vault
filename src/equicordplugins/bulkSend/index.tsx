@@ -6,6 +6,7 @@
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
+import { EquicordDevs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
@@ -107,7 +108,7 @@ const BulkSendButton: ChatBarButtonFactory = ({ channel }) => (
 export default definePlugin({
     name: "BulkSend",
     description: "Adds a chat bar button to queue several messages (one per line) and send them all at once, in order.",
-    authors: [{ name: "eqen", id: 1483151471183921346n }],
+    authors: [EquicordDevs.eqen],
     settings,
     chatBarButton: {
         icon: VaultIcon,

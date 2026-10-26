@@ -1,0 +1,36 @@
+name: Build installer
+
+# Compile VaultSetup.exe (Inno Setup) et le publie dans la release « v1.0 »,
+# ce qui garde stable le lien releases/latest/download/VaultSetup.exe.
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - installer/**
+      - scripts/install-vault.ps1
+
+permissions:
+  contents: write
+
+jobs:
+  installer:
+    name: VaultSetup.exe
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Inno Setup
+        run: choco install innosetup -y --no-progress
+
+      - name: Compile
+        shell: pwsh
+        run: |
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" installer\vault.iss
+          if (-not (Test-Path installer\Output\VaultSetup.exe)) { throw "VaultSetup.exe introuvable" }
+
+      - name: Upload to release v1.0
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload v1.0 installer\Output\VaultSetup.exe --clobber

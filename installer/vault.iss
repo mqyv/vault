@@ -2,7 +2,7 @@
 ; Compile avec : ISCC.exe installer\vault.iss  -> produit installer\Output\VaultSetup.exe
 
 #define MyAppName "Vault"
-#define MyAppVersion "1.0"
+#define MyAppVersion "1.15"
 #define MyAppPublisher "Vault"
 #define MyAppURL "https://github.com/mqyv/vault"
 

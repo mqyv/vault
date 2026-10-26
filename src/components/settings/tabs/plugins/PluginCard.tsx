@@ -12,9 +12,8 @@ import { AddonCard } from "@components/settings/AddonCard";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { Plugin } from "@utils/types";
-import { React, showToast } from "@webpack/common";
-
 import { getVaultOwnerAvatarURL, VAULT_OWNER_ID } from "@utils/vaultOwner";
+import { React, showToast } from "@webpack/common";
 
 import { PluginMeta } from "~plugins";
 

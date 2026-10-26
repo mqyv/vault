@@ -6,6 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { Channel, Message, User } from "@vencord/discord-types";
 import { ChannelStore, Menu, MessageActions, RestAPI, showToast, UserStore } from "@webpack/common";
@@ -153,7 +154,7 @@ const patchMessageContext: NavContextMenuPatchCallback = (children, { message }:
 export default definePlugin({
     name: "ClearMessages",
     description: "Deletes your own messages one by one (newest to oldest). 'Clear Messages' on a user clears a whole DM; 'Clear from this Message' on a message clears that message and everything after it. Re-open the user menu to stop.",
-    authors: [{ name: "eqen", id: 1483151471183921346n }],
+    authors: [EquicordDevs.eqen],
     tags: ["Utility", "Chat"],
     contextMenus: {
         "user-context": patchUserContext,

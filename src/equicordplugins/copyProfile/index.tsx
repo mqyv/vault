@@ -6,6 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
+import { EquicordDevs } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
 import type { User } from "@vencord/discord-types";
@@ -121,7 +122,7 @@ const patchUserContext: NavContextMenuPatchCallback = (children, { user }: UserC
 export default definePlugin({
     name: "CopyProfile",
     description: "Adds a 'Clone Profile to Me' option to the user menu that copies someone's avatar, banner, bio and pronouns onto your own account.",
-    authors: [{ name: "eqen", id: 1483151471183921346n }],
+    authors: [EquicordDevs.eqen],
     tags: ["Utility", "Friends"],
     contextMenus: {
         "user-context": patchUserContext

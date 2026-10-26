@@ -5,6 +5,7 @@
  */
 
 import { disableStyle, enableStyle } from "@api/Styles";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 import style from "./style.css?managed";
@@ -12,7 +13,7 @@ import style from "./style.css?managed";
 export default definePlugin({
     name: "VaultPerformance",
     description: "Lightens Discord for better performance: disables animations, transitions and expensive blur effects.",
-    authors: [{ name: "eqen", id: 1483151471183921346n }],
+    authors: [EquicordDevs.eqen],
     tags: ["Appearance"],
     enabledByDefault: true,
     start() {

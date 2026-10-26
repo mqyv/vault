@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { showToast, VoiceActions } from "@webpack/common";
 
@@ -81,7 +82,7 @@ function FakeVoiceButton({ iconForeground, hideTooltips, nameplate }: UserAreaRe
 export default definePlugin({
     name: "FakeVoice",
     description: "Appear muted and/or deafened to others while you keep talking and hearing. Ghost button next to mute/deafen: left-click = mute, right-click = deafen (independent). Experimental.",
-    authors: [{ name: "eqen", id: 1483151471183921346n }],
+    authors: [EquicordDevs.eqen],
     tags: ["Voice"],
     dependencies: ["UserAreaAPI"],
     settings,

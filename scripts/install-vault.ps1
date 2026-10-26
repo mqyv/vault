@@ -72,10 +72,10 @@ else {
 # --- 4. Telechargement / mise a jour ---
 if (Test-Path (Join-Path $InstallDir ".git")) {
     Step "Mise a jour de Vault ($InstallDir)"
-    git -C $InstallDir pull --ff-only
+    git -c core.longpaths=true -C $InstallDir pull --ff-only
 } else {
     Step "Telechargement de Vault dans $InstallDir"
-    git clone $RepoUrl $InstallDir
+    git clone -c core.longpaths=true $RepoUrl $InstallDir
 }
 if (-not (Test-Path (Join-Path $InstallDir "package.json"))) { Fail "Le telechargement a echoue."; return }
 Ok "Code recupere"
@@ -118,5 +118,5 @@ Write-Host "   Installation terminee ! Rouvre Discord :" -ForegroundColor Green
 Write-Host "   Vault apparait dans Reglages (onglet 'Vault')." -ForegroundColor Green
 Write-Host "  =======================================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "   Mettre a jour plus tard :  pnpm -C `"$InstallDir`" update-vault" -ForegroundColor DarkGray
+Write-Host "   Mettre a jour plus tard :  pnpm -C `"$InstallDir`" update-vault  (ou simplement l updater integre de Vault)" -ForegroundColor DarkGray
 Write-Host ""

@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher, MediaEngineStore } from "@webpack/common";
 
@@ -72,7 +73,7 @@ function onRtcState() {
 export default definePlugin({
     name: "BetterMicrophone",
     description: "Unlocks a higher microphone encoding bitrate for better voice quality. Experimental — toggle mute or rejoin the call to apply, and it may break with Discord updates.",
-    authors: [{ name: "eqen", id: 1483151471183921346n }],
+    authors: [EquicordDevs.eqen],
     tags: ["Voice"],
     settings,
 
