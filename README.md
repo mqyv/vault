@@ -39,7 +39,7 @@ pnpm -C "$HOME\Vault" uninject
 
 ## Mettre à jour à la main
 ```powershell
-pnpm -C "$HOMEVault" update-vault
+pnpm -C "$HOME\Vault" update-vault
 ```
 Puis relance Discord.
 
