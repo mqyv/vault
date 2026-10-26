@@ -10,16 +10,19 @@ import { findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, Menu, NavigationRouter, useState } from "@webpack/common";
 import type { CSSProperties, JSX, MouseEvent } from "react";
 
-import { getQuestifySettings, useQuestifySettings } from "../settings/access";
+import { useQuestifySettings } from "../settings/access";
 import type { QuestButtonAction, QuestButtonDisplayMode, QuestButtonIndicatorMode } from "../settings/def";
 import { getIgnoredQuestIDs, ignoreAllQuests, resetIgnoredQuests } from "../settings/ignoredQuests";
+import { rerenderQuests, useQuestRerender } from "../settings/rerender";
 import { initialQuestDataFetched } from "../state";
+import { getActiveAutoCompletes, getQueueableAutoCompleteQuests, isProcessingQuests, isQuestEnrollmentRateLimited, processQuests, stopAllAutoCompletes } from "../utils/completion";
 import { fetchAndAlertQuests } from "../utils/fetching";
+import { QL } from "../utils/logging";
 import { decimalToRGB, formatLowerBadge, isDarkish, leftClick, middleClick, q, QUEST_PAGE, rightClick } from "../utils/ui";
 import { openQuestifySettingsModal } from "./settingsModal";
 
 const GuildlessServerListItemComponent = findComponentByCodeLazy("tooltip:", "lowerBadgeSize:");
-const ServerListItemPillComponent = findComponentByCodeLazy('"pill":"empty"');
+const ServerListItemPillComponent = findComponentByCodeLazy("=!1,hovered:", "=!1,unread:", "=!1,disabled:");
 const ServerListItemLowerBadgeComponent = findComponentByCodeLazy("BADGE_NOTIFICATION_BACKGROUND", "let{count:");
 
 interface QuestButtonLowerBadgeProps {
@@ -189,9 +192,30 @@ function getQuestButtonLowerBadgeProps(
 }
 
 export function QuestButtonContextMenu({ dummy = false }: { dummy?: boolean; }): JSX.Element {
+    useQuestRerender();
+
+    const settings = useQuestifySettings([
+        "questButtonBadgeCount",
+        "autoCompleteQuestsSimultaneously",
+        "usedKonamiCode",
+        "allowChangingDangerousSettings",
+        "autoEnrollQuests",
+        "autoCompleteQuests",
+        "autoEnrollQuestsUnpaused",
+        "autoCompleteQuestsUnpaused",
+    ]);
+
     const navId = q(dummy ? "dummy-quest-button-context-menu" : "quest-button-context-menu");
-    const markAllIgnoredDisabled = dummy || getQuestifySettings().questButtonBadgeCount <= 0;
+    const markAllIgnoredDisabled = dummy || settings.questButtonBadgeCount <= 0;
     const resetIgnoredDisabled = dummy || getIgnoredQuestIDs().length <= 0;
+    const noneAutoCompletable = getQueueableAutoCompleteQuests().length <= 0;
+    const queueAllQuestsVisible = !settings.autoCompleteQuestsSimultaneously && !noneAutoCompletable;
+    const enrollmentRateLimited = isQuestEnrollmentRateLimited();
+    const queueAllQuestsInProgress = isProcessingQuests();
+    const queueAllQuestsDisabled = dummy || queueAllQuestsInProgress || enrollmentRateLimited;
+    const labelSuffix = (dummy ? "" : queueAllQuestsInProgress ? " (In-Progress)" : enrollmentRateLimited ? " (Rate-Limited)" : "");
+    const clearQueueVisible = queueAllQuestsInProgress || getActiveAutoCompletes().length > 0;
+    const automationControlsVisible = settings.usedKonamiCode === true && settings.allowChangingDangerousSettings;
     const fetchQuestsDisabled = dummy;
 
     return (
@@ -212,6 +236,63 @@ export function QuestButtonContextMenu({ dummy = false }: { dummy?: boolean; }):
                 action={resetIgnoredQuests}
                 disabled={resetIgnoredDisabled}
             />
+            {queueAllQuestsVisible && (
+                <Menu.MenuItem
+                    id={q(`${navId}-queue-all-quests`)}
+                    label={"Queue All Quests" + labelSuffix}
+                    action={() => {
+                        const queueAllPromise = processQuests(getQueueableAutoCompleteQuests(), { autoComplete: true });
+
+                        rerenderQuests();
+
+                        void queueAllPromise.catch(error => {
+                            QL.error("QUEST_PROCESSING_FAILED", { error });
+                        }).finally(() => {
+                            rerenderQuests();
+                        });
+                    }}
+                    disabled={queueAllQuestsDisabled}
+                />
+            )}
+            {clearQueueVisible && (
+                <Menu.MenuItem
+                    id={q(`${navId}-clear-queue`)}
+                    label="Clear Quest Queue"
+                    action={() => {
+                        stopAllAutoCompletes({
+                            manual: true,
+                            preserveResume: false,
+                            terminalHeartbeat: true,
+                        });
+                        rerenderQuests();
+                    }}
+                    disabled={dummy}
+                />
+            )}
+            {automationControlsVisible && settings.autoEnrollQuests && (
+                <Menu.MenuItem
+                    id={q(`${navId}-pause-auto-enrollment`)}
+                    label={settings.autoEnrollQuestsUnpaused === false ? "Unpause Auto-Enrollment" : "Pause Auto-Enrollment"}
+                    dontCloseOnAction
+                    action={() => {
+                        settings.autoEnrollQuestsUnpaused = settings.autoEnrollQuestsUnpaused === false;
+                        rerenderQuests();
+                    }}
+                    disabled={dummy}
+                />
+            )}
+            {automationControlsVisible && settings.autoCompleteQuests && (
+                <Menu.MenuItem
+                    id={q(`${navId}-pause-auto-processing`)}
+                    label={settings.autoCompleteQuestsUnpaused === false ? "Unpause Auto-Processing" : "Pause Auto-Processing"}
+                    dontCloseOnAction
+                    action={() => {
+                        settings.autoCompleteQuestsUnpaused = settings.autoCompleteQuestsUnpaused === false;
+                        rerenderQuests();
+                    }}
+                    disabled={dummy}
+                />
+            )}
             <Menu.MenuItem
                 id={q(`${navId}-fetch-quests`)}
                 label="Fetch Quests"

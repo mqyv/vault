@@ -4,26 +4,26 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { CloudDownloadIcon } from "@components/Icons";
 import { EquicordDevs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import { pluralise } from "@utils/misc";
-import definePlugin from "@utils/types";
+import { pluralize } from "@utils/misc";
+import definePlugin, { OptionType } from "@utils/types";
 import { Message, MessageAttachment } from "@vencord/discord-types";
-import { ChannelStore, showToast, Toasts } from "@webpack/common";
+import { ChannelStore, showToast } from "@webpack/common";
 
 const logger = new Logger("DownloadAllAttachments");
 
-async function downloadAll(attachments: MessageAttachment[]) {
-    let dir: FileSystemDirectoryHandle;
-    try {
-        dir = await window.showDirectoryPicker({ mode: "readwrite" });
-    } catch (e) {
-        if (e instanceof DOMException && e.name === "AbortError") return;
-        logger.error("Failed to open directory picker:", e);
-        return;
+const settings = definePluginSettings({
+    downloadAllFileTypes: {
+        type: OptionType.BOOLEAN,
+        description: "Also download non-media attachments. Only enable this if you trust what people send you.",
+        default: false
     }
+});
 
+async function downloadAll(attachments: MessageAttachment[]) {
     const usedNames = new Map<string, number>();
 
     function uniqueName(original: string): string {
@@ -36,31 +36,28 @@ async function downloadAll(attachments: MessageAttachment[]) {
             : `${original.slice(0, dot)}_${count}${original.slice(dot)}`;
     }
 
-    const tasks = attachments.map(a => ({ attachment: a, filename: uniqueName(a.filename) }));
+    const results = await Promise.allSettled(attachments.map(async attachment => {
+        const filename = uniqueName(attachment.filename);
+        const sources = [attachment.proxy_url];
+        if (settings.store.downloadAllFileTypes) sources.push(attachment.url);
+        if (!sources.some(Boolean)) throw new Error("Missing attachment URL");
 
-    const results = await Promise.allSettled(tasks.map(async ({ attachment, filename }) => {
-        if (!attachment.proxy_url) throw new Error("Missing Proxy URL");
-
-        const res = await fetch(attachment.proxy_url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        if (!res.body) throw new Error("Response body is empty");
-
-        let fileHandle: FileSystemFileHandle | undefined;
-        try {
-            fileHandle = await dir.getFileHandle(filename, { create: true });
-            const writable = await fileHandle.createWritable();
-            try {
-                await res.body.pipeTo(writable);
-            } catch (e) {
-                await writable.abort();
-                throw e;
-            }
-        } catch (e) {
-            if (fileHandle) {
-                try { await dir.removeEntry(filename); } catch { }
-            }
-            throw e;
+        let res: Response | undefined;
+        for (const source of sources) {
+            if (!source) continue;
+            res = await fetch(source).catch(() => undefined);
+            if (res?.ok) break;
         }
+        if (!res?.ok) throw new Error(res ? `HTTP ${res.status}` : "Network error");
+
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10_000);
     }));
 
     const failed = results.filter(r => {
@@ -74,9 +71,9 @@ async function downloadAll(attachments: MessageAttachment[]) {
     const succeeded = attachments.length - failed;
 
     if (failed === 0)
-        showToast(`Downloaded ${pluralise(succeeded, "attachment")}.`, Toasts.Type.SUCCESS);
+        showToast({ text: `Downloaded ${pluralize(succeeded, "attachment")}.`, variant: "success" });
     else
-        showToast(`Downloaded ${succeeded} of ${attachments.length} attachments. ${failed} failed.`, Toasts.Type.FAILURE);
+        showToast({ text: `Downloaded ${succeeded} of ${attachments.length} attachments. ${failed} failed.`, variant: "critical" });
 }
 
 export default definePlugin({
@@ -85,6 +82,7 @@ export default definePlugin({
     tags: ["Utility", "Chat"],
     authors: [EquicordDevs.dhopcs],
     dependencies: ["MessagePopoverAPI"],
+    settings,
     messagePopoverButton: {
         icon: CloudDownloadIcon,
         render(message: Message) {

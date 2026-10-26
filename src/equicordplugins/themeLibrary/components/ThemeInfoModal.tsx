@@ -15,7 +15,7 @@ import { openInviteModal } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import type { PluginNative } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Button, Modal, openModal, Parser, React, showToast, Toasts } from "@webpack/common";
+import { Button, Modal, openModal, Parser, React, showToast } from "@webpack/common";
 
 import { logger } from "./ThemeTab";
 
@@ -25,10 +25,10 @@ const UserSummaryItem = findComponentByCodeLazy("defaultRenderUser", "showDefaul
 async function downloadTheme(theme: Theme) {
     try {
         await Native.downloadTheme(theme);
-        showToast(`Downloaded ${theme.name}!`, Toasts.Type.SUCCESS);
+        showToast({ text: `Downloaded ${theme.name}!`, variant: "success" });
     } catch (err: unknown) {
         logger.error(err);
-        showToast(`Failed to download ${theme.name}! (check console)`, Toasts.Type.FAILURE);
+        showToast({ text: `Failed to download ${theme.name}! (check console)`, variant: "critical" });
     }
 }
 
@@ -61,11 +61,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                     variant: "primary",
                     disabled: !theme.content || theme.id === "preview",
                     onClick: async () => {
-                        const validThemesDir = await VencordNative.themes.getThemesDir() + `/${theme?.name}.theme.css`;
-                        if (!validThemesDir) {
-                            showToast(`Failed to download ${theme.name}!`, Toasts.Type.FAILURE);
-                            return;
-                        }
+                        const fileName = `${theme?.name}.theme.css`;
 
                         const exists = await Native.themeExists(theme);
                         if (exists) {
@@ -95,7 +91,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                             <p>A theme with the same name <b>already exists</b> in your themes directory! Do you want to overwrite it?</p>
                                             <div className="vce-overwrite-modal">
                                                 <code style={{ wordWrap: "break-word" }}>
-                                                    {validThemesDir}
+                                                    {fileName}
                                                 </code>
                                             </div>
                                         </div>
@@ -170,7 +166,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                     onClick={async e => {
                                         e.preventDefault();
                                         const useInvite = guild ? guild.invite_link?.split("discord.gg/")[1] : invite;
-                                        useInvite != null && openInviteModal(useInvite).catch(() => showToast("Invalid or expired invite!", Toasts.Type.FAILURE));
+                                        useInvite != null && openInviteModal(useInvite).catch(() => showToast({ text: "Invalid or expired invite!", variant: "critical" }));
                                     }}
                                 >
                                     Join Discord Server
@@ -198,7 +194,7 @@ export const ThemeInfoModal: React.FC<ThemeInfoModalProps> = ({ author, theme, .
                                             variant: "primary",
                                             onClick: () => {
                                                 copyToClipboard(themeContent);
-                                                showToast("Copied to Clipboard", Toasts.Type.SUCCESS);
+                                                showToast({ text: "Copied to Clipboard", variant: "success" });
                                             }
                                         }
                                     ]}

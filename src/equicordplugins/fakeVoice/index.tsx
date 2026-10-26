@@ -6,7 +6,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
 import definePlugin, { OptionType } from "@utils/types";
-import { Toasts, VoiceActions } from "@webpack/common";
+import { showToast, VoiceActions } from "@webpack/common";
 
 // Independent fake states. Your REAL mute/deafen stay off, so you always keep
 // talking and hearing — only what others see is faked.
@@ -24,7 +24,7 @@ const settings = definePluginSettings({
 });
 
 function feedback(msg: string) {
-    Toasts.show({ message: msg, type: Toasts.Type.MESSAGE, id: Toasts.genId(), options: { position: Toasts.Position.BOTTOM } });
+    showToast({ text: msg, variant: "success" });
 }
 
 // force Discord to resend the voice state so the faked flags take effect now

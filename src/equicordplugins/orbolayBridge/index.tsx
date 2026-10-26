@@ -7,7 +7,8 @@
 import { definePluginSettings } from "@api/Settings";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { ChannelStore, FluxDispatcher, GuildMemberStore, StreamerModeStore, Toasts, UserStore, VoiceStateStore } from "@webpack/common";
+import { SoundboardSound } from "@vencord/discord-types";
+import { ChannelStore, FluxDispatcher, GuildMemberStore, showToast, SoundboardStore, StreamerModeStore, UserStore, VoiceStateStore } from "@webpack/common";
 
 interface ChannelState {
     userId: string;
@@ -20,7 +21,15 @@ interface ChannelState {
     selfStream: boolean;
 }
 
-const liveUpdate = () => sendConfig();
+interface SoundboardSoundPayload {
+    sound_id: string;
+    name: string;
+    volume: number;
+    emoji_id: string | null;
+    emoji_name: string | null;
+    guild_id: string | null;
+    available: boolean;
+}
 
 const settings = definePluginSettings({
     port: {
@@ -28,80 +37,6 @@ const settings = definePluginSettings({
         description: "Port to connect to",
         default: 6888,
         restartNeeded: true
-    },
-    isKeybindEnabled: {
-        type: OptionType.BOOLEAN,
-        description: "Enable/disable the global keybind (Ctrl + `)",
-        default: true,
-        onChange: liveUpdate,
-    },
-    messageAlignment: {
-        type: OptionType.SELECT,
-        description: "Alignment of messages in the overlay",
-        options: [
-            { label: "Top left", value: "topleft", default: true },
-            { label: "Top right", value: "topright" },
-            { label: "Bottom left", value: "bottomleft" },
-            { label: "Bottom right", value: "bottomright" },
-            { label: "Top center", value: "topcenter" },
-            { label: "Bottom center", value: "bottomcenter" },
-            { label: "Center left", value: "centerleft" },
-            { label: "Center right", value: "centerright" },
-        ],
-        default: "topright",
-        onChange: liveUpdate,
-    },
-    messageOffsetX: {
-        type: OptionType.NUMBER,
-        description: "Horizontal offset for messages, in pixels",
-        default: 0,
-        onChange: liveUpdate,
-    },
-    messageOffsetY: {
-        type: OptionType.NUMBER,
-        description: "Vertical offset for messages, in pixels",
-        default: 0,
-        onChange: liveUpdate,
-    },
-    userAlignment: {
-        type: OptionType.SELECT,
-        description: "Alignment of users in the overlay",
-        options: [
-            { label: "Top left", value: "topleft", default: true },
-            { label: "Top right", value: "topright" },
-            { label: "Bottom left", value: "bottomleft" },
-            { label: "Bottom right", value: "bottomright" },
-            { label: "Top center", value: "topcenter" },
-            { label: "Bottom center", value: "bottomcenter" },
-            { label: "Center left", value: "centerleft" },
-            { label: "Center right", value: "centerright" },
-        ],
-        default: "topleft",
-        onChange: liveUpdate,
-    },
-    userOffsetX: {
-        type: OptionType.NUMBER,
-        description: "Horizontal offset for users, in pixels",
-        default: 0,
-        onChange: liveUpdate,
-    },
-    userOffsetY: {
-        type: OptionType.NUMBER,
-        description: "Vertical offset for users, in pixels",
-        default: 0,
-        onChange: liveUpdate,
-    },
-    voiceSemitransparent: {
-        type: OptionType.BOOLEAN,
-        description: "Make voice channel members transparent",
-        default: true,
-        onChange: liveUpdate,
-    },
-    messagesSemitransparent: {
-        type: OptionType.BOOLEAN,
-        description: "Make message notifications transparent",
-        default: false,
-        onChange: liveUpdate,
     },
 });
 
@@ -111,16 +46,13 @@ const sendConfig = () => {
     const userId = UserStore.getCurrentUser()?.id;
     if (!userId) return;
 
-    const config: Record<string, unknown> = { userId };
-    for (const key of Object.keys(settings.def)) {
-        config[key] = settings.store[key];
-    }
-
-    ws?.send(JSON.stringify({ cmd: "REGISTER_CONFIG", ...config }));
+    ws.send(JSON.stringify({ cmd: "REGISTER_CONFIG", userId }));
 };
 
 let ws: WebSocket | null = null;
 let currentChannel: string | null = null;
+let retryTimer: ReturnType<typeof setTimeout> | null = null;
+let stopped = false;
 
 const waitForPopulate = async fn => {
     while (true) {
@@ -130,18 +62,72 @@ const waitForPopulate = async fn => {
     }
 };
 
-const stateToPayload = (guildId: string, state: ChannelState) => ({
-    userId: state.userId,
-    username:
-        GuildMemberStore.getNick(guildId, state.userId) ||
-        UserStore.getUser(state.userId)?.globalName,
-    avatarUrl: UserStore.getUser(state.userId)?.avatar,
-    channelId: state.channelId,
-    deaf: state.deaf || state.selfDeaf,
-    mute: state.mute || state.selfMute,
-    streaming: state.selfStream,
-    speaking: false,
-});
+const waitForUserData = async (guildId: string, userId: string) => {
+    const isKnown = () =>
+        !!GuildMemberStore.getNick(guildId, userId) ||
+        !!UserStore?.getUser(userId)?.globalName;
+
+    const deadline = Date.now() + 3000;
+    while (!isKnown() && Date.now() < deadline) {
+        await new Promise(r => setTimeout(r, 100));
+    }
+};
+
+const stateToPayload = async (guildId: string, state: ChannelState) => {
+    await waitForUserData(guildId, state.userId);
+
+    return {
+        userId: state.userId,
+        username:
+            GuildMemberStore.getNick(guildId, state.userId) ||
+            UserStore?.getUser(state.userId)?.globalName,
+        avatarUrl: UserStore?.getUser(state.userId)?.avatar,
+        channelId: state.channelId,
+        deaf: state.deaf || state.selfDeaf,
+        mute: state.mute || state.selfMute,
+        streaming: state.selfStream,
+        speaking: false,
+    };
+};
+
+const toSoundboardPayload = (sound: SoundboardSound, fallbackGuild?: string): SoundboardSoundPayload | null => {
+    const soundId = sound?.soundId;
+    if (!soundId) return null;
+
+    const guildId = sound?.guildId ?? fallbackGuild;
+
+    return {
+        sound_id: soundId,
+        name: sound.name,
+        volume: sound.volume,
+        emoji_id: sound?.emojiId ?? null,
+        emoji_name: sound?.emojiName ?? null,
+        guild_id: !guildId || guildId === "0" ? null : guildId,
+        available: sound.available,
+    };
+};
+
+const getSoundboardSounds = (): SoundboardSoundPayload[] => {
+    const sounds: SoundboardSoundPayload[] = [];
+
+    for (const [guildKey, guildSounds] of SoundboardStore.getSounds() ?? []) {
+        for (const sound of guildSounds ?? []) {
+            const payload = toSoundboardPayload(sound, guildKey);
+            if (payload) sounds.push(payload);
+        }
+    }
+
+    return sounds;
+};
+
+const sendSoundboardUpdate = () => {
+    if (ws?.readyState !== WebSocket.OPEN) return;
+
+    const sounds = getSoundboardSounds();
+    if (!sounds.length) return;
+
+    ws.send(JSON.stringify({ cmd: "SOUNDBOARD_UPDATE", sounds }));
+};
 
 const incoming = payload => {
     switch (payload.cmd) {
@@ -242,11 +228,16 @@ const handleVoiceStateUpdates = async dispatch => {
                 ws?.send(
                     JSON.stringify({
                         cmd: "CHANNEL_JOINED",
-                        states: Object.values(voiceStates).map(s => stateToPayload(guildId, s as ChannelState)),
+                        states:
+                            await Promise.all(
+                                Object.values(voiceStates).map(s => stateToPayload(guildId, s as ChannelState))
+                            ),
                     })
                 );
 
                 currentChannel = state.channelId;
+
+                sendSoundboardUpdate();
 
                 break;
             } else if (!state.channelId) {
@@ -270,7 +261,7 @@ const handleVoiceStateUpdates = async dispatch => {
             ws?.send(
                 JSON.stringify({
                     cmd: "VOICE_STATE_UPDATE",
-                    state: stateToPayload(guildId, state as ChannelState),
+                    state: await stateToPayload(guildId, state as ChannelState),
                 })
             );
         }
@@ -290,23 +281,15 @@ const createWebsocket = () => {
     console.log("Attempting to connect to Orbolay server");
     if (ws?.close) ws.close();
 
-    setTimeout(() => {
-        if (ws?.readyState !== WebSocket.OPEN) {
-            Toasts.show({
-                message: "Orbolay websocket could not connect. Is it running?",
-                type: Toasts.Type.FAILURE,
-                id: Toasts.genId(),
-            });
-            ws = null;
-            return;
-        }
-    }, 1000);
-
     ws = new WebSocket("ws://127.0.0.1:" + settings.store.port);
-    ws.onerror = e => {
+    ws.onerror = () => {
         ws?.close?.();
         ws = null;
-        throw e;
+
+        if (!stopped) {
+            if (retryTimer) clearTimeout(retryTimer);
+            retryTimer = setTimeout(createWebsocket, 5000);
+        }
     };
     ws.onmessage = e => {
         incoming(JSON.parse(e.data));
@@ -315,16 +298,20 @@ const createWebsocket = () => {
         ws = null;
     };
     ws.onopen = async () => {
-        Toasts.show({
-            message: "Connected to Orbolay server",
-            type: Toasts.Type.SUCCESS,
-            id: Toasts.genId(),
-        });
+        showToast({ text: "Connected to Orbolay server", variant: "success" });
 
         const userId = await waitForPopulate(() => UserStore.getCurrentUser().id);
         if (!userId) return;
 
         sendConfig();
+
+        // Let the client know whether we are in streamer mode
+        ws?.send(
+            JSON.stringify({
+                cmd: "STREAMER_MODE",
+                enabled: StreamerModeStore.enabled,
+            })
+        );
 
         const userVoiceState = VoiceStateStore.getVoiceStateForUser(userId);
         if (!userVoiceState || !userVoiceState.channelId) return;
@@ -339,18 +326,16 @@ const createWebsocket = () => {
         ws?.send(
             JSON.stringify({
                 cmd: "CHANNEL_JOINED",
-                states: Object.values(channelState).map(s => stateToPayload(guildId, s as ChannelState)),
-            })
-        );
-
-        ws?.send(
-            JSON.stringify({
-                cmd: "STREAMER_MODE",
-                enabled: StreamerModeStore.enabled,
+                states:
+                    await Promise.all(
+                        Object.values(channelState).map(s => stateToPayload(guildId, s as ChannelState))
+                    ),
             })
         );
 
         currentChannel = userVoiceState.channelId;
+
+        sendSoundboardUpdate();
     };
 };
 
@@ -368,10 +353,14 @@ export default definePlugin({
     },
 
     start() {
+        stopped = false;
+        if (retryTimer) clearTimeout(retryTimer);
         createWebsocket();
     },
 
     stop() {
+        stopped = true;
+        if (retryTimer) clearTimeout(retryTimer);
         ws?.close?.();
         ws = null;
     }

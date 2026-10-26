@@ -45,7 +45,7 @@ const format = (date: Date, formatTemplate: string): string => {
     const sameElseFormat = settings.store?.formats?.sameElseFormat || timeFormats.sameElseFormat.default;
 
     return mmt.format(formatTemplate)
-        .replace("calendar", () => mmt.calendar(null, {
+        .replace("calendar", () => mmt.calendar(undefined, {
             sameDay: sameDayFormat,
             lastDay: lastDayFormat,
             lastWeek: lastWeekFormat,
@@ -164,7 +164,7 @@ export default definePlugin({
             ]
         },
         {
-            find: /.full,.{0,15}children:/,
+            find: ".MINUTE],[45*",
             replacement: {
                 // Tooltips for timestamp markdown (e.g. <t:1234567890>)
                 match: /(__unsupportedReactNodeAsText:)\i.full/,

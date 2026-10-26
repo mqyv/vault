@@ -23,17 +23,8 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
-import { FluxStore } from "@vencord/discord-types";
-import { findStoreLazy } from "@webpack";
 
 import { MemberCount } from "./MemberCount";
-
-export const ChannelMemberStore = findStoreLazy("ChannelMemberStore") as FluxStore & {
-    getProps(guildId?: string, channelId?: string): { groups: { count: number; id: string; }[]; };
-};
-export const ThreadMemberListStore = findStoreLazy("ThreadMemberListStore") as FluxStore & {
-    getMemberListSections(channelId?: string): { [sectionId: string]: { sectionId: string; userIds: string[]; }; };
-};
 
 export const settings = definePluginSettings({
     toolTip: {
@@ -61,7 +52,7 @@ export const cl = classNameFactory("vc-membercount-");
 
 export default definePlugin({
     name: "MemberCount",
-    description: "Shows the number of online members, total members, and users in voice channels on the server — in the member list and tooltip.",
+    description: "Shows the number of online members, total members, and users in voice channels on the server - in the member list and tooltip.",
     tags: ["Servers", "Utility"],
     authors: [Devs.Ven, Devs.Commandtechno, Devs.Apexo],
     settings,
@@ -84,6 +75,13 @@ export default definePlugin({
                 replace: "$&,$self.renderTooltip(arguments[0].guild)"
             },
             predicate: () => settings.store.toolTip
+        },
+        {
+            find: '"GuildSubscriptionsStore"',
+            replacement: {
+                match: /(\i\.\i\.getSection\(\i\))===(\i\.\i)\.MEMBERS/,
+                replace: (m, section, ChannelSectionTypes) => `(${m}||${section}===${ChannelSectionTypes}.NONE)`
+            }
         }
     ],
     render: ErrorBoundary.wrap(() => <MemberCount />, { noop: true }),

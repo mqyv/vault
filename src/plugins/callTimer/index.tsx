@@ -30,7 +30,7 @@ export const settings = definePluginSettings({
                 label: "30d 23h 00m 42s",
                 value: "human"
             }
-        ]
+        ] as const
     },
     allCallTimers: {
         type: OptionType.BOOLEAN,
@@ -124,7 +124,7 @@ export default definePlugin({
             predicate: () => settings.store.allCallTimers,
             replacement: [
                 {
-                    match: /user:(\i).*?\.EMBEDDED.{0,25};(?=return 0!==(\i)\.length)/,
+                    match: /user:(\i).*?\.isEmbedded.{0,200};(?=return\(\i&&null!=\i&&(\i)\.push\(\i\))/,
                     replace: "$&$2.push($self.renderTimer($1.id));",
                     predicate: () => !settings.store.showWithoutHover,
                 },
@@ -136,17 +136,11 @@ export default definePlugin({
             ]
         },
         {
-            find: "renderConnectionStatus(){",
-            replacement: [
-                {
-                    match: /(renderConnectionStatus\(\).{0,1000}?lineClamp:1,children:)(\i)(?=,|}\))/,
-                    replace: "$1[$2,$self.renderConnectionTimer({ channelId: this?.props?.channel?.id })]"
-                },
-                {
-                    match: /("RTCConnectionMenu".{0,200}?lineClamp:1,children:)(\i)(?=,|}\))/,
-                    replace: "$1[$2,$self.renderConnectionTimer({ channelId: this?.props?.channel?.id })]"
-                }
-            ]
+            find: '"RTCConnectionMenu"',
+            replacement: {
+                match: /("RTCConnectionMenu".{0,300}?lineClamp:1,children:)(\i)(?=,|}\))/,
+                replace: "$1[$2,$self.renderConnectionTimer({ channelId: this?.props?.channel?.id })]"
+            }
         },
     ],
 
