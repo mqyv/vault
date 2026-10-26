@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "vault-site", "runtimeExecutable": "npx", "runtimeArgs": ["--yes", "serve", "site", "-l", "4173"], "port": 4173 }
+  ]
+}
