@@ -106,6 +106,16 @@ jobs:
         if: steps.merge.outputs.status == 'merged' && steps.guard.outcome == 'success'
         run: pnpm test && pnpm buildWeb && pnpm generatePluginJson > /dev/null
 
+      - name: Refresh the website plugin catalogue
+        id: catalogue
+        if: steps.test.outcome == 'success'
+        run: |
+          pnpm generateSitePlugins
+          if ! git diff --quiet -- site/plugins.json; then
+            git add site/plugins.json
+            git commit -q -m "Site: refresh plugin catalogue"
+          fi
+
       - name: Push to main
         id: push
         if: steps.test.outcome == 'success'
