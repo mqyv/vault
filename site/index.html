@@ -196,7 +196,7 @@ footer a:hover{color:var(--text)}
 }
 @media(max-width:620px){
   .grid{grid-template-columns:1fr}.win-body{grid-template-columns:1fr}.side{display:none}
-  header.hero{padding-top:130px}section{padding:80px 0}.window{transform:none}
+  header.hero{padding-top:130px;padding-bottom:56px}section{padding:56px 0}.window{transform:none}
 }
 #rows{max-height:340px;overflow-y:auto;padding:2px 6px 2px 0;margin-right:-6px;scrollbar-width:thin;scrollbar-color:rgba(var(--gold-rgb),.35) transparent;-webkit-mask-image:linear-gradient(#000 calc(100% - 28px),transparent);mask-image:linear-gradient(#000 calc(100% - 28px),transparent);padding-bottom:26px}
 #rows::-webkit-scrollbar{width:6px}#rows::-webkit-scrollbar-thumb{background:rgba(var(--gold-rgb),.35);border-radius:9px}
@@ -225,32 +225,6 @@ footer a:hover{color:var(--text)}
 @media(max-width:360px){
   h1{font-size:44px}
 }
-/* full plugin catalogue */
-.catalog{margin-top:70px}
-.cat-top{display:grid;gap:14px;margin-bottom:26px}
-.cat-search{margin:0;background:var(--bg2)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chips.scroll{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;-webkit-mask-image:linear-gradient(90deg,#000 92%,transparent);mask-image:linear-gradient(90deg,#000 92%,transparent)}
-.chips.scroll::-webkit-scrollbar{display:none}
-.chip-btn{all:unset;box-sizing:border-box;cursor:pointer;white-space:nowrap;padding:9px 16px;min-height:40px;display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:99px;font-size:13.5px;color:var(--muted);background:var(--bg2);transition-property:transform,background-color,border-color,box-shadow,color,opacity;transition-duration:.25s;transition-timing-function:cubic-bezier(.2,.7,.2,1);}
-.chip-btn:hover{color:var(--text);border-color:var(--line2)}
-.chip-btn.on{color:#15110a;background:var(--gold);border-color:transparent;font-weight:500}
-.chip-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.chips.scroll .chip-btn{font-size:13px;padding:7px 14px;min-height:36px}
-.chips.scroll .chip-btn.on{background:rgba(var(--gold-rgb),.14);color:var(--gold2);border-color:rgba(var(--gold-rgb),.45);font-weight:400}
-.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.pc{content-visibility:auto;contain-intrinsic-size:auto 150px;padding:20px 22px;border:1px solid var(--line);border-radius:14px;background:var(--panel);transition:border-color .25s,transform .35s var(--ease);display:flex;flex-direction:column;gap:8px;min-width:0}
-.pc:hover{border-color:rgba(var(--gold-rgb),.35);transform:translateY(-2px)}
-.pc.v{border-color:rgba(var(--gold-rgb),.4);background:linear-gradient(180deg,rgba(var(--gold-rgb),.07),var(--panel))}
-.pc h4{font:500 15.5px Albert Sans;display:flex;align-items:center;gap:8px;flex-wrap:wrap;overflow-wrap:anywhere}
-.pc p{color:var(--muted);font-size:13.5px;line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.pc .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
-.pc .tags i{font:normal 11.5px 'JetBrains Mono';letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:3px 8px}
-.pc .bd{font:500 11px 'JetBrains Mono';letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(var(--gold-rgb),.4);border-radius:99px;padding:2px 8px}
-.cmore{text-align:center;margin-top:26px}
-.cnote{text-align:center;color:var(--muted);font-size:12.5px;margin-top:22px;opacity:.8}
-@media(max-width:900px){.cgrid{grid-template-columns:1fr 1fr}}
-@media(max-width:620px){.cgrid{grid-template-columns:1fr}.catalog{margin-top:50px}.chips:not(.scroll){gap:6px}.chip-btn{padding:8px 13px}}
 /* browser surfaces, focus, skip link */
 html{scrollbar-color:#2c2c36 var(--bg);scrollbar-width:thin}
 input{caret-color:var(--gold)}
@@ -259,7 +233,7 @@ input{caret-color:var(--gold)}
 .skip:focus{top:12px}
 h1,h2,h3{text-wrap:balance}
 p,li,summary,small{text-wrap:pretty}
-#ccount,#cnt,.bars em{font-variant-numeric:tabular-nums}
+#cnt,.bars em{font-variant-numeric:tabular-nums}
 .btn:active,.chip-btn:active,.theme:active,.seg button:active{transform:scale(.97)}
 .tg:active::after{width:20px}
 /* feature rows (no cards, no icons) */
@@ -283,7 +257,7 @@ p,li,summary,small{text-wrap:pretty}
 
 <nav aria-label="Navigation principale">
   <a class="brand" href="#top"><img src="logo.svg" alt="">Vault</a>
-  <div class="links"><a href="#features">Fonctions</a><a href="#plugins">Plugins</a><a href="#install">Installation</a><a href="#faq">FAQ</a></div>
+  <div class="links"><a href="#features">Fonctions</a><a href="#install">Installation</a><a href="#faq">FAQ</a></div>
   <a class="btn primary sm" href="https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe">Télécharger</a>
 </nav>
 
@@ -291,7 +265,7 @@ p,li,summary,small{text-wrap:pretty}
 <header class="hero" id="top">
   <div class="wrap">
     <span class="pill"><i></i>Version 1.15 · synchronisé avec Equicord</span>
-    <h1 class="serif">Discord, avec <em class="gold"><span data-total>370+</span> plugins</em> en plus.</h1>
+    <h1 class="serif">Discord, avec <em class="gold">370+ plugins</em> en plus.</h1>
     <p class="lead">Vault est un mod pour le client Discord de bureau. Il ajoute des plugins, des thèmes et une sauvegarde cloud, et se met à jour tout seul.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe">
@@ -366,26 +340,6 @@ p,li,summary,small{text-wrap:pretty}
   </div>
 </section>
 
-<section id="plugins" style="padding-top:20px">
-  <div class="wrap"><div class="head rv"><h2 class="serif">Les <span data-total>370+</span> plugins, triés et faciles à chercher</h2><p>La liste vient directement du code de Vault. Cherche par nom, par description ou par catégorie.</p></div></div>
-    <div class="wrap catalog rv" id="catalogue">
-    <div class="cat-top">
-      <label class="search cat-search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="cq" type="search" placeholder="Chercher un plugin…" autocomplete="off" aria-label="Rechercher dans le catalogue"><em id="ccount"></em></label>
-      <div class="chips" id="csrc" role="group" aria-label="Origine">
-        <button class="chip-btn on" data-s="all" aria-pressed="true">Tous</button>
-        <button class="chip-btn" data-s="vault" aria-pressed="false">Exclusifs Vault</button>
-        <button class="chip-btn" data-s="equicord" aria-pressed="false">Equicord</button>
-        <button class="chip-btn" data-s="vencord" aria-pressed="false">Vencord</button>
-      </div>
-      <div class="chips scroll" id="ctags" role="group" aria-label="Catégories"></div>
-    </div>
-    <div class="cgrid" id="cgrid" aria-live="polite"></div>
-    <p class="empty" id="cempty" hidden>Aucun plugin ne correspond à ta recherche.</p>
-    <div class="cmore"><button class="btn" id="cmore" hidden>Afficher plus de plugins</button></div>
-    <p class="cnote">Descriptions en anglais, telles que fournies par les auteurs des plugins. Liste générée depuis le code de Vault.</p>
-  </div>
-</section>
-
 <section id="install">
   <div class="wrap install">
     <div class="rv"><h2 class="serif" style="font-size:clamp(32px,4.6vw,52px);line-height:1.08;margin:0 0 16px;max-width:16ch">Installer Vault en trois étapes</h2>
@@ -457,15 +411,13 @@ document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e
 // ---- interactive settings window ----
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const PL=[["BulkSend","Envoie plusieurs messages d'un coup, délai réglable",1],["VaultPerformance","Préréglage pour un Discord plus fluide",1],["CopyProfile","Clone un profil complet : bannière, couleurs, thème",1],["ClearMessages","Supprime tes messages depuis n'importe quel point",0],["FakeVoice","Faux mute / sourd indépendants",0],["BetterMicrophone","Débloque le bitrate du micro (expérimental)",0],["MessageLogger","Garde une trace des messages supprimés ou modifiés",1],["ShowHiddenChannels","Affiche les salons que tu ne peux pas voir",0],["ViewIcons","Ouvre avatars, bannières et icônes en grand",1],["Translate","Traduis n'importe quel message en un clic",0]];
-let PL_ALL=null;
 const ON=new Set(PL.filter(p=>p[2]).map(p=>p[0]));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const setTg=(b,on)=>{b.classList.toggle('on',on);b.setAttribute('aria-checked',on)};
 const count=()=>{$('#cnt').textContent=ON.size+' actifs'};
 function renderPlugins(){
   const q=$('#q').value.trim().toLowerCase();
-  // sans recherche : la sélection ; avec recherche : tout le catalogue réel
-  const src=!q||!PL_ALL?PL.map(p=>({n:p[0],d:p[1]})):PL_ALL;
+  const src=PL.map(p=>({n:p[0],d:p[1]}));
   const list=src.filter(p=>!q||(p.n+' '+p.d).toLowerCase().includes(q)).slice(0,40);
   $('#rows').innerHTML=list.map(p=>`<div class="row"><div><p>${esc(p.n)}</p><small>${esc(p.d)}</small></div><button class="tg${ON.has(p.n)?' on':''}" role="switch" aria-checked="${ON.has(p.n)}" aria-label="${esc(p.n)}" data-n="${esc(p.n)}"></button></div>`).join('');
   $('#empty').hidden=list.length>0;count()}
@@ -496,49 +448,6 @@ $('#exp').onclick=function(){const b=this;b.textContent='Exporté ✓';setTimeou
 const PERF=[[[64,48,70],["480 Mo","18 %","60 fps"]],[[42,30,88],["320 Mo","11 %","120 fps"]],[[28,20,96],["240 Mo","7 %","144 fps"]]];
 function perf(i){[1,2,3].forEach((n,k)=>{$('#b'+n).style.width=PERF[i][0][k]+'%';$('#v'+n).textContent=PERF[i][1][k]})}
 $$('#seg button').forEach(b=>b.onclick=()=>{$$('#seg button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)});perf(+b.dataset.p)});
-// ---- full plugin catalogue (site/plugins.json, generated from the real plugin sources) ----
-let ALL = [];
-const SRC = { vault: "Vault", equicord: "Equicord", vencord: "Vencord" };
-const cs = { q: "", s: "all", t: "all", shown: 60 };
-const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-
-function cardHTML(p) {
-    const tags = p.t.slice(0, 3).map(t => `<i>${esc(t)}</i>`).join("");
-    return `<article class="pc${p.s === "vault" ? " v" : ""}"><h4>${esc(p.n)}${p.s === "vault" ? '<span class="bd">Exclusif</span>' : ""}</h4><p>${esc(p.d)}</p>${tags ? `<div class="tags">${tags}</div>` : ""}</article>`;
-}
-function filtered() {
-    const q = norm(cs.q.trim());
-    return ALL.filter(p => (cs.s === "all" || p.s === cs.s) && (cs.t === "all" || p.t.includes(cs.t)) && (!q || norm(p.n + " " + p.d + " " + p.t.join(" ")).includes(q)));
-}
-function renderCatalog() {
-    const list = filtered();
-    $("#cgrid").innerHTML = list.slice(0, cs.shown).map(cardHTML).join("");
-    $("#ccount").textContent = list.length + (list.length > 1 ? " plugins" : " plugin");
-    $("#cempty").hidden = list.length > 0;
-    const more = $("#cmore");
-    more.hidden = list.length <= cs.shown;
-    more.textContent = `Afficher plus de plugins (${list.length - cs.shown} restants)`;
-}
-function initCatalog(list) {
-    ALL = list;
-    const counts = {};
-    ALL.forEach(p => p.t.forEach(t => counts[t] = (counts[t] || 0) + 1));
-    const tags = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 14).map(e => e[0]);
-    $("#ctags").innerHTML = `<button class="chip-btn on" data-t="all" aria-pressed="true">Toutes catégories</button>` + tags.map(t => `<button class="chip-btn" data-t="${esc(t)}" aria-pressed="false">${esc(t)} <small style="opacity:.6;margin-left:6px">${counts[t]}</small></button>`).join("");
-    document.querySelectorAll("[data-total]").forEach(el => { el.textContent = ALL.length; });
-    renderCatalog();
-    // the settings mock-up searches the real catalogue too
-    PL_ALL = ALL;
-    renderPlugins();
-}
-function resetShown() { cs.shown = 60; renderCatalog(); }
-$("#cq").addEventListener("input", e => { cs.q = e.target.value; resetShown(); });
-$("#csrc").addEventListener("click", e => { const b = e.target.closest(".chip-btn"); if (!b) return; cs.s = b.dataset.s; $$("#csrc .chip-btn").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); }); resetShown(); });
-$("#ctags").addEventListener("click", e => { const b = e.target.closest(".chip-btn"); if (!b) return; cs.t = b.dataset.t; $$("#ctags .chip-btn").forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); }); resetShown(); });
-$("#cmore").addEventListener("click", () => { cs.shown += 90; renderCatalog(); });
-fetch("plugins.json").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(initCatalog).catch(() => {
-    $("#cgrid").innerHTML = '<p class="empty">Le catalogue complet n’a pas pu être chargé. Réessaie dans un instant.</p>';
-});
 // tabs
 const tabs=document.querySelectorAll('.tabs button'),panes=document.querySelectorAll('.pane');
 tabs.forEach(b=>b.onclick=()=>{tabs.forEach(x=>x.setAttribute('aria-selected',x===b));panes.forEach((p,i)=>p.classList.toggle('on',i==b.dataset.t))});
