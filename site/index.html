@@ -48,7 +48,7 @@ nav{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;width
   background:rgba(14,14,19,.62);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
   border:1px solid var(--line2);border-radius:999px}
 .brand{display:flex;align-items:center;gap:10px;font:500 15px Inter;letter-spacing:.14em;text-transform:uppercase}
-.brand img{width:30px;height:30px;border-radius:8px}
+.brand img{width:28px;height:28px}
 .links{display:flex;gap:26px;font-size:14px;color:var(--muted)}
 .links a{transition:color .2s}.links a:hover{color:var(--text)}
 .btn{display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border-radius:999px;font:500 14px Inter;border:1px solid var(--line2);transition:.3s var(--ease);cursor:pointer;background:transparent;color:var(--text)}
@@ -95,7 +95,7 @@ h1 em{font-style:italic}
 .side button.on{background:rgba(var(--gold-rgb),.1);color:var(--gold2)}
 .side button:focus-visible,.tg:focus-visible,.seg button:focus-visible,.theme:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .main{min-width:0}
-.tp{display:none;animation:fin .35s var(--ease)}.tp.on{display:block}
+section.tp{display:none;padding:0;animation:fin .35s var(--ease)}section.tp.on{display:block}
 @keyframes fin{from{opacity:0;transform:translateY(6px)}}
 .search input{all:unset;flex:1;min-width:0;color:var(--text)}.search input::placeholder{color:var(--muted)}
 .search em{font:normal 12px 'JetBrains Mono';color:var(--gold);white-space:nowrap}
@@ -118,7 +118,7 @@ h1 em{font-style:italic}
 .spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:rot .7s linear infinite;vertical-align:-2px;margin-right:6px}
 @keyframes rot{to{transform:rotate(1turn)}}
 @media(max-width:620px){.themes{grid-template-columns:1fr}.bars>div{grid-template-columns:70px 1fr 56px}
-  .side{display:flex!important;flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:10px}.side button{white-space:nowrap}.win-body{grid-template-columns:1fr}}
+  .side{display:flex!important;flex-direction:row;overflow-x:auto;scrollbar-width:none;border-right:0;border-bottom:1px solid var(--line);padding:10px}.side button{white-space:nowrap}.win-body{grid-template-columns:1fr}}
 
 /* sections */
 section{padding:110px 0}
@@ -194,6 +194,32 @@ footer a:hover{color:var(--text)}
   .grid{grid-template-columns:1fr}.win-body{grid-template-columns:1fr}.side{display:none}
   header.hero{padding-top:130px}section{padding:80px 0}.window{transform:none}
 }
+/* touch targets + small phones */
+.tg{position:relative}
+.tg::before{content:"";position:absolute;inset:-11px -8px}
+.search{min-height:46px}
+.seg button,.side button,.theme,.tabs button,summary,.copy{min-height:44px}
+.tabs{overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tabs button{white-space:nowrap}
+@media(max-width:620px){
+  nav{padding:6px 8px 6px 14px}.btn.sm{min-height:44px;padding:0 18px}
+  .btn{min-height:46px}
+  .tabs button{padding:14px 12px;font-size:13px}
+  .pane{padding:20px 16px}.term{border-radius:14px}
+  pre{padding:16px 14px;font-size:12px;padding-right:14px;padding-top:46px}
+  .copy{top:8px;right:8px;min-height:32px}
+  .win-body{min-height:0;grid-auto-rows:min-content}.main{padding:16px}
+  .bar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.seg{gap:4px;padding:4px}.seg button{padding:10px 2px;font-size:13px}
+  .pill{border-radius:16px;text-align:center;font-size:12.5px}
+  .stat{padding:24px 18px}.card{padding:24px}
+  .final{padding:60px 18px;border-radius:22px}
+  .row{gap:14px}.upd{flex-direction:column;align-items:flex-start}
+  .step{gap:14px}summary{font-size:19px}
+  .tag{font-size:11px}
+}
+@media(max-width:360px){
+  h1{font-size:44px}.stats{grid-template-columns:1fr}.stat{border-right:0!important;border-bottom:1px solid var(--line)}.stat:last-child{border-bottom:0}
+}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}.window{transform:none}}
 </style>
 </head>
@@ -201,7 +227,7 @@ footer a:hover{color:var(--text)}
 <div class="ambient"></div><div class="grain"></div>
 
 <nav>
-  <a class="brand" href="#top"><img src="icon.png" alt="">Vault</a>
+  <a class="brand" href="#top"><img src="logo.svg" alt="">Vault</a>
   <div class="links"><a href="#features">Fonctions</a><a href="#plugins">Plugins</a><a href="#install">Installation</a><a href="#faq">FAQ</a></div>
   <a class="btn primary sm" href="https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe">Télécharger</a>
 </nav>
@@ -222,7 +248,7 @@ footer a:hover{color:var(--text)}
     <p class="meta" style="margin-top:56px">Essaie : active des plugins, change de thème, lance une mise à jour.</p>
     <div class="stage rv" style="margin-top:20px">
       <div class="window">
-        <div class="bar"><b></b><b></b><b></b><span>Réglages › Vault › Plugins</span></div>
+        <div class="bar"><b></b><b></b><b></b><span id="crumb">Réglages › Vault › Plugins</span></div>
         <div class="win-body">
           <div class="side" role="tablist" aria-label="Réglages Vault">
             <button class="on" role="tab" aria-selected="true" data-tab="plugins">Plugins</button>
@@ -233,7 +259,7 @@ footer a:hover{color:var(--text)}
           </div>
           <div class="main">
             <section class="tp on" id="tp-plugins">
-              <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Rechercher parmi 370+ plugins…" autocomplete="off" aria-label="Rechercher un plugin"><em id="cnt"></em></label>
+              <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Rechercher un plugin…" autocomplete="off" aria-label="Rechercher un plugin"><em id="cnt"></em></label>
               <div class="rows" id="rows"></div>
               <p class="empty" id="empty" hidden>Aucun plugin ne correspond. Il y en a 370+ dans la vraie version.</p>
             </section>
@@ -353,7 +379,7 @@ pnpm inject</pre></div>
 <footer>
   <div class="wrap">
     <div class="row2">
-      <div><a class="brand" href="#top"><img src="icon.png" alt="">Vault</a>
+      <div><a class="brand" href="#top"><img src="logo.svg" alt="">Vault</a>
         <p>Discord est une marque de Discord Inc., citée à titre descriptif uniquement. Vault n'est ni affilié ni approuvé par Discord Inc. Basé sur Equicord et Vencord, sous licence GPL-3.0.</p></div>
       <div style="display:flex;gap:26px"><a href="https://github.com/mqyv/vault">GitHub</a><a href="https://github.com/mqyv/vault/blob/main/PRIVACY_POLICY.md">Confidentialité</a><a href="https://github.com/mqyv/vault/blob/main/LICENSE">Licence</a></div>
     </div>
@@ -382,7 +408,7 @@ $('#rows').addEventListener('click',e=>{const b=e.target.closest('.tg');if(!b)re
 $('#q').addEventListener('input',renderPlugins);renderPlugins();
 // tabs
 const sideBtns=$$('.side button');
-function openTab(t){sideBtns.forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});$$('.tp').forEach(p=>p.classList.toggle('on',p.id==='tp-'+t));if(t==='perf')perf(+$('#seg .on').dataset.p)}
+function openTab(t){const L={plugins:"Plugins",themes:"Thèmes",updates:"Mises à jour",cloud:"Cloud",perf:"Performance"};$("#crumb").textContent="Réglages › Vault › "+L[t];sideBtns.forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on)});$$('.tp').forEach(p=>p.classList.toggle('on',p.id==='tp-'+t));if(t==='perf')perf(+$('#seg .on').dataset.p)}
 sideBtns.forEach((b,i)=>{b.onclick=()=>openTab(b.dataset.tab);b.onkeydown=e=>{const d={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[e.key];if(!d)return;e.preventDefault();const n=sideBtns[(i+d+sideBtns.length)%sideBtns.length];n.focus();openTab(n.dataset.tab)}});
 // themes
 const TH=[["Or","Le classique",["#f3dca6","#d8b46a","#8f7236"]],["Saphir","Bleu profond",["#b9d4ff","#6aa2f2","#2f5da8"]],["Rubis","Rouge intense",["#ffc2c2","#ec6b6b","#9c3030"]],["Émeraude","Vert profond",["#bff3d3","#5fd49b","#2a7a55"]]];
