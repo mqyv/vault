@@ -12,6 +12,7 @@ import { AddonCard } from "@components/settings/AddonCard";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { Plugin } from "@utils/types";
+import { VAULT_LOGO_URI } from "@utils/vaultLogo";
 import { getVaultOwnerAvatarURL, VAULT_OWNER_ID } from "@utils/vaultOwner";
 import { React, showToast } from "@webpack/common";
 
@@ -101,7 +102,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         },
         {
             condition: isEquicordPlugin,
-            src: "https://equicord.org/assets/favicon.png",
+            src: VAULT_LOGO_URI,
             alt: "Vault",
             title: "Vault Plugin"
         },

@@ -33,13 +33,14 @@ import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { localStorage } from "@utils/localStorage";
 import { Margins } from "@utils/margins";
 import { useForceUpdater } from "@utils/react";
+import { VAULT_LOGO_URI } from "@utils/vaultLogo";
 import { findComponentByCodeLazy } from "@webpack";
 import { Alerts, SearchableSelect, Select, useState } from "@webpack/common";
 
 const ICON_STYLE: React.CSSProperties = { width: 20, height: 20, borderRadius: 4, verticalAlign: "middle" };
 
 function EquicordIcon() {
-    return <img src="https://equicord.org/assets/favicon.png" alt="Vault" style={ICON_STYLE} />;
+    return <img src={VAULT_LOGO_URI} alt="Vault" style={ICON_STYLE} />;
 }
 
 function VencordIcon() {
