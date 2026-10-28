@@ -33,7 +33,7 @@ a{color:inherit;text-decoration:none}
 .wrap{width:min(1160px,100% - 40px);margin-inline:auto}
 .serif{font-family:Fraunces,Georgia,serif;font-weight:300;letter-spacing:-.02em}
 .mono{font-family:'JetBrains Mono',monospace}
-.gold{background:linear-gradient(120deg,var(--gold2),var(--gold) 45%,var(--goldd));-webkit-background-clip:text;background-clip:text;color:transparent}
+.gold{background:linear-gradient(120deg,var(--gold2),var(--gold) 45%,var(--goldd));-webkit-background-clip:text;background-clip:text;color:transparent;padding:0 .12em;margin:0 -.12em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 .eyebrow{font:500 12px/1 'JetBrains Mono',monospace;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
 
 /* ambient */
@@ -194,6 +194,8 @@ footer a:hover{color:var(--text)}
   .grid{grid-template-columns:1fr}.win-body{grid-template-columns:1fr}.side{display:none}
   header.hero{padding-top:130px}section{padding:80px 0}.window{transform:none}
 }
+#rows{max-height:340px;overflow-y:auto;padding:2px 6px 2px 0;margin-right:-6px;scrollbar-width:thin;scrollbar-color:rgba(var(--gold-rgb),.35) transparent;-webkit-mask-image:linear-gradient(#000 calc(100% - 28px),transparent);mask-image:linear-gradient(#000 calc(100% - 28px),transparent);padding-bottom:26px}
+#rows::-webkit-scrollbar{width:6px}#rows::-webkit-scrollbar-thumb{background:rgba(var(--gold-rgb),.35);border-radius:9px}
 /* touch targets + small phones */
 .tg{position:relative}
 .tg::before{content:"";position:absolute;inset:-11px -8px}
@@ -236,7 +238,7 @@ footer a:hover{color:var(--text)}
   <div class="wrap">
     <span class="pill"><i></i>Version 1.15 — synchronisé avec Discord</span>
     <h1 class="serif">Discord, <em class="gold">sans limites.</em></h1>
-    <p class="lead">Vault est un mod privé pour Discord : plus de 370 plugins, des thèmes sur-mesure et des mises à jour qui se font toutes seules.</p>
+    <p class="lead">Vault est un mod privé pour Discord&nbsp;: plus de 370 plugins, des thèmes sur-mesure et des mises à jour qui se font toutes seules.</p>
     <div class="cta">
       <a class="btn primary" href="https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v13m0 0-5-5m5 5 5-5M4 20h16"/></svg>
@@ -245,7 +247,7 @@ footer a:hover{color:var(--text)}
     </div>
     <p class="meta">Gratuit · Open source GPL-3.0 · Windows 10 &amp; 11</p>
 
-    <p class="meta" style="margin-top:56px">Essaie : active des plugins, change de thème, lance une mise à jour.</p>
+    <p class="meta" style="margin-top:56px">Essaie&nbsp;: active des plugins, change de thème, lance une mise à jour.</p>
     <div class="stage rv" style="margin-top:20px">
       <div class="window">
         <div class="bar"><b></b><b></b><b></b><span id="crumb">Réglages › Vault › Plugins</span></div>
@@ -264,14 +266,14 @@ footer a:hover{color:var(--text)}
               <p class="empty" id="empty" hidden>Aucun plugin ne correspond. Il y en a 370+ dans la vraie version.</p>
             </section>
             <section class="tp" id="tp-themes">
-              <p class="ttl">Thème</p><p class="sub">Choisis une couleur : tout le site s'adapte.</p>
+              <p class="ttl">Thème</p><p class="sub">Choisis une couleur&nbsp;: tout le site s'adapte.</p>
               <div class="themes" id="themes"></div>
             </section>
             <section class="tp" id="tp-updates">
-              <div class="upd"><div><p>Vault <b id="ver">1.15.13.0</b></p><small id="updmsg">Dernière vérification : à l'instant</small></div><button class="btn sm" id="chk">Rechercher</button></div>
+              <div class="upd"><div><p>Vault <b id="ver">1.15.13.0</b></p><small id="updmsg">Dernière vérification&nbsp;: à l'instant</small></div><button class="btn sm" id="chk">Rechercher</button></div>
               <div class="rows">
                 <div class="row"><div><p>Mises à jour automatiques</p><small>Télécharge les correctifs en arrière-plan</small></div><button class="tg on" role="switch" aria-checked="true" aria-label="Mises à jour automatiques"></button></div>
-                <div class="row"><div><p>Me prévenir une fois terminée</p><small>Notification « Restart » comme Discord</small></div><button class="tg on" role="switch" aria-checked="true" aria-label="Notification de mise à jour"></button></div>
+                <div class="row"><div><p>Me prévenir une fois terminée</p><small>Notification «&nbsp;Restart&nbsp;» comme Discord</small></div><button class="tg on" role="switch" aria-checked="true" aria-label="Notification de mise à jour"></button></div>
               </div>
             </section>
             <section class="tp" id="tp-cloud">
@@ -307,7 +309,7 @@ footer a:hover{color:var(--text)}
       <h2 class="serif">Pensé pour ceux qui veulent <em class="gold">plus.</em></h2>
       <p>Une base solide, des outils exclusifs, et rien d'inutile entre toi et ton Discord.</p></div>
     <div class="grid">
-      <article class="card rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z"/></svg></div><h3>Mises à jour invisibles</h3><p>Vault suit Discord. Un correctif sort, tu reçois une notification « Restart » et c'est réglé.</p></article>
+      <article class="card rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6z"/></svg></div><h3>Mises à jour invisibles</h3><p>Vault suit Discord. Un correctif sort, tu reçois une notification «&nbsp;Restart&nbsp;» et c'est réglé.</p></article>
       <article class="card rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div><h3>Performance</h3><p>VaultPerformance applique un préréglage optimisé dès l'installation. Plus fluide, moins gourmand.</p><span class="tag">Exclusif</span></article>
       <article class="card rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 4h16v12H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg></div><h3>BulkSend</h3><p>Une ligne = un message. Délai en millisecondes réglable directement dans la fenêtre.</p><span class="tag">Exclusif</span></article>
       <article class="card rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><h3>CopyProfile</h3><p>Clone la bannière, la couleur et le thème de profil d'un autre utilisateur en un clic.</p><span class="tag">Exclusif</span></article>
@@ -340,11 +342,11 @@ footer a:hover{color:var(--text)}
         <button role="tab" aria-selected="false" data-t="1">PowerShell</button>
         <button role="tab" aria-selected="false" data-t="2">Développeurs</button>
       </div>
-      <div class="pane on"><p>Recommandé. Windows peut afficher « Windows a protégé votre PC » car l'installeur n'est pas signé : Informations complémentaires → Exécuter quand même.</p>
+      <div class="pane on"><p>Recommandé. Windows peut afficher «&nbsp;Windows a protégé votre PC&nbsp;» car l'installeur n'est pas signé&nbsp;: Informations complémentaires → Exécuter quand même.</p>
         <a class="btn primary" href="https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe">Télécharger VaultSetup.exe</a></div>
       <div class="pane"><p>Une seule commande, dans PowerShell.</p>
         <pre><button class="copy">Copier</button>irm https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.ps1 | iex</pre></div>
-      <div class="pane"><p>Prérequis : Git et Node.js LTS. Ferme Discord avant d'injecter.</p>
+      <div class="pane"><p>Prérequis&nbsp;: Git et Node.js LTS. Ferme Discord avant d'injecter.</p>
         <pre><button class="copy">Copier</button>npm i -g pnpm
 git clone https://github.com/mqyv/vault.git Vault
 cd Vault
@@ -359,11 +361,11 @@ pnpm inject</pre></div>
   <div class="wrap">
     <div class="head rv" style="margin-inline:auto;text-align:center"><span class="eyebrow">FAQ</span><h2 class="serif">Questions <em class="gold">fréquentes</em></h2></div>
     <div class="faq rv">
-      <details><summary>Est-ce que Vault est gratuit ?</summary><p>Oui, entièrement. Vault est un logiciel libre sous licence GPL-3.0 : tu peux lire, modifier et redistribuer le code.</p></details>
-      <details><summary>Comment fonctionnent les mises à jour ?</summary><p>Au lancement, Vault récupère les derniers correctifs et affiche une notification « Restart ». Un clic et tu es à jour.</p></details>
-      <details><summary>Comment désinstaller ?</summary><p>Via « Ajout/Suppression de programmes » si tu as utilisé l'installeur, ou avec la commande <span class="mono">pnpm uninject</span> pour une installation manuelle.</p></details>
-      <details><summary>Y a-t-il un risque pour mon compte ?</summary><p>Modifier le client Discord enfreint ses conditions d'utilisation. Dans les faits, aucun bannissement n'est connu pour l'usage d'un client mod, mais si ton compte est essentiel, évite tout client mod.</p></details>
-      <details><summary>Sur quels systèmes ça marche ?</summary><p>L'installeur graphique est prévu pour Windows 10 et 11. Le build manuel fonctionne ailleurs avec Node.js et pnpm.</p></details>
+      <details><summary>Est-ce que Vault est gratuit&nbsp;?</summary><p>Oui, entièrement. Vault est un logiciel libre sous licence GPL-3.0&nbsp;: tu peux lire, modifier et redistribuer le code.</p></details>
+      <details><summary>Comment fonctionnent les mises à jour&nbsp;?</summary><p>Au lancement, Vault récupère les derniers correctifs et affiche une notification «&nbsp;Restart&nbsp;». Un clic et tu es à jour.</p></details>
+      <details><summary>Comment désinstaller&nbsp;?</summary><p>Via «&nbsp;Ajout/Suppression de programmes&nbsp;» si tu as utilisé l'installeur, ou avec la commande <span class="mono">pnpm uninject</span> pour une installation manuelle.</p></details>
+      <details><summary>Y a-t-il un risque pour mon compte&nbsp;?</summary><p>Modifier le client Discord enfreint ses conditions d'utilisation. Dans les faits, aucun bannissement n'est connu pour l'usage d'un client mod, mais si ton compte est essentiel, évite tout client mod.</p></details>
+      <details><summary>Sur quels systèmes ça marche&nbsp;?</summary><p>L'installeur graphique est prévu pour Windows 10 et 11. Le build manuel fonctionne ailleurs avec Node.js et pnpm.</p></details>
     </div>
   </div>
 </section>
