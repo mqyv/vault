@@ -19,7 +19,7 @@ async function isOriginApproved(url: string): Promise<boolean> {
 
     const { response } = await dialog.showMessageBox({
         type: "warning",
-        title: "Equicord FileUpload",
+        title: "Vault FileUpload",
         message: `FileUpload wants to upload files to ${origin}`,
         detail: `Unless you recognise and fully trust ${origin}, you should cancel this request!\n\nTrust remembers this server, Allow only permits this request.`,
         buttons: ["Trust", "Allow", "Cancel"],

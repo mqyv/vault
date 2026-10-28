@@ -1,15 +1,18 @@
 name: Sync with Equicord
 
 # Garde Vault à jour avec Equicord (qui suit lui-même Vencord) : dès qu'Equicord publie un changement,
-# on le fusionne dans main. Les utilisateurs le reçoivent ensuite via l'updater intégré.
+# il est fusionné dans main. Les utilisateurs le reçoivent ensuite via l'updater intégré.
 #
-# Garde-fou : la fusion est d'abord testée (build, types, lint, patchs). Si elle a des conflits
-# ou si les tests échouent, RIEN n'arrive sur main : le résultat est poussé sur la branche
-# `sync/equicord` et une issue est ouverte pour que tu règles ça toi-même.
+#  1. fusion d'Equicord ; sur un conflit, la version d'Equicord l'emporte (le code upstream fait foi) ;
+#  2. le rebranding « Equicord -> Vault » est réappliqué sur les lignes que la fusion a apportées ;
+#  3. vérification que les personnalisations de Vault sont intactes (scripts/vaultSync.mjs check) ;
+#  4. build, types, lint et patchs doivent passer ;
+#  5. seulement alors, push sur main.
+# Si une étape échoue, rien n'arrive sur main : le job passe en rouge (GitHub t'envoie un email) et le
+# résultat est conservé sur la branche `sync/equicord` pour être corrigé à la main.
 #
-# Secret optionnel : SYNC_TOKEN (PAT fine-grained, droits Contents + Workflows en lecture/écriture).
-# Sans lui, GitHub refuse de pousser une fusion qui modifie des fichiers .github/workflows
-# (le job échoue alors proprement et l'issue l'explique).
+# Secret recommandé : SYNC_TOKEN (PAT fine-grained, Contents + Workflows en lecture/écriture).
+# Sans lui, GitHub refuse de pousser une fusion qui modifie des fichiers .github/workflows d'Equicord.
 
 on:
   schedule:
@@ -18,7 +21,6 @@ on:
 
 permissions:
   contents: write
-  issues: write
 
 concurrency:
   group: sync-upstream-v2
@@ -30,15 +32,12 @@ jobs:
     runs-on: ubuntu-latest
     # ne tourne que sur le fork, jamais sur Equicord lui-même
     if: github.repository != 'Equicord/Equicord'
-    env:
-      GH_TOKEN: ${{ github.token }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
-          token: ${{ github.token }}
 
       - name: Configure git
         run: |
@@ -58,17 +57,20 @@ jobs:
         id: merge
         if: steps.fetch.outputs.behind != '0'
         run: |
-          # Workflows propres à Vault : tout le reste de .github/workflows vient d'Equicord et ne nous concerne pas.
+          # Workflows propres à Vault : le reste de .github/workflows vient d'Equicord et ne nous concerne pas.
           KEEP="autofix.yml installer.yml sync-upstream.yml test.yml"
           before=$(git rev-parse HEAD)
 
-          git merge --no-commit --no-ff upstream/main || true
+          # -X theirs : sur un conflit de lignes, la version d'Equicord l'emporte (le rebranding est réappliqué après).
+          git merge --no-commit --no-ff -X theirs upstream/main || true
 
-          # Conflits dans .github/workflows : on garde notre version (ou on supprime le fichier d'Equicord).
-          for f in $(git diff --name-only --diff-filter=U -- .github/workflows); do
-            if echo " $KEEP " | grep -q " $(basename "$f") "; then git checkout --ours -- "$f" && git add "$f"; else git rm -q -f "$f"; fi
+          # Fichiers supprimés d'un côté et modifiés de l'autre : on suit Equicord s'il a supprimé, sinon on garde le nôtre.
+          for f in $(git diff --name-only --diff-filter=U); do
+            if git cat-file -e "upstream/main:$f" 2>/dev/null; then git checkout --ours -- "$f" 2>/dev/null || git checkout --theirs -- "$f"; git add "$f"; else git rm -q -f "$f"; fi
           done
-          # Workflows ajoutés par Equicord : on les retire. Les nôtres restent identiques.
+
+          # Nos fichiers, jamais ceux d'Equicord
+          git checkout "$before" -- README.md 2>/dev/null || true
           for f in .github/workflows/*; do
             [ -e "$f" ] || continue
             echo " $KEEP " | grep -q " $(basename "$f") " || git rm -q -f "$f"
@@ -76,17 +78,24 @@ jobs:
           for k in $KEEP; do git checkout "$before" -- ".github/workflows/$k"; done
 
           if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
-            echo "Conflits :"; git diff --name-only --diff-filter=U
-            git diff --name-only --diff-filter=U > conflicts.txt
+            echo "Conflits non résolus :"; git diff --name-only --diff-filter=U
             echo "status=conflict" >> "$GITHUB_OUTPUT"
-            git merge --abort
-          else
-            git commit -q -m "Merge Equicord upstream ($(git rev-parse --short upstream/main))"
-            echo "status=merged" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
-      - name: Setup PNPM
+          node scripts/vaultSync.mjs rebrand "$before"
+          node scripts/vaultSync.mjs fixpkg
+          git add -A
+          git commit -q -m "Merge Equicord upstream ($(git rev-parse --short upstream/main))"
+          echo "status=merged" >> "$GITHUB_OUTPUT"
+
+      - name: Check Vault customisations
+        id: guard
         if: steps.merge.outputs.status == 'merged'
+        run: node scripts/vaultSync.mjs check
+
+      - name: Setup PNPM
+        if: steps.merge.outputs.status == 'merged' && steps.guard.outcome == 'success'
         uses: pnpm/setup@v2.1.0
         with:
           runtime: node@v24
@@ -94,30 +103,37 @@ jobs:
 
       - name: Test the merge
         id: test
-        if: steps.merge.outputs.status == 'merged'
+        if: steps.merge.outputs.status == 'merged' && steps.guard.outcome == 'success'
         run: pnpm test && pnpm buildWeb && pnpm generatePluginJson > /dev/null
 
       - name: Push to main
-        if: steps.merge.outputs.status == 'merged' && steps.test.outcome == 'success'
-        run: git push origin HEAD:main
-
-      - name: Push to review branch
-        id: review
-        if: always() && steps.fetch.outputs.behind != '0' && (steps.merge.outputs.status == 'conflict' || (steps.merge.outputs.status == 'merged' && steps.test.outcome != 'success'))
+        id: push
+        if: steps.test.outcome == 'success'
+        env:
+          PAT: ${{ secrets.SYNC_TOKEN }}
         run: |
-          if [ "${{ steps.merge.outputs.status }}" = "merged" ]; then
-            git push --force origin HEAD:refs/heads/sync/equicord
-            echo "reason=Les tests échouent après la fusion. La fusion est sur la branche \`sync/equicord\` (voir les logs de ce run pour l'erreur)." >> "$GITHUB_OUTPUT"
+          if [ -n "$PAT" ]; then
+            git push "https://x-access-token:${PAT}@github.com/${GITHUB_REPOSITORY}.git" HEAD:main
           else
-            echo "reason=La fusion a des conflits dans : $(tr '\n' ' ' < conflicts.txt). Règle-les en local : \`git fetch upstream && git merge upstream/main\`." >> "$GITHUB_OUTPUT"
+            git push origin HEAD:main
           fi
 
-      - name: Open an issue
-        if: always() && steps.review.outcome == 'success'
+      - name: Keep the result for review
+        if: failure() && steps.merge.outputs.status == 'merged'
         env:
-          REASON: ${{ steps.review.outputs.reason }}
+          PAT: ${{ secrets.SYNC_TOKEN }}
         run: |
-          title="Synchro Equicord à régler à la main"
-          body="$REASON"$'\n\n'"Run : $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          existing=$(gh issue list --state open --search "$title in:title" --json number -q '.[0].number')
-          if [ -n "$existing" ]; then gh issue comment "$existing" --body "$body"; else gh issue create --title "$title" --body "$body"; fi
+          if [ -n "$PAT" ]; then url="https://x-access-token:${PAT}@github.com/${GITHUB_REPOSITORY}.git"; else url=origin; fi
+          git push --force "$url" HEAD:refs/heads/sync/equicord || echo "Impossible de pousser la branche de revue (fichiers .github/workflows modifiés ? ajoute le secret SYNC_TOKEN)."
+          {
+            echo "### Synchro Equicord à régler à la main"
+            echo "La fusion a été préparée mais n'a pas été poussée sur \`main\`. Elle est sur la branche \`sync/equicord\` (si le push a réussi)."
+            echo "Regarde l'étape en échec ci-dessus : personnalisation perdue, test en échec, ou push refusé."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail on unresolved conflicts
+        if: steps.merge.outputs.status == 'conflict'
+        run: |
+          echo "### Conflits que la synchro ne sait pas résoudre seule" >> "$GITHUB_STEP_SUMMARY"
+          echo "Résous-les en local : git fetch upstream && git merge upstream/main" >> "$GITHUB_STEP_SUMMARY"
+          exit 1

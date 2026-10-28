@@ -95,7 +95,7 @@ function CspErrorCard() {
     const allowableHosts = new Set(allowableUrls.map(url => new URL(url).host));
 
     const allowUrls = async (urls: string[]) => {
-        const result = await VencordNative.csp.requestAddOverride(urls.map(url => new URL(url).origin), ["connect-src", "img-src", "style-src", "font-src"], "Equicord Themes");
+        const result = await VencordNative.csp.requestAddOverride(urls.map(url => new URL(url).origin), ["connect-src", "img-src", "style-src", "font-src"], "Vault Themes");
         if (result !== "ok") return;
 
         const hosts = new Set(urls.map(url => new URL(url).host));
