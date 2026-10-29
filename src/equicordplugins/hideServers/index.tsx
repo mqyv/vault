@@ -116,7 +116,8 @@ export default definePlugin({
                     replace: "$self.useFilteredGuilds($1)$2"
                 },
                 {
-                    match: /let{disableAppDownload.{0,10}isPlatformEmbedded/,
+                    // Discord may declare other variables first ("let n,i,{disableAppDownload:...}")
+                    match: /let ?(?:\i,)*{disableAppDownload.{0,10}isPlatformEmbedded/,
                     replace: "$self.useStore();$&",
                 }
             ]

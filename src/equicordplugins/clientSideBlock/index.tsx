@@ -206,9 +206,9 @@ export default definePlugin({
         {
             find: "PrivateChannel.renderAvatar",
             replacement: {
-                // horror but it works
-                match: /(return \i\.isMultiUserDM\(\))(?<=function\(\i,(\i),\i\){.*)/,
-                replace: "if($2.rawRecipients[0] && $2.rawRecipients[0]?.id){if($self.shouldHideUser($2.rawRecipients[0].id)) return null;}$1"
+                // The DM row wrapper calls its hooks before this return, so returning null here is hook-safe
+                match: /return (\i)\.isMultiUserDM\(\)\?/,
+                replace: "if($1.rawRecipients?.[0]?.id&&$self.shouldHideUser($1.rawRecipients[0].id))return null;$&"
             }
         },
         // thank nick (644298972420374528) for these patches :3

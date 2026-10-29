@@ -90,7 +90,8 @@ export default definePlugin({
     // hook the voice-state payload Discord sends to the gateway
     patches: [
         {
-            find: ".identifyStartTime))",
+            // the gateway socket's voiceStateUpdate (".identifyStartTime))" now points at the incoming-state parser)
+            find: /\.shouldIncludePreferredRegion\(\)&&\(\i\.preferred_region=/,
             replacement: {
                 match: /self_mute:([^,]+),self_deaf:([^,]+)/,
                 replace: "self_mute:$self.fakeMute($1),self_deaf:$self.fakeDeaf($2)"

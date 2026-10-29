@@ -39,7 +39,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
     const isUserPlugin = pluginMeta?.userPlugin ?? false;
     const isModifiedPlugin = plugin.isModified ?? false;
 
-    // Vault: plugins authored by the owner show their Discord avatar as the badge
+    // Vault: plugins authored by the owner get the "Plugin Vault" badge (Vault logo)
     const isVaultOwnPlugin = (plugin.authors ?? []).some(a => String(a.id) === VAULT_OWNER_ID);
 
     const isEnabled = () => isPluginEnabled(plugin.name);

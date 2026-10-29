@@ -65,11 +65,8 @@ export default definePlugin({
                 {
                     match: /\[\{.{0,25}\i.\i.SECONDS_30.{0,500}\}\]/,
                     replace: " $self.patchTimeslots($&)"
-                },
-                {
-                    match: /\[\{.{0,25}\i.\i.FPS_15.{0,500}\}\]/,
-                    replace: " $self.patchFramerates($&)"
                 }
+                // Discord removed the clip framerate selector (only a stored default remains): nothing left to extend.
             ]
         },
     ],

@@ -144,12 +144,36 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
     }
 });
 
+/**
+ * API plugins a plugin needs because of the fields it defines (chatBarButton, userAreaButton...).
+ * They are not listed in `dependencies`, so they must be resolved here both at startup and when a plugin is
+ * enabled at runtime; otherwise the plugin starts but its button/badge/etc. never shows until a restart (Vault fix).
+ */
+export function getImplicitApiDependencies(p: Plugin): string[] {
+    const apis: string[] = [];
+    if (p.commands?.length) apis.push("CommandsAPI");
+    if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) apis.push("MessageEventsAPI");
+    if (p.chatBarButton || p.chatBarButtonWrapper) apis.push("ChatInputButtonAPI");
+    if (p.renderMemberListDecorator) apis.push("MemberListDecoratorsAPI");
+    if (p.renderMessageAccessory) apis.push("MessageAccessoriesAPI");
+    if (p.renderMessageDecoration) apis.push("MessageDecorationsAPI");
+    if (p.messagePopoverButton) apis.push("MessagePopoverAPI");
+    if (p.userProfileBadge) apis.push("BadgeAPI");
+    if (p.renderNicknameIcon) apis.push("NicknameIconsAPI");
+    if (p.headerBarButton) apis.push("HeaderBarAPI");
+    if (p.audioProcessor) apis.push("AudioPlayerAPI");
+    if (p.userAreaButton) apis.push("UserAreaAPI");
+    if (p.renderProfileCollection) apis.push("ProfileCollectionsAPI");
+    if (p.renderProfileSection) apis.push("ProfileSectionsAPI");
+    return apis.filter(api => api in Plugins);
+}
+
 export function startDependenciesRecursive(p: Plugin) {
     const settings = Settings.plugins;
     let restartNeeded = false;
     const failures: string[] = [];
 
-    p.dependencies?.forEach(d => {
+    [...(p.dependencies ?? []), ...getImplicitApiDependencies(p)].forEach(d => {
         if (!settings[d].enabled) {
             const dep = Plugins[d];
             startDependenciesRecursive(dep);
@@ -411,23 +435,7 @@ export const initPluginManager = onlyOnce(function init() {
             dep.isDependency = true;
         });
 
-        if (p.commands?.length) neededApiPlugins.add("CommandsAPI");
-        if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
-        if (p.chatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
-        if (p.renderMemberListDecorator) neededApiPlugins.add("MemberListDecoratorsAPI");
-        if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
-        if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
-        if (p.messagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
-        if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
-
-        // Custom
-        if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
-        if (p.headerBarButton) neededApiPlugins.add("HeaderBarAPI");
-        if (p.audioProcessor) neededApiPlugins.add("AudioPlayerAPI");
-        if (p.userAreaButton) neededApiPlugins.add("UserAreaAPI");
-        if (p.renderProfileCollection) neededApiPlugins.add("ProfileCollectionsAPI");
-        if (p.chatBarButtonWrapper) neededApiPlugins.add("ChatInputButtonAPI");
-        if (p.renderProfileSection) neededApiPlugins.add("ProfileSectionsAPI");
+        for (const api of getImplicitApiDependencies(p)) neededApiPlugins.add(api);
 
         for (const key of pluginKeysToBind) {
             p[key] &&= (p[key] as Function).bind(p) as any;
