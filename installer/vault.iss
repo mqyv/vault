@@ -50,8 +50,13 @@ Filename: "powershell.exe"; \
 
 [Code]
 // Le script PowerShell écrit son avancement dans un fichier : "RUN|pourcentage|plafond|étape" puis "DONE|code|message".
-// L'assistant le lit toutes les 200 ms, affiche l'étape en français et fait avancer la barre doucement
-// jusqu'au plafond de l'étape tant que la suivante n'a pas commencé.
+// Un minuteur lit ce fichier toutes les 200 ms (Setup traite les messages pendant l'attente de Exec), affiche l'étape
+// en français et fait avancer la barre doucement jusqu'au plafond de l'étape tant que la suivante n'a pas commencé.
+
+var
+  ProgFile, LastLine: String;
+  Shown, Limit: Integer;
+  ProgTimer: TTimer;
 
 function NextField(var S: String): String;
 var
@@ -83,17 +88,48 @@ begin
   else Result := 'Installation de Vault…';
 end;
 
+procedure PollProgress(Sender: TObject);
+var
+  Lines: TArrayOfString;
+  Line, Kind, Code: String;
+  Pct, Cap: Integer;
+begin
+  if LoadStringsFromFile(ProgFile, Lines) and (GetArrayLength(Lines) > 0) then
+  begin
+    Line := Trim(Lines[0]);
+    if Line <> LastLine then
+    begin
+      LastLine := Line;
+      Kind := NextField(Line);
+      if Kind = 'RUN' then
+      begin
+        Pct := StrToIntDef(NextField(Line), 0);
+        Cap := StrToIntDef(NextField(Line), Pct);
+        Code := NextField(Line);
+        if Pct * 10 > Shown then Shown := Pct * 10;
+        Limit := Cap * 10;
+        WizardForm.StatusLabel.Caption := StepText(Code);
+      end;
+    end;
+  end;
+  if Shown < Limit then Shown := Shown + 1; // 0,5 % par seconde jusqu'au plafond de l'étape
+  WizardForm.ProgressGauge.Position := Shown;
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 var
-  ResultCode, Pct, Cap, Shown, Limit, Ticks, ExitCode: Integer;
-  Params, ProgFile, Line, LastLine, Kind, Code, Msg: String;
+  ResultCode: Integer;
+  Params, Msg: String;
   Lines: TArrayOfString;
-  Done: Boolean;
+  Line: String;
 begin
   if CurStep <> ssPostInstall then Exit;
 
   ProgFile := ExpandConstant('{tmp}\vault-progress.txt');
   DeleteFile(ProgFile);
+  LastLine := '';
+  Shown := 0;
+  Limit := 0;
   Params := '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{tmp}\install-vault.ps1') +
     '" -InstallDir "' + ExpandConstant('{app}') + '" -Yes -ProgressFile "' + ProgFile + '"';
 
@@ -103,62 +139,35 @@ begin
   WizardForm.FilenameLabel.Caption := '';
   WizardForm.StatusLabel.Caption := 'Préparation…';
 
-  if not Exec('powershell.exe', Params, '', SW_HIDE, ewNoWait, ResultCode) then
-  begin
-    MsgBox('Impossible de lancer PowerShell.' + #13#10 + 'Lance plutôt la commande PowerShell indiquée dans le README.', mbError, MB_OK);
-    Abort;
+  ProgTimer := TTimer.Create(WizardForm);
+  ProgTimer.Interval := 200;
+  ProgTimer.OnTimer := @PollProgress;
+  ProgTimer.Enabled := True;
+  try
+    if not Exec('powershell.exe', Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+      ResultCode := 1;
+  finally
+    ProgTimer.Enabled := False;
   end;
 
-  Shown := 0;
-  Limit := 0;
-  Ticks := 0;
-  LastLine := '';
-  Done := False;
-  ExitCode := 1;
-  Msg := 'Aucune réponse du script d''installation.';
-
-  while (not Done) and (Ticks < 9000) do // 30 minutes au maximum
-  begin
-    Sleep(200);
-    Application.ProcessMessages;
-    Ticks := Ticks + 1;
-
-    if LoadStringsFromFile(ProgFile, Lines) and (GetArrayLength(Lines) > 0) then
-    begin
-      Line := Trim(Lines[0]);
-      if Line <> LastLine then
-      begin
-        LastLine := Line;
-        Kind := NextField(Line);
-        if Kind = 'DONE' then
-        begin
-          ExitCode := StrToIntDef(NextField(Line), 1);
-          if Line <> '' then Msg := Line;
-          Done := True;
-        end
-        else if Kind = 'RUN' then
-        begin
-          Pct := StrToIntDef(NextField(Line), 0);
-          Cap := StrToIntDef(NextField(Line), Pct);
-          Code := NextField(Line);
-          if Pct * 10 > Shown then Shown := Pct * 10;
-          Limit := Cap * 10;
-          WizardForm.StatusLabel.Caption := StepText(Code);
-        end;
-      end;
-    end;
-
-    if Shown < Limit then Shown := Shown + 1; // 0,5 % par seconde jusqu'au plafond de l'étape
-    WizardForm.ProgressGauge.Position := Shown;
-  end;
-
-  if Done and (ExitCode = 0) then
+  if ResultCode = 0 then
   begin
     WizardForm.ProgressGauge.Position := 1000;
     WizardForm.StatusLabel.Caption := 'Terminé.';
   end
   else
   begin
+    Msg := 'Le script d''installation s''est arrêté.';
+    if LoadStringsFromFile(ProgFile, Lines) and (GetArrayLength(Lines) > 0) then
+    begin
+      Line := Trim(Lines[0]);
+      if Copy(Line, 1, 5) = 'DONE|' then
+      begin
+        NextField(Line);
+        NextField(Line);
+        if Line <> '' then Msg := Line;
+      end;
+    end;
     MsgBox('L''installation de Vault a échoué.' + #13#10 + #13#10 + Msg + #13#10 + #13#10 +
       'Journal : ' + ExpandConstant('{%TEMP}\vault-install.log') + #13#10 +
       'Tu peux aussi lancer la commande PowerShell du README pour voir les détails.', mbError, MB_OK);
