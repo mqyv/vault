@@ -158,7 +158,7 @@ export function getImplicitApiDependencies(p: Plugin): string[] {
     if (p.renderMessageAccessory) apis.push("MessageAccessoriesAPI");
     if (p.renderMessageDecoration) apis.push("MessageDecorationsAPI");
     if (p.messagePopoverButton) apis.push("MessagePopoverAPI");
-    if (p.userProfileBadge) apis.push("BadgeAPI");
+    if (p.userProfileBadge || p.userProfileBadges?.length) apis.push("BadgeAPI");
     if (p.renderNicknameIcon) apis.push("NicknameIconsAPI");
     if (p.headerBarButton) apis.push("HeaderBarAPI");
     if (p.audioProcessor) apis.push("AudioPlayerAPI");

@@ -6,6 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
+import { CopyProfileIcon } from "@components/VaultIcons";
 import { EquicordDevs } from "@utils/constants";
 import { fetchUserProfile } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -14,15 +15,6 @@ import { Alerts, Menu, RestAPI, showToast, UserProfileStore } from "@webpack/com
 
 interface UserContextProps {
     user?: User;
-}
-
-function VaultIcon(props: any) {
-    return (
-        <svg width={18} height={18} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="11" strokeLinejoin="miter" {...props}>
-            <path d="M14 22 L50 82 L86 22" />
-            <path d="M30 22 L50 56 L70 22" />
-        </svg>
-    );
 }
 
 function cdn(kind: "avatars" | "banners", id: string, hash: string) {
@@ -102,7 +94,7 @@ const patchUserContext: NavContextMenuPatchCallback = (children, { user }: UserC
         <Menu.MenuItem
             id="vault-copy-profile"
             label="Clone Profile to Me"
-            icon={VaultIcon}
+            icon={() => <CopyProfileIcon size={18} />}
             action={() => Alerts.show({
                 title: "Clone Profile",
                 body: `This overwrites YOUR avatar, banner, bio and pronouns with ${user.username}'s. This changes your own account. Continue?`,

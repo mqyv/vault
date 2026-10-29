@@ -6,6 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
+import { ClearMessagesIcon } from "@components/VaultIcons";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import type { Channel, Message, User } from "@vencord/discord-types";
@@ -24,14 +25,6 @@ const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 // only normal messages (DEFAULT = 0, REPLY = 19) can be deleted by their author
 const DELETABLE_TYPES = [0, 19];
-
-function TrashIcon() {
-    return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M15 3.999V2H9v1.999H3v2h1.5v15A1.5 1.5 0 0 0 6 22.5h12a1.5 1.5 0 0 0 1.5-1.5V6H21V4h-6zM9 18.5H7v-9h2v9zm4 0h-2v-9h2v9zm4 0h-2v-9h2v9z" />
-        </svg>
-    );
-}
 
 function toast(text: string, variant: "success" | "critical" = "success") {
     showToast({ text, variant });
@@ -117,7 +110,7 @@ const patchUserContext: NavContextMenuPatchCallback = (children, { user, channel
             id="vault-clear-messages"
             label={isClearing ? "Stop Clearing" : "Clear Messages"}
             color="danger"
-            icon={TrashIcon}
+            icon={() => <ClearMessagesIcon size={18} />}
             action={() => {
                 if (clearing.has(channelId)) {
                     clearing.delete(channelId);
@@ -139,7 +132,7 @@ const patchMessageContext: NavContextMenuPatchCallback = (children, { message }:
             id="vault-clear-from-here"
             label="Clear from this Message"
             color="danger"
-            icon={TrashIcon}
+            icon={() => <ClearMessagesIcon size={18} />}
             action={() => {
                 if (clearing.has(channelId)) {
                     toast("Already clearing this channel — open the user menu to stop.", "critical");

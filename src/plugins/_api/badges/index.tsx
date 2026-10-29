@@ -27,24 +27,11 @@ import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { shouldShowContributorBadge, shouldShowEquicordContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { VAULT_OWNER_BADGE_URI } from "@utils/vaultLogo";
-import { VAULT_OWNER_ID } from "@utils/vaultOwner";
 import { ContextMenuApi, Menu, showToast, UserStore } from "@webpack/common";
 
 import Plugins, { PluginMeta } from "~plugins";
 
 import { EquicordDonorModal, EquicordTranslatorModal, VencordDonorModal } from "./modals";
-
-const VaultOwnerBadge: ProfileBadge = {
-    id: "vault_owner_badge",
-    description: "Vault Owner",
-    infoLabel: "Vault",
-    rarity: BadgeRarity.MYTHIC,
-    iconSrc: VAULT_OWNER_BADGE_URI,
-    largeIconSrc: VAULT_OWNER_BADGE_URI,
-    position: BadgePosition.START,
-    shouldShow: ({ userId }) => userId === VAULT_OWNER_ID
-};
 
 const ContributorBadge: ProfileBadge = {
     id: "vencord_contributor_badge",
@@ -241,7 +228,7 @@ export default definePlugin({
         }
     },
 
-    userProfileBadges: [VaultOwnerBadge, ContributorBadge, EquicordContributorBadge, UserPluginContributorBadge],
+    userProfileBadges: [ContributorBadge, EquicordContributorBadge, UserPluginContributorBadge],
 
     async start() {
         await loadAllBadges();

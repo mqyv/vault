@@ -78,7 +78,8 @@ const MUST_CONTAIN = [
     ["scripts/install-vault.ps1", "vault-install.log", "installer script"],
     [".github/workflows/sync-upstream.yml", "vaultSync.mjs", "sync workflow"],
     ["src/api/PluginManager.ts", "getImplicitApiDependencies", "API plugins enabled with the plugin at runtime"],
-    ["src/plugins/_api/badges/index.tsx", "VaultOwnerBadge", "Vault Owner profile badge"]
+    ["src/equicordplugins/vaultBadges/index.ts", "vault_badges", "Vault badges plugin"],
+    ["src/components/VaultIcons.tsx", "BulkSendIcon", "Vault plugin icons"]
 ];
 
 function check() {

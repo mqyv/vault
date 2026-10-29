@@ -6,6 +6,7 @@
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
+import { BulkSendIcon } from "@components/VaultIcons";
 import { EquicordDevs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
@@ -19,15 +20,6 @@ const settings = definePluginSettings({
         default: 0
     }
 });
-
-function VaultIcon(props: any) {
-    return (
-        <svg width={20} height={20} viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="11" strokeLinejoin="miter" {...props}>
-            <path d="M14 22 L50 82 L86 22" />
-            <path d="M30 22 L50 56 L70 22" />
-        </svg>
-    );
-}
 
 async function sendAll(channelId: string, messages: string[], delayMs: number) {
     // Fire in order. RestAPI queues + auto-handles rate limits.
@@ -96,7 +88,7 @@ const BulkSendButton: ChatBarButtonFactory = ({ channel }) => (
         tooltip="Bulk Send"
         onClick={() => openModal(props => <BulkSendModal {...props} channelId={channel.id} />)}
     >
-        <VaultIcon />
+        <BulkSendIcon />
     </ChatBarButton>
 );
 
@@ -106,7 +98,7 @@ export default definePlugin({
     authors: [EquicordDevs.eqen],
     settings,
     chatBarButton: {
-        icon: VaultIcon,
+        icon: BulkSendIcon,
         render: BulkSendButton
     }
 });

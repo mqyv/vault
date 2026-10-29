@@ -6,6 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
+import { FakeVoiceIcon } from "@components/VaultIcons";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { showToast, VoiceActions } from "@webpack/common";
@@ -37,14 +38,6 @@ function resend() {
     } catch { /* not in a voice channel */ }
 }
 
-function GhostIcon({ className, active = false }: { className?: string; active?: boolean; }) {
-    return (
-        <svg className={className} width={20} height={20} viewBox="0 0 24 24" fill={active ? "var(--status-danger)" : "currentColor"} aria-hidden="true">
-            <path d="M12 2a8 8 0 0 0-8 8v10.5a1 1 0 0 0 1.6.8l1.9-1.4 1.9 1.4a1 1 0 0 0 1.2 0l1.4-1.05 1.4 1.05a1 1 0 0 0 1.2 0l1.9-1.4 1.9 1.4a1 1 0 0 0 1.6-.8V10a8 8 0 0 0-8-8Zm-3 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm6 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Z" />
-        </svg>
-    );
-}
-
 function describe(muted: boolean, deafened: boolean) {
     if (muted && deafened) return "Fake Voice: muted + deafened (you still talk & hear)";
     if (muted) return "Fake Voice: muted (you still talk) — right-click: deafen";
@@ -59,7 +52,7 @@ function FakeVoiceButton({ iconForeground, hideTooltips, nameplate }: UserAreaRe
     return (
         <UserAreaButton
             tooltipText={hideTooltips ? void 0 : describe(appearMuted, appearDeafened)}
-            icon={<GhostIcon className={iconForeground} active={on} />}
+            icon={<FakeVoiceIcon className={iconForeground} active={on} />}
             role="switch"
             aria-checked={on}
             redGlow={on}
@@ -107,7 +100,7 @@ export default definePlugin({
     },
 
     userAreaButton: {
-        icon: GhostIcon as any,
+        icon: FakeVoiceIcon as any,
         render: FakeVoiceButton
     }
 });
