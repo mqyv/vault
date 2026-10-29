@@ -1,4 +1,4 @@
-﻿; Vault - assistant d'installation Windows (Inno Setup)
+﻿﻿; Vault - assistant d'installation Windows (Inno Setup)
 ; Compile avec : ISCC.exe installer\vault.iss  -> produit installer\Output\VaultSetup.exe
 ; Ce fichier doit rester en UTF-8 AVEC BOM (accents dans les textes).
 
@@ -38,28 +38,32 @@ ArchitecturesInstallIn64BitMode=x64compatible
 Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 
 [Messages]
-french.WelcomeLabel2=Cet assistant va installer [name] sur ton ordinateur.%n%nIl ajoute Git et Node.js seulement s'ils manquent, télécharge Vault, le compile et l'ajoute à Discord. Une connexion Internet est requise.%n%nDiscord sera fermé pendant l'installation : enregistre ce que tu es en train d'écrire.
-french.FinishedLabel=Vault est installé. Rouvre Discord : Vault apparaît dans les Réglages, onglet « Vault ».
-french.FinishedLabelNoIcons=Vault est installé et Discord le charge bien.%n%nRouvre Discord : Vault apparaît dans les Réglages, onglet « Vault ».
+french.WelcomeLabel2=Cet assistant va installer [name] sur ton ordinateur.%n%nIl ajoute Git et Node.js seulement s'ils manquent, télécharge Vault, le compile et l'ajoute à Discord. Une connexion Internet est requise.%n%nDiscord sera fermé puis rouvert pendant l'installation : enregistre ce que tu es en train d'écrire.
+french.FinishedLabel=Vault est installé et Discord le charge bien.%n%nOuvre Discord : Vault apparaît dans les Réglages, onglet « Vault ».
+french.FinishedLabelNoIcons=Vault est installé et Discord le charge bien.%n%nOuvre Discord : Vault apparaît dans les Réglages, onglet « Vault ».
 
 [Files]
 ; Le script de bootstrap est exécuté pendant l'installation puis supprimé.
 Source: "..\scripts\install-vault.ps1"; DestDir: "{tmp}"; Flags: ignoreversion deleteafterinstall
 
 [UninstallRun]
-; Retire Vault de Discord proprement avant de supprimer les fichiers (best-effort).
+; Retire Vault de Discord (restaure le Discord d'origine) avant de supprimer les fichiers.
 Filename: "powershell.exe"; \
-    Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""try {{ node '{app}\scripts\runInstaller.mjs' -- --uninstall --branch auto }} catch {{}}"""; \
-    Flags: runhidden; RunOnceId: "VaultUninject"
+    Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\scripts\install-vault.ps1"" -Stage uninject -InstallDir ""{app}"" -Yes"; \
+    Flags: runhidden waituntilterminated; RunOnceId: "VaultUninject"
+
+[UninstallDelete]
+; Vault est téléchargé et compilé dans {app} par le script : Setup ne connaît pas ces fichiers, on supprime tout le dossier.
+Type: filesandordirs; Name: "{app}"
 
 [Code]
+// L'installation est faite par scripts\install-vault.ps1, lancé en cinq étapes successives (prereq, clone, deps, build,
+// inject). Setup traite ses messages pendant chaque attente de Exec : la fenêtre reste vivante et la barre avance
+// après chaque étape. En cas d'échec, le script écrit "DONE|1|CODE|détail" dans un fichier lu ici.
+
 var
   InstallFailed: Boolean;
   FailMsg: String;
-
-// L'installation est faite par scripts\install-vault.ps1, lancé en cinq étapes successives (prereq, clone, deps, build,
-// inject). Setup traite ses messages pendant chaque attente de Exec : la fenêtre reste vivante et la barre avance
-// après chaque étape. Si une étape échoue, le script écrit son message dans un fichier lu ici.
 
 function NextField(var S: String): String;
 var
@@ -78,13 +82,28 @@ begin
   end;
 end;
 
+function CodeText(Code: String): String;
+begin
+  if Code = 'NO_WINGET' then Result := 'Git ou Node.js manque et Windows ne permet pas de l''installer automatiquement. Installe Node.js (nodejs.org) et Git (git-scm.com), puis relance.'
+  else if Code = 'NO_GIT' then Result := 'Git n''a pas pu être installé. Installe-le depuis git-scm.com, puis relance.'
+  else if Code = 'NO_NODE' then Result := 'Node.js 22 ou plus n''a pas pu être installé. Installe-le depuis nodejs.org, puis relance.'
+  else if Code = 'NO_PNPM' then Result := 'pnpm n''a pas pu être installé. Vérifie ta connexion Internet, puis relance.'
+  else if Code = 'CLONE' then Result := 'Le téléchargement de Vault a échoué. Vérifie ta connexion Internet, puis relance.'
+  else if Code = 'DEPS' then Result := 'L''installation des dépendances a échoué. Vérifie ta connexion Internet, puis relance.'
+  else if Code = 'BUILD' then Result := 'La compilation de Vault a échoué.'
+  else if Code = 'NO_DISCORD' then Result := 'Discord est introuvable. Installe-le depuis discord.com, lance-le une fois, puis relance.'
+  else if Code = 'DISCORD_LOCKED' then Result := 'Discord est encore ouvert. Ferme-le complètement (icône près de l''horloge), puis relance.'
+  else if Code = 'INJECT' then Result := 'Vault n''a pas pu être ajouté à Discord.'
+  else Result := 'Erreur inattendue.';
+end;
+
 function StageText(Stage: String): String;
 begin
   if Stage = 'prereq' then Result := 'Vérification de Git, Node.js et pnpm…'
   else if Stage = 'clone' then Result := 'Téléchargement de Vault…'
-  else if Stage = 'deps' then Result := 'Installation des dépendances (environ une minute)…'
+  else if Stage = 'deps' then Result := 'Installation des dépendances…'
   else if Stage = 'build' then Result := 'Compilation de Vault…'
-  else if Stage = 'inject' then Result := 'Fermeture de Discord et ajout de Vault…'
+  else if Stage = 'inject' then Result := 'Ajout de Vault à Discord (Discord sera fermé puis rouvert)…'
   else Result := 'Installation de Vault…';
 end;
 
@@ -143,7 +162,7 @@ begin
   end
   else
   begin
-    Msg := 'Une étape de l''installation s''est arrêtée.';
+    Msg := CodeText('');
     if LoadStringsFromFile(ProgFile, Lines) and (GetArrayLength(Lines) > 0) then
     begin
       Line := Trim(Lines[0]);
@@ -151,15 +170,15 @@ begin
       begin
         NextField(Line);
         NextField(Line);
-        if Line <> '' then Msg := Line;
+        Msg := CodeText(NextField(Line));
+        if Line <> '' then Msg := Msg + #13#10 + 'Détail : ' + Line;
       end;
     end;
-    // On ne s'arrête pas avec Abort : la page de fin affiche l'échec (voir CurPageChanged), en plus de ce message.
+    // Pas d'Abort : la page de fin affiche l'échec (voir CurPageChanged), en plus de ce message.
     InstallFailed := True;
     FailMsg := Msg;
     MsgBox('L''installation de Vault a échoué.' + #13#10 + #13#10 + Msg + #13#10 + #13#10 +
-      'Journal : ' + ExpandConstant('{%TEMP}\vault-install.log') + #13#10 +
-      'Tu peux aussi lancer la commande PowerShell du README pour voir les détails.', mbError, MB_OK);
+      'Journal : ' + ExpandConstant('{%TEMP}\vault-install.log'), mbError, MB_OK);
   end;
 end;
 
@@ -168,11 +187,8 @@ begin
   if (CurPageID = wpFinished) and InstallFailed then
   begin
     WizardForm.FinishedHeadingLabel.Caption := 'L''installation de Vault a échoué';
-    WizardForm.FinishedLabel.Caption :=
-      'Vault n''a pas été installé correctement.' + #13#10 + #13#10 +
-      'Raison : ' + FailMsg + #13#10 + #13#10 +
-      'Journal complet : ' + ExpandConstant('{%TEMP}\vault-install.log') + #13#10 + #13#10 +
-      'Tu peux relancer l''installeur, ou envoyer ce journal pour obtenir de l''aide.';
+    WizardForm.FinishedLabel.Caption := FailMsg + #13#10 + #13#10 +
+      'Journal : ' + ExpandConstant('{%TEMP}\vault-install.log');
     WizardForm.FinishedLabel.Height := WizardForm.FinishedLabel.Height * 3;
   end;
 end;
