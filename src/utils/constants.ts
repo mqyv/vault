@@ -728,7 +728,9 @@ export const EquicordDevs = Object.freeze({
     },
     eqen: {
         name: "eqen",
-        id: 1483151471183921346n
+        id: 1483151471183921346n,
+        // Vault's owner: no "Equicord Contributor" profile badge
+        badge: false
     },
     thororen: {
         name: "thororen",

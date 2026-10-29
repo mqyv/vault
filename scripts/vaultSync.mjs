@@ -18,8 +18,8 @@ import { existsSync, readFileSync, writeFileSync } from "fs";
 const git = (...args) => execFileSync("git", args, { encoding: "utf-8", maxBuffer: 1 << 28 });
 
 // "Equicord" -> "Vault" only where it is user-visible text: never in identifiers, property access,
-// URLs, domains or other projects' names.
-const SKIP_LINE = /^\s*(import\b|export\s*\{)|github\.com|equicord\.org|cdn\.|Equilotl|Equibop|Equicloud|Equibored|Equibuilds|\/\/\s*@|require\(/;
+// URLs, domains or other projects' names. Credits stay accurate: contributor badges and plugin-origin labels keep "Equicord".
+const SKIP_LINE = /^\s*(import\b|export\s*\{)|github\.com|equicord\.org|cdn\.|Equilotl|Equibop|Equicloud|Equibored|Equibuilds|\/\/\s*@|require\(|Contributor|infoLabel|Equicord Plugin/;
 const EQUICORD = /(?<![\w/@.\-$])Equicord(?![\w.\-/]|\.\w)/g;
 const FILES = /^src\/.*\.(tsx?|html|css)$/;
 

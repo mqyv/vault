@@ -47,8 +47,8 @@ const ContributorBadge: ProfileBadge = {
 
 const EquicordContributorBadge: ProfileBadge = {
     id: "equicord_contributor_badge",
-    description: "Vault Contributor",
-    infoLabel: "Vault",
+    description: "Equicord Contributor",
+    infoLabel: "Equicord",
     rarity: BadgeRarity.MYTHIC,
     iconSrc: "https://cdn.discordapp.com/emojis/1563740725726683167.webp?size=128",
     largeIconSrc: "https://cdn.discordapp.com/emojis/1563740725726683167.webp?size=512",

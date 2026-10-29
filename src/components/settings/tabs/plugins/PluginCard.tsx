@@ -13,7 +13,7 @@ import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
 import { Plugin } from "@utils/types";
 import { VAULT_LOGO_URI } from "@utils/vaultLogo";
-import { getVaultOwnerAvatarURL, VAULT_OWNER_ID } from "@utils/vaultOwner";
+import { VAULT_OWNER_ID } from "@utils/vaultOwner";
 import { React, showToast } from "@webpack/common";
 
 import { PluginMeta } from "~plugins";
@@ -41,7 +41,6 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
     // Vault: plugins authored by the owner show their Discord avatar as the badge
     const isVaultOwnPlugin = (plugin.authors ?? []).some(a => String(a.id) === VAULT_OWNER_ID);
-    const vaultOwnerAvatar = isVaultOwnPlugin ? getVaultOwnerAvatarURL() : null;
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
@@ -101,10 +100,16 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             title: "Modified Vencord Plugin"
         },
         {
-            condition: isEquicordPlugin,
+            condition: isVaultOwnPlugin,
             src: VAULT_LOGO_URI,
             alt: "Vault",
-            title: "Vault Plugin"
+            title: "Plugin Vault"
+        },
+        {
+            condition: isEquicordPlugin,
+            src: "https://equicord.org/assets/favicon.png",
+            alt: "Equicord",
+            title: "Equicord Plugin"
         },
         {
             condition: isVencordPlugin,
@@ -122,14 +127,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
 
     const pluginDetails = pluginInfo.find(p => p.condition);
 
-    const sourceBadge = vaultOwnerAvatar ? (
-        <img
-            src={vaultOwnerAvatar}
-            alt="eqen"
-            className={cl("source")}
-            style={{ borderRadius: "50%" }}
-        />
-    ) : pluginDetails ? (
+    const sourceBadge = pluginDetails ? (
         <img
             src={pluginDetails.src}
             alt={pluginDetails.alt}
@@ -137,7 +135,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         />
     ) : null;
 
-    const tooltip = vaultOwnerAvatar ? "Plugin by eqen" : (pluginDetails?.title || "Unknown Plugin");
+    const tooltip = pluginDetails?.title || "Unknown Plugin";
 
     return (
         <AddonCard
