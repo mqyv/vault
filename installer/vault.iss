@@ -28,6 +28,9 @@ SetupIconFile=vault.ico
 WizardImageFile=wizard-large.bmp,wizard-large-2x.bmp
 WizardSmallImageFile=wizard-small.bmp,wizard-small-64.bmp,wizard-small-80.bmp,wizard-small-110.bmp
 PrivilegesRequired=lowest
+; Inno Setup active par défaut la protection Windows "Redirection Guard", héritée par les processus lancés par Setup :
+; pnpm ne peut alors plus traverser les liens de dossiers qu'il crée dans node_modules (os error 448).
+RedirectionGuard=no
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
