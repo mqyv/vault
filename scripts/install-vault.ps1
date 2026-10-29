@@ -115,8 +115,15 @@ try {
             Run "La mise a jour" { git -c core.longpaths=true -C $InstallDir pull --ff-only }
         } else {
             Step "Telechargement de Vault dans $InstallDir"
-            # --depth 1 : seulement la derniere version, pas les 8000 commits d'historique (bien plus rapide).
-            Run "Le telechargement" { git clone --depth 1 -c core.longpaths=true $RepoUrl $InstallDir }
+            # Le dossier peut deja contenir des fichiers (le desinstalleur de l'assistant .exe), ce que `git clone`
+            # refuse : on initialise le depot sur place, puis on recupere seulement la derniere version
+            # (--depth 1 : pas les 8000 commits d'historique, bien plus rapide).
+            New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+            Run "Le telechargement (init)" { git -C $InstallDir init -q -b main }
+            Run "Le telechargement (origine)" { git -C $InstallDir remote add origin $RepoUrl }
+            Run "Le telechargement" { git -C $InstallDir -c core.longpaths=true fetch --depth 1 origin main }
+            Run "Le telechargement (extraction)" { git -C $InstallDir -c core.longpaths=true checkout -f -B main FETCH_HEAD }
+            Run "Le telechargement (suivi)" { git -C $InstallDir branch --set-upstream-to=origin/main main }
         }
         if (-not (Test-Path (Join-Path $InstallDir "package.json"))) { throw "Le telechargement est incomplet." }
         Ok "Code recupere"
