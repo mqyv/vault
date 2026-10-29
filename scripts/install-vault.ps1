@@ -162,6 +162,27 @@ try {
         # injection non-interactive : --branch auto detecte Discord tout seul
         Run "L'injection dans Discord" { node "$InstallDir\scripts\runInstaller.mjs" -- --install --branch auto }
 
+        # Verification : Vault est compile et Discord charge bien Vault (et pas un autre mod installe avant).
+        if (-not (Test-Path (Join-Path $InstallDir "dist\desktop\patcher.js"))) {
+            throw "Vault n'a pas ete compile correctement (dist\desktop\patcher.js introuvable)."
+        }
+        $target = [IO.Path]::GetFullPath($InstallDir).TrimEnd('\').ToLowerInvariant()
+        $injected = $false
+        foreach ($flavor in "Discord", "DiscordPTB", "DiscordCanary", "DiscordDevelopment") {
+            $app = Get-ChildItem -Path (Join-Path $env:LOCALAPPDATA $flavor) -Directory -Filter "app-*" -ErrorAction SilentlyContinue |
+                Sort-Object Name -Descending | Select-Object -First 1
+            if (-not $app) { continue }
+            $index = Join-Path $app.FullName "resources\app.asar\index.js"
+            if (-not (Test-Path $index -PathType Leaf)) { continue }
+            $content = (Get-Content $index -Raw).Replace('\\', '\').ToLowerInvariant()
+            Log "Injection $flavor : $((Get-Content $index -Raw).Trim())"
+            if ($content.Contains($target)) { $injected = $true }
+        }
+        if (-not $injected) {
+            throw "Discord ne charge pas Vault apres l'injection (un autre mod est peut-etre encore installe). Details : $LogFile"
+        }
+        Ok "Discord charge bien Vault"
+
         Write-Host ""
         Write-Host "  =======================================================" -ForegroundColor Green
         Write-Host "   Installation terminee ! Rouvre Discord :" -ForegroundColor Green

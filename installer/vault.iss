@@ -37,6 +37,7 @@ Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 [Messages]
 french.WelcomeLabel2=Cet assistant va installer [name] sur ton ordinateur.%n%nIl ajoute Git et Node.js seulement s'ils manquent, télécharge Vault, le compile et l'ajoute à Discord. Une connexion Internet est requise.%n%nDiscord sera fermé pendant l'installation : enregistre ce que tu es en train d'écrire.
 french.FinishedLabel=Vault est installé. Rouvre Discord : Vault apparaît dans les Réglages, onglet « Vault ».
+french.FinishedLabelNoIcons=Vault est installé et Discord le charge bien.%n%nRouvre Discord : Vault apparaît dans les Réglages, onglet « Vault ».
 
 [Files]
 ; Le script de bootstrap est exécuté pendant l'installation puis supprimé.
@@ -49,6 +50,10 @@ Filename: "powershell.exe"; \
     Flags: runhidden; RunOnceId: "VaultUninject"
 
 [Code]
+var
+  InstallFailed: Boolean;
+  FailMsg: String;
+
 // L'installation est faite par scripts\install-vault.ps1, lancé en cinq étapes successives (prereq, clone, deps, build,
 // inject). Setup traite ses messages pendant chaque attente de Exec : la fenêtre reste vivante et la barre avance
 // après chaque étape. Si une étape échoue, le script écrit son message dans un fichier lu ici.
@@ -146,9 +151,25 @@ begin
         if Line <> '' then Msg := Line;
       end;
     end;
+    // On ne s'arrête pas avec Abort : la page de fin affiche l'échec (voir CurPageChanged), en plus de ce message.
+    InstallFailed := True;
+    FailMsg := Msg;
     MsgBox('L''installation de Vault a échoué.' + #13#10 + #13#10 + Msg + #13#10 + #13#10 +
       'Journal : ' + ExpandConstant('{%TEMP}\vault-install.log') + #13#10 +
       'Tu peux aussi lancer la commande PowerShell du README pour voir les détails.', mbError, MB_OK);
-    Abort;
+  end;
+end;
+
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if (CurPageID = wpFinished) and InstallFailed then
+  begin
+    WizardForm.FinishedHeadingLabel.Caption := 'L''installation de Vault a échoué';
+    WizardForm.FinishedLabel.Caption :=
+      'Vault n''a pas été installé correctement.' + #13#10 + #13#10 +
+      'Raison : ' + FailMsg + #13#10 + #13#10 +
+      'Journal complet : ' + ExpandConstant('{%TEMP}\vault-install.log') + #13#10 + #13#10 +
+      'Tu peux relancer l''installeur, ou envoyer ce journal pour obtenir de l''aide.';
+    WizardForm.FinishedLabel.Height := WizardForm.FinishedLabel.Height * 3;
   end;
 end;
