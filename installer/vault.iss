@@ -1,4 +1,4 @@
-﻿﻿; Vault - assistant d'installation Windows (Inno Setup)
+﻿; Vault - assistant d'installation Windows (Inno Setup)
 ; Compile avec : ISCC.exe installer\vault.iss  -> produit installer\Output\VaultSetup.exe
 ; Ce fichier doit rester en UTF-8 AVEC BOM (accents dans les textes).
 
