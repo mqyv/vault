@@ -94,6 +94,11 @@ export interface Settings {
         logLimit: number;
     };
 
+    vaultBadges: {
+        showMembership: boolean;
+        ownerKey: string;
+    };
+
     cloud: {
         authenticated: boolean;
         url: string;
@@ -136,6 +141,11 @@ const DefaultSettings: Settings = {
         useNative: "not-focused",
         missed: true,
         logLimit: 50
+    },
+
+    vaultBadges: {
+        showMembership: true,
+        ownerKey: ""
     },
 
     cloud: {

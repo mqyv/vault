@@ -2,9 +2,9 @@ Equicord is designed with user privacy in mind and doesn’t collect or share an
 
 ## Vault badges
 
-The **VaultBadges** plugin (enabled by default) shows Vault's profile badges (Owner, Staff, Donor, Bug Hunter, Helper, Member) to Vault users.
+Vault has built-in profile badges (Owner, Staff, Donor, Bug Hunter, Helper, Member), visible to Vault users. The Member badge comes with installing Vault; the others are granted by Vault's owners.
 
 - To show your **Member** badge, Vault sends **only your Discord user id** to Vault's badge service (hosted on Supabase, EU region) and stores it with the dates it was first and last seen. Nothing else is sent: no messages, no token, no profile data.
 - To display badges, Vault asks the service about the users whose profiles you open, by user id.
 - The member list cannot be downloaded: the service only answers for user ids it is asked about.
-- To stop sharing your id, turn off **Show the Member badge** in the VaultBadges settings (your id is then deleted from the service), or disable the plugin.
+- To stop sharing your id, turn off **Afficher mon badge Membre** in Vault's settings (section Badges Vault); your id is then deleted from the service.

@@ -78,7 +78,9 @@ const MUST_CONTAIN = [
     ["scripts/install-vault.ps1", "vault-install.log", "installer script"],
     [".github/workflows/sync-upstream.yml", "vaultSync.mjs", "sync workflow"],
     ["src/api/PluginManager.ts", "getImplicitApiDependencies", "API plugins enabled with the plugin at runtime"],
-    ["src/equicordplugins/vaultBadges/index.ts", "vault_badges", "Vault badges plugin"],
+    ["src/utils/vaultBadges.tsx", "vault_badges", "built-in Vault badges"],
+    ["src/Vencord.ts", "initVaultBadges", "Vault badges started with Vault"],
+    ["src/components/settings/tabs/vencord/index.tsx", "VaultBadgesSection", "Vault badges settings"],
     ["src/components/VaultIcons.tsx", "BulkSendIcon", "Vault plugin icons"],
     ["src/main/csp/index.ts", "zjppxtnfohjvsjfqioqh.supabase.co", "badge service allowed by the CSP"]
 ];
