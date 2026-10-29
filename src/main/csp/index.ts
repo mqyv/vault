@@ -56,6 +56,7 @@ export const CspPolicies: PolicyMap = {
 
     // Function Specific
     "api.github.com": ConnectSrc, // used for updating Vencord itself
+    "zjppxtnfohjvsjfqioqh.supabase.co": ConnectSrc, // Vault badge service (VaultBadges plugin)
     "ws.audioscrobbler.com": ConnectSrc, // Last.fm API
     "musicbrainz.org": ConnectSrc,
     "*.listenbrainz.org": ConnectSrc,

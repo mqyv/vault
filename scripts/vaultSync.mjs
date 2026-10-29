@@ -79,7 +79,8 @@ const MUST_CONTAIN = [
     [".github/workflows/sync-upstream.yml", "vaultSync.mjs", "sync workflow"],
     ["src/api/PluginManager.ts", "getImplicitApiDependencies", "API plugins enabled with the plugin at runtime"],
     ["src/equicordplugins/vaultBadges/index.ts", "vault_badges", "Vault badges plugin"],
-    ["src/components/VaultIcons.tsx", "BulkSendIcon", "Vault plugin icons"]
+    ["src/components/VaultIcons.tsx", "BulkSendIcon", "Vault plugin icons"],
+    ["src/main/csp/index.ts", "zjppxtnfohjvsjfqioqh.supabase.co", "badge service allowed by the CSP"]
 ];
 
 function check() {
