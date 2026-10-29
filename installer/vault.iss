@@ -49,14 +49,9 @@ Filename: "powershell.exe"; \
     Flags: runhidden; RunOnceId: "VaultUninject"
 
 [Code]
-// Le script PowerShell écrit son avancement dans un fichier : "RUN|pourcentage|plafond|étape" puis "DONE|code|message".
-// Un minuteur lit ce fichier toutes les 200 ms (Setup traite les messages pendant l'attente de Exec), affiche l'étape
-// en français et fait avancer la barre doucement jusqu'au plafond de l'étape tant que la suivante n'a pas commencé.
-
-var
-  ProgFile, LastLine: String;
-  Shown, Limit: Integer;
-  ProgTimer: TTimer;
+// L'installation est faite par scripts\install-vault.ps1, lancé en cinq étapes successives (prereq, clone, deps, build,
+// inject). Setup traite ses messages pendant chaque attente de Exec : la fenêtre reste vivante et la barre avance
+// après chaque étape. Si une étape échoue, le script écrit son message dans un fichier lu ici.
 
 function NextField(var S: String): String;
 var
@@ -75,89 +70,72 @@ begin
   end;
 end;
 
-function StepText(Code: String): String;
+function StageText(Stage: String): String;
 begin
-  if Code = 'GIT' then Result := 'Vérification de Git…'
-  else if Code = 'NODE' then Result := 'Vérification de Node.js…'
-  else if Code = 'PNPM' then Result := 'Vérification de pnpm…'
-  else if Code = 'CLONE' then Result := 'Téléchargement de Vault…'
-  else if Code = 'DEPS' then Result := 'Installation des dépendances (environ une minute)…'
-  else if Code = 'BUILD' then Result := 'Compilation de Vault…'
-  else if Code = 'CLOSE' then Result := 'Fermeture de Discord…'
-  else if Code = 'INJECT' then Result := 'Ajout de Vault à Discord…'
+  if Stage = 'prereq' then Result := 'Vérification de Git, Node.js et pnpm…'
+  else if Stage = 'clone' then Result := 'Téléchargement de Vault…'
+  else if Stage = 'deps' then Result := 'Installation des dépendances (environ une minute)…'
+  else if Stage = 'build' then Result := 'Compilation de Vault…'
+  else if Stage = 'inject' then Result := 'Fermeture de Discord et ajout de Vault…'
   else Result := 'Installation de Vault…';
 end;
 
-procedure PollProgress(Sender: TObject);
+function RunStage(Stage, ProgFile: String; Position: Integer): Boolean;
 var
-  Lines: TArrayOfString;
-  Line, Kind, Code: String;
-  Pct, Cap: Integer;
+  ResultCode: Integer;
+  Params: String;
 begin
-  if LoadStringsFromFile(ProgFile, Lines) and (GetArrayLength(Lines) > 0) then
-  begin
-    Line := Trim(Lines[0]);
-    if Line <> LastLine then
-    begin
-      LastLine := Line;
-      Kind := NextField(Line);
-      if Kind = 'RUN' then
-      begin
-        Pct := StrToIntDef(NextField(Line), 0);
-        Cap := StrToIntDef(NextField(Line), Pct);
-        Code := NextField(Line);
-        if Pct * 10 > Shown then Shown := Pct * 10;
-        Limit := Cap * 10;
-        WizardForm.StatusLabel.Caption := StepText(Code);
-      end;
-    end;
-  end;
-  if Shown < Limit then Shown := Shown + 1; // 0,5 % par seconde jusqu'au plafond de l'étape
-  WizardForm.ProgressGauge.Position := Shown;
+  WizardForm.StatusLabel.Caption := StageText(Stage);
+  Params := '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{tmp}\install-vault.ps1') +
+    '" -InstallDir "' + ExpandConstant('{app}') + '" -Yes -Stage ' + Stage + ' -ProgressFile "' + ProgFile + '"';
+  if not Exec('powershell.exe', Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+    ResultCode := 1;
+  Result := (ResultCode = 0);
+  if Result then WizardForm.ProgressGauge.Position := Position;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 var
-  ResultCode: Integer;
-  Params, Msg: String;
+  ProgFile, Msg, Line: String;
   Lines: TArrayOfString;
-  Line: String;
+  Stages: array of String;
+  Marks: array of Integer;
+  I: Integer;
+  Ok: Boolean;
 begin
   if CurStep <> ssPostInstall then Exit;
 
   ProgFile := ExpandConstant('{tmp}\vault-progress.txt');
   DeleteFile(ProgFile);
-  LastLine := '';
-  Shown := 0;
-  Limit := 0;
-  Params := '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{tmp}\install-vault.ps1') +
-    '" -InstallDir "' + ExpandConstant('{app}') + '" -Yes -ProgressFile "' + ProgFile + '"';
+
+  SetArrayLength(Stages, 5);
+  SetArrayLength(Marks, 5);
+  Stages[0] := 'prereq'; Marks[0] := 100;
+  Stages[1] := 'clone';  Marks[1] := 300;
+  Stages[2] := 'deps';   Marks[2] := 700;
+  Stages[3] := 'build';  Marks[3] := 880;
+  Stages[4] := 'inject'; Marks[4] := 1000;
 
   WizardForm.ProgressGauge.Min := 0;
   WizardForm.ProgressGauge.Max := 1000;
   WizardForm.ProgressGauge.Position := 0;
   WizardForm.FilenameLabel.Caption := '';
-  WizardForm.StatusLabel.Caption := 'Préparation…';
 
-  ProgTimer := TTimer.Create(WizardForm);
-  ProgTimer.Interval := 200;
-  ProgTimer.OnTimer := @PollProgress;
-  ProgTimer.Enabled := True;
-  try
-    if not Exec('powershell.exe', Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
-      ResultCode := 1;
-  finally
-    ProgTimer.Enabled := False;
+  Ok := True;
+  I := 0;
+  while Ok and (I < 5) do
+  begin
+    Ok := RunStage(Stages[I], ProgFile, Marks[I]);
+    I := I + 1;
   end;
 
-  if ResultCode = 0 then
+  if Ok then
   begin
-    WizardForm.ProgressGauge.Position := 1000;
     WizardForm.StatusLabel.Caption := 'Terminé.';
   end
   else
   begin
-    Msg := 'Le script d''installation s''est arrêté.';
+    Msg := 'Une étape de l''installation s''est arrêtée.';
     if LoadStringsFromFile(ProgFile, Lines) and (GetArrayLength(Lines) > 0) then
     begin
       Line := Trim(Lines[0]);
