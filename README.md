@@ -22,7 +22,7 @@
 
 | Atout | Détail |
 |---|---|
-| **370+ plugins** | La base d'[Equicord](https://github.com/Equicord/Equicord) et [Vencord](https://github.com/Vendicated/Vencord), plus des plugins exclusifs. |
+| **370+ plugins** | Un large catalogue, avec six plugins écrits pour Vault. |
 | **Mises à jour invisibles** | Au lancement, Vault récupère les correctifs et affiche une notification **Restart**. Un clic et c'est à jour. |
 | **Thèmes sur-mesure** | Importe n'importe quel thème CSS, aperçu en direct. |
 | **Cloud & sauvegarde** | Synchronise tes réglages entre appareils ou exporte-les en JSON. |
@@ -99,7 +99,7 @@ Le site vitrine est dans [`site/`](./site) (HTML statique, aucune étape de buil
 
 ## Licence et avertissement
 
-Vault est un logiciel libre sous licence **[GPL-3.0](./LICENSE)**, basé sur Equicord et Vencord. Discord est une marque de Discord Inc., citée à titre descriptif : aucune affiliation ni approbation de Discord Inc.
+Vault est un logiciel libre sous licence **[GPL-3.0](./LICENSE)**, dont le code repose sur [Equicord](https://github.com/Equicord/Equicord) et [Vencord](https://github.com/Vendicated/Vencord), merci à leurs auteurs. Discord est une marque de Discord Inc., citée à titre descriptif : aucune affiliation ni approbation de Discord Inc.
 
 <details>
 <summary>Modifier le client Discord enfreint les conditions d'utilisation de Discord</summary>
