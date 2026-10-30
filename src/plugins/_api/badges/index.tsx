@@ -18,7 +18,7 @@
 
 import "./fixDiscordBadgePadding.css";
 
-import { _getBadges, BadgePosition, BadgeRarity, BadgeUserArgs, DirectoryBadge, ProfileBadge } from "@api/Badges";
+import { _getBadges, BadgePosition, BadgeRarity, BadgeUserArgs, DirectoryBadge, ProfileBadge, useBadgesVersion } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { CopyIcon, LinkIcon } from "@components/Icons";
 import { openContributorModal } from "@components/settings/tabs";
@@ -189,6 +189,14 @@ export default definePlugin({
                 }
             ]
         },
+        // Vault: the profile badges hook re-renders when badges change (refreshBadges), so a new badge shows at once
+        {
+            find: ".getBadges()??[]",
+            replacement: {
+                match: /(?<=hidePersonalInformation\);)(?=if\(null==\i\)return\[\];)/,
+                replace: "$self.useBadgeRefresh();"
+            }
+        },
         {
             find: "getLegacyUsername(){",
             replacement: {
@@ -240,6 +248,8 @@ export default definePlugin({
         clearInterval(intervalId);
         DirectoryBadges = {};
     },
+
+    useBadgeRefresh: useBadgesVersion,
 
     getBadges(profile: { userId: string; guildId: string; }) {
         if (!profile) return [];

@@ -19,6 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import globalBadges from "@equicordplugins/globalBadges";
 import BadgeAPIPlugin from "@plugins/_api/badges";
+import { React } from "@webpack/common";
 import { ComponentType, HTMLProps } from "react";
 
 import { isPluginEnabled } from "./PluginManager";
@@ -95,6 +96,24 @@ export interface DirectoryBadge {
 }
 
 const Badges = new Set<ProfileBadge>();
+
+// Vault: profiles only recompute their badges when they re-render. refreshBadges() makes every open profile re-render,
+// so a badge that was just granted or removed shows up at once (see the "useBadgeRefresh" patch in the BadgeAPI plugin).
+let badgesVersion = 0;
+const badgesListeners = new Set<() => void>();
+const subscribeBadges = (listener: () => void) => {
+    badgesListeners.add(listener);
+    return () => void badgesListeners.delete(listener);
+};
+
+export function refreshBadges() {
+    badgesVersion++;
+    badgesListeners.forEach(l => l());
+}
+
+export function useBadgesVersion() {
+    return React.useSyncExternalStore(subscribeBadges, () => badgesVersion);
+}
 
 /**
  * Register a new badge with the Badges API

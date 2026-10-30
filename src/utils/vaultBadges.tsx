@@ -8,7 +8,7 @@
 // so owners can change them from Vault without an update. Owners grant badges from a user's context menu; the Member
 // badge comes with installing Vault (it can be turned off in Vault's settings).
 
-import { addProfileBadge, BadgePosition, BadgeRarity, ProfileBadge, removeProfileBadge } from "@api/Badges";
+import { addProfileBadge, BadgePosition, BadgeRarity, ProfileBadge, refreshBadges, removeProfileBadge } from "@api/Badges";
 import { addContextMenuPatch, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
 import { copyWithToast } from "@utils/discord";
@@ -36,7 +36,11 @@ let types: BadgeType[] = [];
 let ownerId: string | null = null;
 let ownerCheckedKey: string | null = null; // key the last successful check was made with
 const listeners = new Set<() => void>();
-const notify = () => listeners.forEach(l => l());
+// open menus and open profiles both follow badge changes right away
+const notify = () => {
+    listeners.forEach(l => l());
+    refreshBadges();
+};
 
 const settings = () => Settings.vaultBadges;
 

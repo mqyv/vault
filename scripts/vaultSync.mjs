@@ -115,7 +115,10 @@ const MUST_CONTAIN = [
     ["src/components/settings/tabs/plugins/index.tsx", "SearchStatus.VAULT", "Show Vault filter (owner plugins only)"],
     ["src/components/settings/tabs/plugins/index.tsx", "isRecentlyAdded", "New filter follows upstream additions"],
     ["src/components/settings/tabs/plugins/PluginCard.tsx", "getPluginSource", "plugin source badge"],
-    ["src/utils/pluginDates.json", "bulksend", "plugin add dates"]
+    ["src/utils/pluginDates.json", "bulksend", "plugin add dates"],
+    ["src/api/Badges.ts", "refreshBadges", "profiles re-render when a badge changes"],
+    ["src/plugins/_api/badges/index.tsx", "useBadgeRefresh", "profiles re-render when a badge changes"],
+    ["src/utils/vaultBadges.tsx", "refreshBadges()", "badge toggles show at once"]
 ];
 
 function check() {
