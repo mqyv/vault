@@ -245,12 +245,12 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
 // --- image framing ----------------------------------------------------------------------------
 
 /**
- * Frames any picture like Discord's own badges: the visible part (non-transparent pixels) is scaled so its longest
- * side fills 88% of a square and centred, then exported as a 96px PNG. Every Vault badge thus has the exact same
- * size and position next to Discord's badges, whatever the source image.
+ * Frames any picture like Discord's own badges: the visible part (non-transparent pixels) is scaled to the area of an
+ * 88% square (so wide, tall and square shapes look the same size), never past 94% on either side, centred, then
+ * exported as a 96px PNG. Every Vault badge thus has the same size and position next to Discord's badges.
  */
 export async function frameBadgeImage(file: Blob): Promise<string> {
-    const SIZE = 96, FILL = 0.88;
+    const SIZE = 96, FILL = 0.88, MAX = 0.94;
     const bitmap = await createImageBitmap(file);
     const src = document.createElement("canvas");
     src.width = bitmap.width;
@@ -271,7 +271,7 @@ export async function frameBadgeImage(file: Blob): Promise<string> {
     if (x1 < 0) throw new Error("image vide (entièrement transparente)");
 
     const w = x1 - x0 + 1, h = y1 - y0 + 1;
-    const scale = (SIZE * FILL) / Math.max(w, h);
+    const scale = Math.min((SIZE * FILL) / Math.sqrt(w * h), (SIZE * MAX) / Math.max(w, h));
     const out = document.createElement("canvas");
     out.width = out.height = SIZE;
     const ctx = out.getContext("2d")!;
