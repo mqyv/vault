@@ -160,29 +160,49 @@ export async function checkOwnerKey(): Promise<string | null> {
 
 export const isOwner = () => ownerId != null;
 
-/** Applies the change locally right away (menu and profile update instantly), then confirms it with the server. */
-async function setRole(userId: string, username: string, type: BadgeType, enabled: boolean) {
+// Per user+badge: the state the owner asked for last, and whether a request is already running. Requests for the same
+// badge of the same user are sent one at a time and the last choice wins, so fast check/uncheck never ends out of sync.
+const wanted = new Map<string, boolean>();
+const sending = new Set<string>();
+
+function setLocal(userId: string, role: string, enabled: boolean) {
     const entry = cache.get(userId) ?? { member: false, roles: [], expires: Date.now() + CACHE_MS };
-    const before = entry.roles;
-    entry.roles = enabled ? [...new Set([...before, type.key])] : before.filter(r => r !== type.key);
+    entry.roles = enabled ? [...new Set([...entry.roles, role])] : entry.roles.filter(r => r !== role);
     cache.set(userId, entry);
     notify();
+}
 
+/** Applies the change locally right away (menu and profile update instantly), then confirms it with the server. */
+async function setRole(userId: string, username: string, type: BadgeType, enabled: boolean) {
+    const id = `${userId}:${type.key}`;
+    const confirmed = !enabled; // what the server has before this click
+    wanted.set(id, enabled);
+    setLocal(userId, type.key, enabled);
+    if (sending.has(id)) return; // the running request will send the latest choice when it ends
+
+    sending.add(id);
+    let serverState = confirmed;
     try {
-        const newKey = await rpc<string | null>("vault_owner_set_role", { owner_key: settings().ownerKey, uid: userId, role: type.key, enabled });
-        if (newKey) {
-            Alerts.show({
-                title: `Clé owner de ${username}`,
-                body: `Donne cette clé à ${username} (en privé) : elle ne sera plus jamais affichée. Il la colle dans Réglages Vault, section Badges Vault.\n\n${newKey}`,
-                confirmText: "Copier la clé",
-                cancelText: "Fermer",
-                onConfirm: () => copyWithToast(newKey, "Clé copiée")
-            });
+        while (wanted.get(id) !== serverState) {
+            const target = wanted.get(id)!;
+            const newKey = await rpc<string | null>("vault_owner_set_role", { owner_key: settings().ownerKey, uid: userId, role: type.key, enabled: target });
+            serverState = target;
+            if (newKey) {
+                Alerts.show({
+                    title: `Clé owner de ${username}`,
+                    body: `Donne cette clé à ${username} (en privé) : elle ne sera plus jamais affichée. Il la colle dans Réglages Vault, section Badges Vault.\n\n${newKey}`,
+                    confirmText: "Copier la clé",
+                    cancelText: "Fermer",
+                    onConfirm: () => copyWithToast(newKey, "Clé copiée")
+                });
+            }
         }
     } catch (err: any) {
-        entry.roles = before; // undo the local change
-        notify();
+        wanted.set(id, serverState);
+        setLocal(userId, type.key, serverState); // show what the server really has
         showToast({ text: `${type.label} non modifié pour ${username} : ${err?.message ?? err}`, variant: "critical" });
+    } finally {
+        sending.delete(id);
     }
 }
 
