@@ -11,12 +11,10 @@ import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { classNameFactory } from "@utils/css";
 import { Logger } from "@utils/Logger";
+import { getPluginSource } from "@utils/pluginSource";
 import { Plugin } from "@utils/types";
 import { VAULT_LOGO_URI } from "@utils/vaultLogo";
-import { VAULT_OWNER_ID } from "@utils/vaultOwner";
 import { React, showToast } from "@webpack/common";
-
-import { PluginMeta } from "~plugins";
 
 import { openPluginModal } from "./PluginModal";
 
@@ -33,14 +31,9 @@ interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
-    const pluginMeta = PluginMeta[plugin.name];
-    const isEquicordPlugin = pluginMeta.folderName.startsWith("src/equicordplugins/") ?? false;
-    const isVencordPlugin = pluginMeta.folderName.startsWith("src/plugins/") ?? false;
-    const isUserPlugin = pluginMeta?.userPlugin ?? false;
+    // Vault's own plugins (written by the owner) get the Vault logo; the rest stay credited to Equicord or Vencord
+    const source = getPluginSource(plugin);
     const isModifiedPlugin = plugin.isModified ?? false;
-
-    // Vault: plugins authored by the owner get the "Plugin Vault" badge (Vault logo)
-    const isVaultOwnPlugin = (plugin.authors ?? []).some(a => String(a.id) === VAULT_OWNER_ID);
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
@@ -100,25 +93,25 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
             title: "Modified Vencord Plugin"
         },
         {
-            condition: isVaultOwnPlugin,
+            condition: source === "vault",
             src: VAULT_LOGO_URI,
             alt: "Vault",
-            title: "Plugin Vault"
+            title: "Vault Plugin"
         },
         {
-            condition: isEquicordPlugin,
+            condition: source === "equicord",
             src: "https://equicord.org/assets/favicon.png",
             alt: "Equicord",
             title: "Equicord Plugin"
         },
         {
-            condition: isVencordPlugin,
+            condition: source === "vencord",
             src: "https://equicord.org/assets/icons/vencord/icon-light.png",
             alt: "Vencord",
             title: "Vencord Plugin"
         },
         {
-            condition: isUserPlugin,
+            condition: source === "user",
             src: "https://equicord.org/assets/icons/misc/userplugin.png",
             alt: "User",
             title: "User Plugin"

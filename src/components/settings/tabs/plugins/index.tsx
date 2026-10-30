@@ -35,6 +35,7 @@ import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { getPluginSource, isRecentlyAdded } from "@utils/pluginSource";
 import { PluginTarget } from "@utils/pluginTargets";
 import { promptToRestart } from "@utils/promptToRestart";
 import { useAwaiter, useCleanupEffect, useIntersection } from "@utils/react";
@@ -101,6 +102,7 @@ const enum SearchStatus {
     FAVORITES,
     ENABLED,
     DISABLED,
+    VAULT,
     EQUICORD,
     VENCORD,
     NEW,
@@ -215,11 +217,14 @@ export default function PluginSettings() {
             case SearchStatus.ENABLED:
                 if (!isPluginEnabled(plugin.name)) return false;
                 break;
+            case SearchStatus.VAULT:
+                if (getPluginSource(plugin) !== "vault") return false;
+                break;
             case SearchStatus.EQUICORD:
-                if (!PluginMeta[plugin.name].folderName.startsWith("src/equicordplugins/")) return false;
+                if (getPluginSource(plugin) !== "equicord") return false;
                 break;
             case SearchStatus.VENCORD:
-                if (!PluginMeta[plugin.name].folderName.startsWith("src/plugins/")) return false;
+                if (getPluginSource(plugin) !== "vencord") return false;
                 break;
             case SearchStatus.NEW:
                 if (!newPluginsSet?.has(plugin.name)) return false;
@@ -249,16 +254,21 @@ export default function PluginSettings() {
         const existingTimestamps: Record<string, number> = {};
         const sortedPluginNames = Object.values(sortedPlugins).map(plugin => plugin.name);
 
-        const newPlugins: string[] = [];
+        const seenRecently: string[] = [];
         for (const { name: p } of sortedPlugins) {
             const time = existingTimestamps[p] = cachedPlugins?.[p] ?? now;
             if ((time + 60 * 60 * 24 * 2) > now) {
-                newPlugins.push(p);
+                seenRecently.push(p);
             }
         }
         DataStore.set("Vencord_existingPlugins", existingTimestamps);
 
-        return lodash.isEqual(newPlugins, sortedPluginNames) ? null : new Set(newPlugins);
+        // New = added to Vencord, Equicord or Vault in the last weeks (dates come from the upstream history), plus
+        // anything that appeared on this install in the last two days (ignored on the very first run, when every
+        // plugin is "seen" for the first time).
+        const newPlugins = new Set(sortedPlugins.filter(p => isRecentlyAdded(p)).map(p => p.name));
+        if (!lodash.isEqual(seenRecently, sortedPluginNames)) seenRecently.forEach(p => newPlugins.add(p));
+        return newPlugins.size ? newPlugins : null;
     }));
 
     const handleRestartNeeded = useCallback((name: string, key: string) => changes.handleChange(`${name}:${key}`), [changes]);
@@ -420,7 +430,8 @@ export default function PluginSettings() {
                             { label: "Show Favorites", value: SearchStatus.FAVORITES },
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
-                            { label: "Show Vault", value: SearchStatus.EQUICORD },
+                            { label: "Show Vault", value: SearchStatus.VAULT },
+                            { label: "Show Equicord", value: SearchStatus.EQUICORD },
                             { label: "Show Vencord", value: SearchStatus.VENCORD },
                             { label: "Show New", value: SearchStatus.NEW },
                             hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },

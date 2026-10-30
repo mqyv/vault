@@ -8,18 +8,19 @@
 //
 //   node scripts/vaultSync.mjs rebrand <sha-before-merge>   rebrand the lines Equicord added/changed
 //   node scripts/vaultSync.mjs fixpkg                       keep Vault's package.json identity
+//   node scripts/vaultSync.mjs dates                        record when each plugin was added upstream (for "New")
 //   node scripts/vaultSync.mjs check                        fail if a Vault customisation got lost
 //
 // Everything is idempotent: running it twice changes nothing.
 
 import { execFileSync } from "child_process";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "fs";
 
 const git = (...args) => execFileSync("git", args, { encoding: "utf-8", maxBuffer: 1 << 28 });
 
 // "Equicord" -> "Vault" only where it is user-visible text: never in identifiers, property access,
 // URLs, domains or other projects' names. Credits stay accurate: contributor badges and plugin-origin labels keep "Equicord".
-const SKIP_LINE = /^\s*(import\b|export\s*\{)|github\.com|equicord\.org|cdn\.|Equilotl|Equibop|Equicloud|Equibored|Equibuilds|\/\/\s*@|require\(|Contributor|infoLabel|Equicord Plugin/;
+const SKIP_LINE = /^\s*(import\b|export\s*\{)|github\.com|equicord\.org|cdn\.|Equilotl|Equibop|Equicloud|Equibored|Equibuilds|\/\/\s*@|require\(|Contributor|infoLabel|Equicord Plugin|Show Equicord/;
 const EQUICORD = /(?<![\w/@.\-$])Equicord(?![\w.\-/]|\.\w)/g;
 const FILES = /^src\/.*\.(tsx?|html|css)$/;
 
@@ -60,6 +61,33 @@ function fixPackage() {
     console.log("package.json identity ok");
 }
 
+// When each plugin landed in Vencord / Equicord (committer date of the commit that added it), so the plugin list can
+// flag what is new upstream as new in Vault too. Written to src/utils/pluginDates.json; installs are shallow clones
+// without history, so the file is generated here (full history) and committed.
+// Keyed by the folder's base name (lowercase, without .desktop/.web… suffix or extension), so a plugin that was only
+// renamed or moved between src/plugins and src/equicordplugins keeps its original date. Must match pluginBaseName()
+// in src/utils/pluginSource.ts.
+const PLUGIN_DIRS = ["src/plugins", "src/equicordplugins"];
+const baseName = folder => folder.split("/").pop().split(".")[0].toLowerCase();
+function pluginDates() {
+    // --no-renames: a move shows as an add at its new path and the old path's add is still seen, so the min is right
+    const out = git("log", "--full-history", "--no-renames", "--diff-filter=A", "--name-only", "--format=@%ct", "--", ...PLUGIN_DIRS);
+    const dates = {};
+    let time = 0;
+    for (const line of out.split("\n")) {
+        if (line.startsWith("@")) { time = +line.slice(1); continue; }
+        const m = line.match(/^src\/(?:plugins|equicordplugins)\/[^/]+/);
+        if (!m) continue;
+        const key = baseName(m[0]);
+        dates[key] = Math.min(dates[key] ?? Infinity, time);
+    }
+    // only plugins that exist today
+    const live = PLUGIN_DIRS.flatMap(d => readdirSync(d).map(f => baseName(`${d}/${f}`))).filter(k => k in dates);
+    const sorted = Object.fromEntries([...new Set(live)].sort().map(k => [k, dates[k]]));
+    writeFileSync("src/utils/pluginDates.json", JSON.stringify(sorted, null, 1) + "\n");
+    console.log(`dates: ${Object.keys(sorted).length} plugins`);
+}
+
 // [file, text that must still be present, why]
 const MUST_CONTAIN = [
     ["package.json", "\"name\": \"vault\"", "package identity"],
@@ -82,7 +110,12 @@ const MUST_CONTAIN = [
     ["src/Vencord.ts", "initVaultBadges", "Vault badges started with Vault"],
     ["src/components/settings/tabs/vencord/index.tsx", "VaultBadgesSection", "Vault badges settings"],
     ["src/components/VaultIcons.tsx", "BulkSendIcon", "Vault plugin icons"],
-    ["src/main/csp/index.ts", "zjppxtnfohjvsjfqioqh.supabase.co", "badge service allowed by the CSP"]
+    ["src/main/csp/index.ts", "zjppxtnfohjvsjfqioqh.supabase.co", "badge service allowed by the CSP"],
+    ["src/utils/pluginSource.ts", "isVaultOwnPlugin", "Vault / Equicord / Vencord plugin credits"],
+    ["src/components/settings/tabs/plugins/index.tsx", "SearchStatus.VAULT", "Show Vault filter (owner plugins only)"],
+    ["src/components/settings/tabs/plugins/index.tsx", "isRecentlyAdded", "New filter follows upstream additions"],
+    ["src/components/settings/tabs/plugins/PluginCard.tsx", "getPluginSource", "plugin source badge"],
+    ["src/utils/pluginDates.json", "bulksend", "plugin add dates"]
 ];
 
 function check() {
@@ -102,4 +135,5 @@ const [cmd, arg] = process.argv.slice(2);
 if (cmd === "rebrand" && arg) rebrand(arg);
 else if (cmd === "fixpkg") fixPackage();
 else if (cmd === "check") check();
-else { console.error("usage: vaultSync.mjs rebrand <sha> | fixpkg | check"); process.exit(2); }
+else if (cmd === "dates") pluginDates();
+else { console.error("usage: vaultSync.mjs rebrand <sha> | fixpkg | dates | check"); process.exit(2); }
