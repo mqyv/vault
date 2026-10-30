@@ -18,7 +18,6 @@
 
 import "./styles.css";
 
-import * as DataStore from "@api/DataStore";
 import { isPluginEnabled, stopPlugin } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import { Button } from "@components/Button";
@@ -38,9 +37,9 @@ import { classes } from "@utils/misc";
 import { getPluginSource, isRecentlyAdded } from "@utils/pluginSource";
 import { PluginTarget } from "@utils/pluginTargets";
 import { promptToRestart } from "@utils/promptToRestart";
-import { useAwaiter, useCleanupEffect, useIntersection } from "@utils/react";
+import { useCleanupEffect, useIntersection } from "@utils/react";
 import { PluginTag, PluginTags } from "@utils/types";
-import { Alerts, lodash, Parser, React, SearchableSelect, Select, showToast, TextInput, Tooltip, useCallback, useMemo, useRef, useState } from "@webpack/common";
+import { Alerts, Parser, React, SearchableSelect, Select, showToast, TextInput, Tooltip, useCallback, useMemo, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
@@ -249,27 +248,12 @@ export default function PluginSettings() {
         );
     }, [searchValue, search]);
 
-    const [newPluginsSet] = useAwaiter(() => DataStore.get("Vencord_existingPlugins").then((cachedPlugins: Record<string, number> | undefined) => {
-        const now = Date.now() / 1000;
-        const existingTimestamps: Record<string, number> = {};
-        const sortedPluginNames = Object.values(sortedPlugins).map(plugin => plugin.name);
-
-        const seenRecently: string[] = [];
-        for (const { name: p } of sortedPlugins) {
-            const time = existingTimestamps[p] = cachedPlugins?.[p] ?? now;
-            if ((time + 60 * 60 * 24 * 2) > now) {
-                seenRecently.push(p);
-            }
-        }
-        DataStore.set("Vencord_existingPlugins", existingTimestamps);
-
-        // New = added to Vencord, Equicord or Vault in the last weeks (dates come from the upstream history), plus
-        // anything that appeared on this install in the last two days (ignored on the very first run, when every
-        // plugin is "seen" for the first time).
+    // New = added to Vencord, Equicord or Vault in the last weeks. The dates come from the upstream history (refreshed on
+    // every sync), so what is new for Equicord and Vencord is new in Vault too, whenever you installed it.
+    const newPluginsSet = useMemo(() => {
         const newPlugins = new Set(sortedPlugins.filter(p => isRecentlyAdded(p)).map(p => p.name));
-        if (!lodash.isEqual(seenRecently, sortedPluginNames)) seenRecently.forEach(p => newPlugins.add(p));
         return newPlugins.size ? newPlugins : null;
-    }));
+    }, [sortedPlugins]);
 
     const handleRestartNeeded = useCallback((name: string, key: string) => changes.handleChange(`${name}:${key}`), [changes]);
 
