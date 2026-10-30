@@ -168,7 +168,8 @@ section{padding:110px 0}
 .pane p{color:var(--muted);font-size:14.5px;margin-bottom:20px}
 pre{position:relative;background:#06060a;border:1px solid var(--line);border-radius:12px;padding:18px 90px 18px 18px;font:13px/1.7 'JetBrains Mono',monospace;color:#d6d4cb;overflow-x:auto;white-space:pre}
 pre .c{color:#5f5e68}
-.copy{position:absolute;top:10px;right:10px;padding:6px 12px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);font:12px Albert Sans;cursor:pointer}
+.code{position:relative} /* holds the copy button outside the scrolling block, so it stays put */
+.copy{position:absolute;z-index:1;top:10px;right:10px;padding:6px 12px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);font:12px Albert Sans;cursor:pointer}
 .copy:hover{color:var(--gold2);border-color:var(--gold)}
 
 /* faq */
@@ -466,14 +467,14 @@ summary{transition:color .25s}summary:hover{color:var(--gold2)}
       <div class="pane on" id="ip0" role="tabpanel" aria-labelledby="it0" tabindex="0"><p>Recommandé. Windows peut afficher «&nbsp;Windows a protégé votre PC&nbsp;» car l'installeur n'est pas signé&nbsp;: Informations complémentaires → Exécuter quand même.</p>
         <a class="btn primary" href="https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe">Télécharger VaultSetup.exe</a></div>
       <div class="pane" id="ip1" role="tabpanel" aria-labelledby="it1" tabindex="0"><p>Une seule commande, dans PowerShell.</p>
-        <pre><button class="copy">Copier</button>irm https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.ps1 | iex</pre></div>
+        <div class="code"><button class="copy">Copier</button><pre>irm https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.ps1 | iex</pre></div></div>
       <div class="pane" id="ip2" role="tabpanel" aria-labelledby="it2" tabindex="0"><p>Prérequis&nbsp;: Git et Node.js LTS. Ferme Discord avant d'injecter.</p>
-        <pre><button class="copy">Copier</button>npm i -g pnpm
+        <div class="code"><button class="copy">Copier</button><pre>npm i -g pnpm
 git clone https://github.com/mqyv/vault.git Vault
 cd Vault
 pnpm install
 pnpm build
-pnpm inject</pre></div>
+pnpm inject</pre></div></div>
     </div>
   </div>
 </section>
@@ -579,7 +580,7 @@ $$('#seg button').forEach(b=>b.onclick=()=>{$$('#seg button').forEach(x=>{x.clas
 const tabs=document.querySelectorAll('.tabs button'),panes=document.querySelectorAll('.pane');
 tabs.forEach(b=>b.onclick=()=>{tabs.forEach(x=>x.setAttribute('aria-selected',x===b));panes.forEach((p,i)=>p.classList.toggle('on',i==b.dataset.t))});
 // copy
-document.querySelectorAll('.copy').forEach(b=>b.onclick=async()=>{const t=b.parentElement.innerText.replace(/^Copier\s*|^Copié\s*/,'').trim();
+document.querySelectorAll('.copy').forEach(b=>b.onclick=async()=>{const t=b.parentElement.querySelector('pre').innerText.trim();
   try{await navigator.clipboard.writeText(t);b.textContent='Copié ✓';setTimeout(()=>b.textContent='Copier',1800)}catch{}});
 </script>
 </body>
