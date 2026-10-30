@@ -13,7 +13,7 @@ import { addContextMenuPatch, NavContextMenuPatchCallback } from "@api/ContextMe
 import { Settings } from "@api/Settings";
 import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import { Alerts, FluxDispatcher, Menu, showToast, UserStore } from "@webpack/common";
+import { Alerts, FluxDispatcher, Menu, React, showToast, UserStore } from "@webpack/common";
 
 // Vault's badge service (Supabase project "vault"). The publishable key is meant to ship in clients: it can only call the
 // functions below; tables are not readable with it and every owner action is checked against the owner's secret key.
@@ -34,6 +34,9 @@ let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let registered: ProfileBadge[] = [];
 let types: BadgeType[] = [];
 let ownerId: string | null = null;
+let ownerCheckedKey: string | null = null; // key the last successful check was made with
+const listeners = new Set<() => void>();
+const notify = () => listeners.forEach(l => l());
 
 const settings = () => Settings.vaultBadges;
 
@@ -65,6 +68,7 @@ async function flush() {
             const row = rows.find(r => r.user_id === id);
             cache.set(id, { member: !!row?.member, roles: row?.roles ?? [], expires });
         }
+        notify();
     } catch (err) {
         logger.warn("Could not load badges", err);
         const expires = Date.now() + RETRY_MS;
@@ -116,6 +120,7 @@ export async function loadBadgeTypes() {
         }));
     // Discord shows START badges in reverse insertion order: add the last ones first so the sort order is kept
     [...registered].reverse().forEach(addProfileBadge);
+    notify();
 }
 
 export const getBadgeTypes = () => types;
@@ -138,11 +143,16 @@ export async function syncMembership() {
 /** Discord id of the owner the saved key belongs to, or null. */
 export async function checkOwnerKey(): Promise<string | null> {
     const key = settings().ownerKey?.trim();
-    ownerId = null;
-    if (!key) return null;
+    if (!key) {
+        ownerId = ownerCheckedKey = null;
+        return null;
+    }
     try {
         ownerId = await rpc<string | null>("vault_owner_whoami", { owner_key: key });
+        ownerCheckedKey = key;
+        notify();
     } catch (err) {
+        // keep the previous answer; the check is retried on the next connection or context menu
         logger.warn("Could not check the owner key", err);
     }
     return ownerId;
@@ -150,11 +160,16 @@ export async function checkOwnerKey(): Promise<string | null> {
 
 export const isOwner = () => ownerId != null;
 
+/** Applies the change locally right away (menu and profile update instantly), then confirms it with the server. */
 async function setRole(userId: string, username: string, type: BadgeType, enabled: boolean) {
+    const entry = cache.get(userId) ?? { member: false, roles: [], expires: Date.now() + CACHE_MS };
+    const before = entry.roles;
+    entry.roles = enabled ? [...new Set([...before, type.key])] : before.filter(r => r !== type.key);
+    cache.set(userId, entry);
+    notify();
+
     try {
         const newKey = await rpc<string | null>("vault_owner_set_role", { owner_key: settings().ownerKey, uid: userId, role: type.key, enabled });
-        refresh(userId);
-        showToast({ text: `${type.label} ${enabled ? "donné à" : "retiré à"} ${username}`, variant: "success" });
         if (newKey) {
             Alerts.show({
                 title: `Clé owner de ${username}`,
@@ -165,7 +180,9 @@ async function setRole(userId: string, username: string, type: BadgeType, enable
             });
         }
     } catch (err: any) {
-        showToast({ text: `Badge non modifié : ${err?.message ?? err}`, variant: "critical" });
+        entry.roles = before; // undo the local change
+        notify();
+        showToast({ text: `${type.label} non modifié pour ${username} : ${err?.message ?? err}`, variant: "critical" });
     }
 }
 
@@ -175,6 +192,16 @@ export async function setBadge(key: string, label: string | null, iconUrl: strin
 }
 
 const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { user?: { id: string; username: string; }; }) => {
+    const [, rerender] = React.useReducer((n: number) => n + 1, 0);
+    React.useEffect(() => {
+        listeners.add(rerender);
+        return () => void listeners.delete(rerender);
+    }, []);
+
+    // the key was never checked successfully (offline at startup, key just pasted...): check now, the menu shows next time
+    const key = settings().ownerKey?.trim();
+    if (key && key !== ownerCheckedKey) void checkOwnerKey();
+    if (!types.length) void loadBadgeTypes();
     if (!user || !isOwner() || !types.length) return;
     const current = info(user.id);
     children.push(
@@ -241,6 +268,10 @@ export function initVaultBadges() {
     addContextMenuPatch("user-context", userContextPatch);
     // Start loading a user's badges as soon as Discord starts fetching their profile, so they are ready on render.
     FluxDispatcher.subscribe("USER_PROFILE_FETCH_START", ({ userId }: { userId: string; }) => void info(userId));
-    FluxDispatcher.subscribe("CONNECTION_OPEN", () => void syncMembership());
+    FluxDispatcher.subscribe("CONNECTION_OPEN", () => {
+        syncMembership();
+        checkOwnerKey();
+        if (!types.length) loadBadgeTypes();
+    });
     syncMembership();
 }
