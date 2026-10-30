@@ -272,8 +272,9 @@ nav.scrolled{top:10px;background:rgba(10,10,14,.82);box-shadow:0 12px 30px -12px
 .pill i::after{content:"";position:absolute;inset:0;border-radius:50%;background:inherit;animation:ping 2.2s cubic-bezier(0,0,.2,1) infinite}
 @keyframes ping{75%,100%{transform:scale(2.6);opacity:0}}
 /* a gold rule draws under the headline accent once the hero has landed */
-h1 em.gold{position:relative;white-space:nowrap}
-h1 em.gold::after{content:"";position:absolute;left:2%;right:2%;bottom:.02em;height:.045em;border-radius:9px;background:var(--gold);transform:scaleX(0);transform-origin:0 50%;animation:draw 1.1s var(--ease) 1s forwards}
+/* sits just under the baseline so it never reaches the next line; the shadow cuts it around the descenders (p, g) */
+h1 em.gold{position:relative;z-index:0;white-space:nowrap;text-shadow:3px 0 var(--bg),-3px 0 var(--bg),0 3px var(--bg),0 -3px var(--bg)}
+h1 em.gold::after{content:"";position:absolute;z-index:-1;left:2%;right:2%;bottom:.32em;height:.035em;border-radius:9px;background:var(--gold);transform:scaleX(0);transform-origin:0 50%;animation:draw 1.1s var(--ease) 1s forwards}
 @keyframes draw{to{transform:scaleX(1)}}
 /* demo window: slow float, tilt follows the pointer on desktop */
 .stage.in .window{animation:float 7s ease-in-out 1s infinite}
