@@ -14,7 +14,7 @@ import { SettingsRouter } from "@webpack/common";
 import { deflateSync, inflateSync } from "fflate";
 
 import { deauthorizeCloud, getCloudAuth, getCloudUrl } from "./cloudSetup";
-import { exportSettings, importSettings } from "./offline";
+import { exportSettings, importSettings, shareableSettings } from "./offline";
 import { ManifestEntry, SyncRequest, SyncResponse } from "./types";
 
 const logger = new Logger("SettingsSync:Cloud", "#39b7e0");
@@ -82,7 +82,7 @@ async function buildLocalData(): Promise<Map<string, Uint8Array>> {
     const encoder = new TextEncoder();
     const data = new Map<string, Uint8Array>();
 
-    data.set("settings", encoder.encode(JSON.stringify(VencordNative.settings.get())));
+    data.set("settings", encoder.encode(JSON.stringify(shareableSettings())));
 
     const quickCss = await VencordNative.quickCss.get();
     if (quickCss) data.set("quickCss", encoder.encode(quickCss));

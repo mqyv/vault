@@ -98,8 +98,19 @@ export async function importSettings(data: string, type: BackupType = "all", clo
     }
 }
 
+/** Vault: settings as they may leave this computer (backups, cloud), without the badge owner key. */
+export function shareableSettings() {
+    const settings = structuredClone(VencordNative.settings.get());
+    // dropped rather than blanked, so restoring a backup (deepMerge) keeps the key already on this computer
+    if (settings.vaultBadges) {
+        const { ownerKey: _, ...rest } = settings.vaultBadges;
+        settings.vaultBadges = rest as typeof settings.vaultBadges;
+    }
+    return settings;
+}
+
 export async function exportSettings({ syncDataStore = true, type = "all", minify }: { syncDataStore?: boolean; type?: BackupType; minify?: boolean; }) {
-    const settings = VencordNative.settings.get();
+    const settings = shareableSettings();
     const quickCss = await VencordNative.quickCss.get();
     let dataStore: any;
 

@@ -11,9 +11,8 @@
 import { addProfileBadge, BadgePosition, BadgeRarity, ProfileBadge, refreshBadges, removeProfileBadge } from "@api/Badges";
 import { addContextMenuPatch, NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { Settings } from "@api/Settings";
-import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import { Alerts, FluxDispatcher, Menu, React, showToast, UserStore } from "@webpack/common";
+import { FluxDispatcher, Menu, React, showToast, UserStore } from "@webpack/common";
 
 // Vault's badge service (Supabase project "vault"). The publishable key is meant to ship in clients: it can only call the
 // functions below; tables are not readable with it and every owner action is checked against the owner's secret key.
@@ -189,17 +188,8 @@ async function setRole(userId: string, username: string, type: BadgeType, enable
     try {
         while (wanted.get(id) !== serverState) {
             const target = wanted.get(id)!;
-            const newKey = await rpc<string | null>("vault_owner_set_role", { owner_key: settings().ownerKey, uid: userId, role: type.key, enabled: target });
+            await rpc("vault_owner_set_role", { owner_key: settings().ownerKey, uid: userId, role: type.key, enabled: target });
             serverState = target;
-            if (newKey) {
-                Alerts.show({
-                    title: `Clé owner de ${username}`,
-                    body: `Donne cette clé à ${username} (en privé) : elle ne sera plus jamais affichée. Il la colle dans Réglages Vault, section Badges Vault.\n\n${newKey}`,
-                    confirmText: "Copier la clé",
-                    cancelText: "Fermer",
-                    onConfirm: () => copyWithToast(newKey, "Clé copiée")
-                });
-            }
         }
     } catch (err: any) {
         wanted.set(id, serverState);
@@ -230,7 +220,8 @@ const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { use
     const current = info(user.id);
     children.push(
         <Menu.MenuItem id="vault-badges" label="Badges Vault">
-            {types.filter(t => t.key !== "member").map(t => {
+            {/* the owner badge is yours alone and Member comes with installing Vault: neither can be given */}
+            {types.filter(t => t.key !== "member" && t.key !== "owner").map(t => {
                 const has = !!current?.roles.includes(t.key);
                 return (
                     <Menu.MenuCheckboxItem

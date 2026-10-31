@@ -78,7 +78,7 @@ export function VaultBadgesSection() {
         <section className={Margins.top20}>
             <Heading>Badges Vault</Heading>
             <Paragraph className={Margins.bottom16}>
-                Badges visibles entre utilisateurs de Vault. Le badge Membre vient avec l'installation de Vault ; les autres sont attribués par les owners.
+                Badges visibles entre utilisateurs de Vault. Le badge Membre vient avec l'installation de Vault ; les autres sont attribués par l'owner de Vault.
             </Paragraph>
 
             <FormSwitch
@@ -93,7 +93,7 @@ export function VaultBadgesSection() {
             <Paragraph className={Margins.bottom8}>
                 {owner
                     ? "Owner reconnu. Clic droit sur un utilisateur → Badges Vault pour lui donner ou retirer un badge."
-                    : "Réservé aux owners : colle ici la clé qui t'a été donnée."}
+                    : "Réservé à l'owner de Vault : colle ici ta clé."}
             </Paragraph>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <div style={{ flex: 1 }}>

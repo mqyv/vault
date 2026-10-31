@@ -126,7 +126,9 @@ const MUST_CONTAIN = [
     ["eslint.config.mjs", "@typescript-eslint/no-deprecated", "Vault code warned before upstream removes an API"],
     [".github/workflows/sync-upstream.yml", "seen=again", "one failure email per problem, not every 3 hours"],
     ["src/plugins/_api/badges/index.tsx", "infoLabel: \"Equicord Donor\"", "Equicord badges keep Equicord's name"],
-    ["scripts/vaultSync.mjs", "NEVER_REBRAND", "Equicord badges keep Equicord's name"]
+    ["scripts/vaultSync.mjs", "NEVER_REBRAND", "Equicord badges keep Equicord's name"],
+    ["src/api/SettingsSync/offline.ts", "shareableSettings", "owner key never leaves the computer in backups"],
+    ["src/api/SettingsSync/cloudSync.ts", "shareableSettings()", "owner key never uploaded to the cloud"]
 ];
 
 function check() {
