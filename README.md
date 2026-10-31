@@ -24,19 +24,19 @@
 |---|---|
 | **370+ plugins** | Un large catalogue, avec six plugins écrits pour Vault. |
 | **Mises à jour invisibles** | Au lancement, Vault récupère les correctifs et affiche une notification **Restart**. Un clic et c'est à jour. |
-| **Thèmes sur-mesure** | Importe n'importe quel thème CSS, aperçu en direct. |
-| **Cloud & sauvegarde** | Synchronise tes réglages entre appareils ou exporte-les en JSON. |
+| **Thèmes sur-mesure** | Importez n'importe quel thème CSS, avec aperçu en direct. |
+| **Cloud & sauvegarde** | Synchronisez vos réglages entre appareils ou exportez-les en JSON. |
 | **Open source** | Code sous licence GPL-3.0, lisible et modifiable. |
 
 ## Installation
 
 ### Windows : installeur graphique (recommandé)
 
-1. Télécharge **[VaultSetup.exe](https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe)**
-2. Lance-le puis **Suivant → Installer** (il installe Git et Node.js si besoin)
-3. Rouvre Discord : Vault est dans tes **Réglages**, onglet « Vault »
+1. Téléchargez **[VaultSetup.exe](https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe)**
+2. Lancez-le puis **Suivant → Installer** (il installe Git et Node.js si besoin)
+3. Rouvrez Discord : Vault est dans vos **Réglages**, onglet « Vault »
 
-> Windows peut afficher « Windows a protégé votre PC » (installeur non signé) : clique sur **Informations complémentaires → Exécuter quand même**.
+> Windows peut afficher « Windows a protégé votre PC » (installeur non signé) : cliquez sur **Informations complémentaires → Exécuter quand même**.
 
 ### Windows : une commande
 
@@ -56,20 +56,20 @@ Dans le Terminal :
 curl -fsSL https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.sh | bash
 ```
 
-La commande ne demande pas ton mot de passe administrateur. S'il te manque les outils de développement d'Apple, une fenêtre propose de les installer : accepte, puis relance la commande. S'il te manque Node.js, le script en installe une copie réservée à Vault dans `~/.vault/node`.
+La commande ne demande pas votre mot de passe administrateur. S'il vous manque les outils de développement d'Apple, une fenêtre propose de les installer : acceptez, puis relancez la commande. S'il vous manque Node.js, le script en installe une copie réservée à Vault dans `~/.vault/node`.
 
-> Si macOS refuse de modifier Discord, ouvre **Réglages Système → Confidentialité et sécurité → Gestion des apps**, active **Terminal**, puis relance.
-> Après une grosse mise à jour de Discord, relance la même commande pour remettre Vault.
+> Si macOS refuse de modifier Discord, ouvrez **Réglages Système → Confidentialité et sécurité → Gestion des apps**, activez **Terminal**, puis relancez.
+> Après une grosse mise à jour de Discord, relancez la même commande pour remettre Vault.
 
 Le journal complet est dans `$TMPDIR/vault-install.log`.
 
 ## Mises à jour
 
-Vault se met à jour tout seul. Si une mise à jour de Discord casse quelque chose, relance la commande d'installation de ton système, elle remet aussi Vault à jour.
+Vault se met à jour tout seul. Si une mise à jour de Discord casse quelque chose, relancez la commande d'installation de votre système, elle remet aussi Vault à jour.
 
 ## Désinstaller
 
-Windows : via *Ajout/Suppression de programmes* si tu as utilisé l'installeur graphique, sinon :
+Windows : via *Ajout/Suppression de programmes* si vous avez utilisé l'installeur graphique, sinon :
 
 ```powershell
 pnpm -C "$HOME\Vault" uninject
@@ -86,7 +86,7 @@ curl -fsSL https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vau
 | Plugin | Ce qu'il fait |
 |---|---|
 | **BulkSend** | Envoie plusieurs messages d'un coup (une ligne = un message), délai réglable en ms. |
-| **ClearMessages** | Supprime tes messages d'un salon, y compris depuis un message précis. |
+| **ClearMessages** | Supprime vos messages d'un salon, y compris depuis un message précis. |
 | **CopyProfile** | Clone la bannière, la couleur et le thème de profil d'un utilisateur. |
 | **FakeVoice** | Faux mute / sourd indépendants (clic gauche = mute, clic droit = sourd). |
 | **BetterMicrophone** | Débloque le bitrate du micro (expérimental). |
@@ -121,6 +121,6 @@ Vault est un logiciel libre sous licence **[GPL-3.0](./LICENSE)**, dont le code 
 <details>
 <summary>Modifier le client Discord enfreint les conditions d'utilisation de Discord</summary>
 
-Les modifications du client vont à l'encontre des conditions d'utilisation de Discord. Dans les faits, Discord est plutôt indifférent à leur égard et aucun bannissement n'est connu pour l'usage d'un client mod. Mais si ton compte est essentiel, par prudence, évite tout client mod. Évite aussi de poster des captures montrant Vault dans un serveur où ça pourrait poser problème.
+Les modifications du client vont à l'encontre des conditions d'utilisation de Discord. Dans les faits, Discord est plutôt indifférent à leur égard et aucun bannissement n'est connu pour l'usage d'un client mod. Mais si votre compte est essentiel, par prudence, évitez tout client mod. Évitez aussi de poster des captures montrant Vault dans un serveur où ça pourrait poser problème.
 
 </details>
