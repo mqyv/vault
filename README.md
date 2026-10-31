@@ -6,7 +6,7 @@
 
 **Le mod Discord privé : 370+ plugins, thèmes sur-mesure, mises à jour automatiques.**
 
-[![Télécharger](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-VaultSetup.exe-d8b46a?style=for-the-badge&logo=windows&logoColor=black)](https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe)
+[![Télécharger](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-VaultSetup.exe-d8b46a?style=for-the-badge&logo=windows&logoColor=black)](https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe) [![macOS](https://img.shields.io/badge/macOS-une%20commande-d8b46a?style=for-the-badge&logo=apple&logoColor=black)](#macos--une-commande)
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/mqyv/vault/test.yml?branch=main&label=tests&style=flat-square)](https://github.com/mqyv/vault/actions/workflows/test.yml)
 [![Licence](https://img.shields.io/badge/licence-GPL--3.0-blue?style=flat-square)](./LICENSE)
@@ -48,21 +48,38 @@ irm https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.ps1 
 
 En cas de problème, le journal complet est dans `%TEMP%\vault-install.log`.
 
-## Mises à jour
+### macOS : une commande
 
-Rien à faire : Vault se met à jour tout seul. Si Discord change et casse quelque chose, mets à jour à la main puis relance Discord :
+Dans le Terminal :
 
-```powershell
-pnpm -C "$HOME\Vault" update-vault
+```bash
+curl -fsSL https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.sh | bash
 ```
 
+Rien n'est installé avec un mot de passe administrateur. Si les outils de développement d'Apple manquent, une fenêtre propose de les installer : accepte, puis relance la commande. Node.js est installé à part pour Vault, dans `~/.vault/node`, s'il manque.
+
+> Si macOS refuse de modifier Discord, ouvre **Réglages Système → Confidentialité et sécurité → Gestion des apps**, active **Terminal**, puis relance.
+> Après une grosse mise à jour de Discord, relance la même commande pour remettre Vault.
+
+Le journal complet est dans `$TMPDIR/vault-install.log`.
+
+## Mises à jour
+
+Rien à faire : Vault se met à jour tout seul. Si Discord change et casse quelque chose, relance la commande d'installation de ton système : elle met Vault à jour.
+
 ## Désinstaller
+
+Windows : via *Ajout/Suppression de programmes* si tu as utilisé l'installeur graphique, sinon :
 
 ```powershell
 pnpm -C "$HOME\Vault" uninject
 ```
 
-Ou via *Ajout/Suppression de programmes* si tu as utilisé l'installeur graphique.
+macOS :
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.sh | bash -s -- --uninstall
+```
 
 ## Plugins exclusifs
 

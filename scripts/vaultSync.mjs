@@ -118,7 +118,9 @@ const MUST_CONTAIN = [
     ["src/utils/pluginDates.json", "bulksend", "plugin add dates"],
     ["src/api/Badges.ts", "refreshBadges", "profiles re-render when a badge changes"],
     ["src/plugins/_api/badges/index.tsx", "useBadgeRefresh", "profiles re-render when a badge changes"],
-    ["src/utils/vaultBadges.tsx", "refreshBadges()", "badge toggles show at once"]
+    ["src/utils/vaultBadges.tsx", "refreshBadges()", "badge toggles show at once"],
+    ["scripts/install-vault.sh", "discord_targets", "macOS installer"],
+    ["src/main/updater/git.ts", ".vault\", \"node\"", "macOS updater finds Node installed by the macOS installer"]
 ];
 
 function check() {

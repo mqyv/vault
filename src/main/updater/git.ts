@@ -17,6 +17,8 @@
 */
 
 import { execFile as cpExecFile } from "child_process";
+import { readFile } from "fs/promises";
+import { homedir } from "os";
 import { join } from "path";
 import { promisify } from "util";
 
@@ -29,7 +31,9 @@ const execFile = promisify(cpExecFile);
 
 const isFlatpak = process.platform === "linux" && !!process.env.FLATPAK_ID;
 
-if (process.platform === "darwin") process.env.PATH = `/usr/local/bin:${process.env.PATH}`;
+// Discord opened from the Finder only gets /usr/bin:/bin. Vault's macOS installer puts Node in ~/.vault/node, Homebrew
+// uses /opt/homebrew (Apple Silicon) or /usr/local (Intel).
+if (process.platform === "darwin") process.env.PATH = [join(homedir(), ".vault", "node", "bin"), "/opt/homebrew/bin", "/usr/local/bin", process.env.PATH].join(":");
 
 function git(...args: string[]) {
     const opts = { cwd: VENCORD_SRC_DIR };
@@ -85,8 +89,13 @@ async function installDependenciesIfNeeded(from: string) {
         if (isFlatpak) await execFile("flatpak-spawn", ["--host", "pnpm", ...args], opts);
         else await execFile("pnpm", args, opts);
     } catch {
-        // pnpm n'est pas dans le PATH de Discord : corepack est livré avec Node.
-        await execFile("corepack", ["pnpm", ...args], opts);
+        // pnpm n'est pas dans le PATH de Discord : corepack est livré avec Node (jusqu'à Node 24), sinon npx.
+        try {
+            await execFile("corepack", ["pnpm", ...args], opts);
+        } catch {
+            const pnpmVersion = (await readFile(join(EQUICORD_DIR, "package.json"), "utf-8")).match(/"packageManager":\s*"pnpm@([^"]+)"/)?.[1] ?? "latest";
+            await execFile("npx", ["--yes", `pnpm@${pnpmVersion}`, ...args], opts);
+        }
     }
 }
 

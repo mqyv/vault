@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vault : le mod Discord avec 370+ plugins, pour Windows</title>
-<meta name="description" content="Vault ajoute plus de 370 plugins, des thèmes et des mises à jour automatiques au client Discord de bureau. Gratuit, open source, installation guidée sur Windows.">
+<title>Vault : le mod Discord avec 370+ plugins, pour Windows et macOS</title>
+<meta name="description" content="Vault ajoute plus de 370 plugins, des thèmes et des mises à jour automatiques au client Discord de bureau. Gratuit, open source, installation guidée sur Windows et macOS.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#07070a">
 <meta name="color-scheme" content="dark">
@@ -23,13 +23,13 @@
 <meta name="twitter:image" content="https://vaultmod.vercel.app/icon.png">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
-{"@type":"SoftwareApplication","name":"Vault","url":"https://vaultmod.vercel.app/","description":"Mod du client Discord de bureau : plus de 370 plugins, thèmes et mises à jour automatiques.","applicationCategory":"UtilitiesApplication","operatingSystem":"Windows 10, Windows 11","inLanguage":"fr","license":"https://www.gnu.org/licenses/gpl-3.0.html","downloadUrl":"https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe","codeRepository":"https://github.com/mqyv/vault","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}},
+{"@type":"SoftwareApplication","name":"Vault","url":"https://vaultmod.vercel.app/","description":"Mod du client Discord de bureau : plus de 370 plugins, thèmes et mises à jour automatiques.","applicationCategory":"UtilitiesApplication","operatingSystem":"Windows 10, Windows 11, macOS","inLanguage":"fr","license":"https://www.gnu.org/licenses/gpl-3.0.html","downloadUrl":"https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe","codeRepository":"https://github.com/mqyv/vault","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"Est-ce que Vault est gratuit ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Vault est un logiciel libre sous licence GPL-3.0 : tu peux lire, modifier et redistribuer le code."}},
 {"@type":"Question","name":"Comment fonctionnent les mises à jour ?","acceptedAnswer":{"@type":"Answer","text":"Au lancement, Vault récupère les derniers correctifs et affiche une notification « Restart ». Un clic et tu es à jour."}},
 {"@type":"Question","name":"Comment désinstaller Vault ?","acceptedAnswer":{"@type":"Answer","text":"Via « Ajout/Suppression de programmes » si tu as utilisé l'installeur, ou avec la commande pnpm uninject pour une installation manuelle."}},
 {"@type":"Question","name":"Y a-t-il un risque pour mon compte Discord ?","acceptedAnswer":{"@type":"Answer","text":"Modifier le client Discord enfreint ses conditions d'utilisation. Aucun bannissement n'est connu pour l'usage d'un client mod, mais si ton compte est essentiel, évite tout client mod."}},
-{"@type":"Question","name":"Sur quels systèmes Vault fonctionne-t-il ?","acceptedAnswer":{"@type":"Answer","text":"L'installeur graphique est prévu pour Windows 10 et 11. Le build manuel fonctionne ailleurs avec Node.js et pnpm."}}]}]}
+{"@type":"Question","name":"Sur quels systèmes Vault fonctionne-t-il ?","acceptedAnswer":{"@type":"Answer","text":"Windows 10 et 11 avec l'installeur graphique, et macOS avec une commande dans le Terminal. Le build manuel fonctionne ailleurs avec Node.js et pnpm."}}]}]}
 </script>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="icon" href="icon.png" sizes="512x512" type="image/png">
@@ -374,10 +374,10 @@ summary{transition:color .25s}summary:hover{color:var(--gold2)}
     <div class="cta">
       <a class="btn primary" href="https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v13m0 0-5-5m5 5 5-5M4 20h16"/></svg>
-        Télécharger pour Windows</a>
+        <span class="dl-label">Télécharger pour Windows</span></a>
       <a class="btn" href="https://github.com/mqyv/vault">Voir le code</a>
     </div>
-    <p class="meta">Gratuit · Open source GPL-3.0 · Windows 10 &amp; 11</p>
+    <p class="meta">Gratuit · Open source GPL-3.0 · Windows 10 &amp; 11 · macOS</p>
 
     <p class="meta" style="margin-top:56px">La fenêtre ci-dessous est une démo&nbsp;: tu peux cliquer partout.</p>
     <div class="stage rv" style="margin-top:20px">
@@ -453,8 +453,8 @@ summary{transition:color .25s}summary:hover{color:var(--gold2)}
     <div class="rv"><h2 class="serif" style="font-size:clamp(32px,4.6vw,52px);line-height:1.08;margin:0 0 16px;max-width:16ch">Installer Vault en trois étapes</h2>
       <p style="color:var(--muted);max-width:46ch">Pas de compte à créer. L'installeur ajoute Git et Node.js s'il en manque, télécharge Vault et le compile : compte quelques minutes.</p>
       <div class="steps">
-        <div class="step"><div><b>Télécharge VaultSetup.exe</b><span>Le fichier fait environ 2&nbsp;Mo.</span></div></div>
-        <div class="step"><div><b>Lance-le</b><span>Clique sur Suivant, puis Installer. Discord sera fermé pendant l'installation.</span></div></div>
+        <div class="step"><div><b>Lance l'installeur</b><span>Windows&nbsp;: VaultSetup.exe (environ 2&nbsp;Mo). Mac&nbsp;: une commande à coller dans le Terminal.</span></div></div>
+        <div class="step"><div><b>Laisse-le travailler</b><span>Il ajoute ce qui manque, télécharge Vault et le compile. Discord est fermé pendant l'installation.</span></div></div>
         <div class="step"><div><b>Rouvre Discord</b><span>Vault apparaît dans les Réglages, onglet «&nbsp;Vault&nbsp;».</span></div></div>
       </div>
     </div>
@@ -462,12 +462,15 @@ summary{transition:color .25s}summary:hover{color:var(--gold2)}
       <div class="tabs" role="tablist">
         <button role="tab" id="it0" aria-controls="ip0" aria-selected="true" data-t="0">Installeur</button>
         <button role="tab" id="it1" aria-controls="ip1" aria-selected="false" data-t="1">PowerShell</button>
+        <button role="tab" id="it3" aria-controls="ip3" aria-selected="false" data-t="3">macOS</button>
         <button role="tab" id="it2" aria-controls="ip2" aria-selected="false" data-t="2">Développeurs</button>
       </div>
       <div class="pane on" id="ip0" role="tabpanel" aria-labelledby="it0" tabindex="0"><p>Recommandé. Windows peut afficher «&nbsp;Windows a protégé votre PC&nbsp;» car l'installeur n'est pas signé&nbsp;: Informations complémentaires → Exécuter quand même.</p>
         <a class="btn primary" href="https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe">Télécharger VaultSetup.exe</a></div>
       <div class="pane" id="ip1" role="tabpanel" aria-labelledby="it1" tabindex="0"><p>Une seule commande, dans PowerShell.</p>
         <div class="code"><button class="copy">Copier</button><pre>irm https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.ps1 | iex</pre></div></div>
+      <div class="pane" id="ip3" role="tabpanel" aria-labelledby="it3" tabindex="0"><p>Dans le Terminal (Applications → Utilitaires). Sans mot de passe administrateur&nbsp;; si macOS refuse de modifier Discord, active Terminal dans Réglages Système → Confidentialité et sécurité → Gestion des apps.</p>
+        <div class="code"><button class="copy">Copier</button><pre>curl -fsSL https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.sh | bash</pre></div></div>
       <div class="pane" id="ip2" role="tabpanel" aria-labelledby="it2" tabindex="0"><p>Prérequis&nbsp;: Git et Node.js LTS. Ferme Discord avant d'injecter.</p>
         <div class="code"><button class="copy">Copier</button><pre>npm i -g pnpm
 git clone https://github.com/mqyv/vault.git Vault
@@ -487,7 +490,7 @@ pnpm inject</pre></div></div>
       <details><summary>Comment fonctionnent les mises à jour&nbsp;?</summary><p>Au lancement, Vault récupère les derniers correctifs et affiche une notification «&nbsp;Restart&nbsp;». Un clic et tu es à jour.</p></details>
       <details><summary>Comment désinstaller Vault&nbsp;?</summary><p>Via «&nbsp;Ajout/Suppression de programmes&nbsp;» si tu as utilisé l'installeur, ou avec la commande <span class="mono">pnpm uninject</span> pour une installation manuelle.</p></details>
       <details><summary>Y a-t-il un risque pour mon compte Discord&nbsp;?</summary><p>Modifier le client Discord enfreint ses conditions d'utilisation. Aucun bannissement n'est connu pour l'usage d'un client mod, mais si ton compte est essentiel, évite tout client mod.</p></details>
-      <details><summary>Sur quels systèmes Vault fonctionne-t-il&nbsp;?</summary><p>L'installeur graphique est prévu pour Windows 10 et 11. Le build manuel fonctionne ailleurs avec Node.js et pnpm.</p></details>
+      <details><summary>Sur quels systèmes Vault fonctionne-t-il&nbsp;?</summary><p>Windows 10 et 11 avec l'installeur graphique, et macOS avec une commande dans le Terminal (onglet «&nbsp;macOS&nbsp;» plus haut). Le build manuel fonctionne ailleurs avec Node.js et pnpm.</p></details>
     </div>
   </div>
 </section>
@@ -578,7 +581,14 @@ function perf(i){[1,2,3].forEach((n,k)=>{$('#b'+n).style.width=PERF[i][0][k]+'%'
 $$('#seg button').forEach(b=>b.onclick=()=>{$$('#seg button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)});perf(+b.dataset.p)});
 // tabs
 const tabs=document.querySelectorAll('.tabs button'),panes=document.querySelectorAll('.pane');
-tabs.forEach(b=>b.onclick=()=>{tabs.forEach(x=>x.setAttribute('aria-selected',x===b));panes.forEach((p,i)=>p.classList.toggle('on',i==b.dataset.t))});
+const openInstallTab=t=>{tabs.forEach(x=>x.setAttribute('aria-selected',x.dataset.t==t));panes.forEach(p=>p.classList.toggle('on',p.id==='ip'+t))};
+tabs.forEach(b=>b.onclick=()=>openInstallTab(b.dataset.t));
+// on a Mac, the download buttons lead to the macOS command instead of the Windows installer
+const isMac=(navigator.userAgentData?.platform==='macOS')||(/Macintosh/.test(navigator.userAgent)&&!('ontouchend' in document));
+if(isMac){
+  openInstallTab(3);
+  document.querySelectorAll('a[href$="VaultSetup.exe"]').forEach(a=>{a.href='#install';a.addEventListener('click',()=>openInstallTab(3));if(a.querySelector('.dl-label'))a.querySelector('.dl-label').textContent='Installer sur Mac';else if(/Télécharger VaultSetup/.test(a.textContent))a.textContent='Voir la commande macOS'});
+}
 // copy
 document.querySelectorAll('.copy').forEach(b=>b.onclick=async()=>{const t=b.parentElement.querySelector('pre').innerText.trim();
   try{await navigator.clipboard.writeText(t);b.textContent='Copié ✓';setTimeout(()=>b.textContent='Copier',1800)}catch{}});
