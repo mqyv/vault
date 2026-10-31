@@ -56,7 +56,7 @@ Dans le Terminal :
 curl -fsSL https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.sh | bash
 ```
 
-Rien n'est installé avec un mot de passe administrateur. Si les outils de développement d'Apple manquent, une fenêtre propose de les installer : accepte, puis relance la commande. Node.js est installé à part pour Vault, dans `~/.vault/node`, s'il manque.
+La commande ne demande pas ton mot de passe administrateur. S'il te manque les outils de développement d'Apple, une fenêtre propose de les installer : accepte, puis relance la commande. S'il te manque Node.js, le script en installe une copie réservée à Vault dans `~/.vault/node`.
 
 > Si macOS refuse de modifier Discord, ouvre **Réglages Système → Confidentialité et sécurité → Gestion des apps**, active **Terminal**, puis relance.
 > Après une grosse mise à jour de Discord, relance la même commande pour remettre Vault.
@@ -65,7 +65,7 @@ Le journal complet est dans `$TMPDIR/vault-install.log`.
 
 ## Mises à jour
 
-Rien à faire : Vault se met à jour tout seul. Si Discord change et casse quelque chose, relance la commande d'installation de ton système : elle met Vault à jour.
+Vault se met à jour tout seul. Si une mise à jour de Discord casse quelque chose, relance la commande d'installation de ton système, elle remet aussi Vault à jour.
 
 ## Désinstaller
 
