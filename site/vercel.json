@@ -1,0 +1,8 @@
+{
+    "redirects": [
+        { "source": "/", "has": [{ "type": "host", "value": "www.vaultcord.fr" }], "destination": "https://vaultcord.fr/", "permanent": true },
+        { "source": "/", "has": [{ "type": "host", "value": "vaultmod.vercel.app" }], "destination": "https://vaultcord.fr/", "permanent": true },
+        { "source": "/:path+", "has": [{ "type": "host", "value": "www.vaultcord.fr" }], "destination": "https://vaultcord.fr/:path+", "permanent": true },
+        { "source": "/:path+", "has": [{ "type": "host", "value": "vaultmod.vercel.app" }], "destination": "https://vaultcord.fr/:path+", "permanent": true }
+    ]
+}
