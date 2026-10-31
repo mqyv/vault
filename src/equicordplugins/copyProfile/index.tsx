@@ -114,5 +114,8 @@ export default definePlugin({
     tags: ["Utility", "Friends"],
     contextMenus: {
         "user-context": patchUserContext
-    }
+    },
+
+    // for checking from the console
+    cloneProfile
 });

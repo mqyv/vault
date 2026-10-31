@@ -9,7 +9,7 @@ import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
 import { FakeVoiceIcon } from "@components/VaultIcons";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { showToast, VoiceActions } from "@webpack/common";
+import { MediaEngineStore, showToast, VoiceActions } from "@webpack/common";
 
 // Independent fake states. Your REAL mute/deafen stay off, so you always keep
 // talking and hearing — only what others see is faked.
@@ -17,12 +17,14 @@ const settings = definePluginSettings({
     appearMuted: {
         type: OptionType.BOOLEAN,
         description: "Appear muted to others (you can still talk). Left-click the ghost button.",
-        default: false
+        default: false,
+        onChange: () => resend()
     },
     appearDeafened: {
         type: OptionType.BOOLEAN,
         description: "Appear deafened to others (you can still hear). Right-click the ghost button.",
-        default: false
+        default: false,
+        onChange: () => resend()
     }
 });
 
@@ -40,6 +42,8 @@ function resend() {
         if (lastVoiceState?.[1]?.channelId != null) lastVoiceState[0].voiceStateUpdate(lastVoiceState[1]);
         else { VoiceActions.toggleSelfMute(); VoiceActions.toggleSelfMute(); }
     } catch { /* not in a voice channel */ }
+    // redraw your own icons in the voice channel list (see the second patch)
+    try { (MediaEngineStore as any).emitChange(); } catch { }
 }
 
 function describe(muted: boolean, deafened: boolean) {
@@ -62,14 +66,12 @@ function FakeVoiceButton({ iconForeground, hideTooltips, nameplate }: UserAreaRe
             redGlow={on}
             plated={nameplate != null}
             onClick={() => {
-                settings.store.appearMuted = !settings.store.appearMuted;
-                resend();
+                settings.store.appearMuted = !settings.store.appearMuted; // onChange resends
                 feedback(describe(settings.store.appearMuted, settings.store.appearDeafened));
             }}
             onContextMenu={e => {
                 e.preventDefault();
-                settings.store.appearDeafened = !settings.store.appearDeafened;
-                resend();
+                settings.store.appearDeafened = !settings.store.appearDeafened; // onChange resends
                 feedback(describe(settings.store.appearMuted, settings.store.appearDeafened));
             }}
         />
@@ -101,6 +103,15 @@ export default definePlugin({
                     replace: "$&$self.remember(this,$1);"
                 }
             ]
+        },
+        {
+            // For your own account Discord draws the mute/deafen icons in the voice channel list from your real
+            // microphone state, not from the server's. Show the faked state there too, as everyone else sees it.
+            find: ".isSelfMutedTemporarily(),selfDeaf:",
+            replacement: {
+                match: /selfMute:(\i\.\i\.isSelfMute\(\)\|\|\i\.\i\.isSelfMutedTemporarily\(\)),selfDeaf:(\i\.\i\.isSelfDeaf\(\))/,
+                replace: "selfMute:$self.fakeMute($1),selfDeaf:$self.fakeDeaf($2)"
+            }
         }
     ],
 

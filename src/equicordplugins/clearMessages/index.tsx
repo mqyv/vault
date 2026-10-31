@@ -153,5 +153,8 @@ export default definePlugin({
     contextMenus: {
         "user-context": patchUserContext,
         "message": patchMessageContext
-    }
+    },
+
+    // for checking from the console
+    clearMessages
 });
