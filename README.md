@@ -22,7 +22,7 @@
 
 | Atout | Détail |
 |---|---|
-| **370+ plugins** | Un large catalogue, avec six plugins écrits pour Vault. |
+| **370+ plugins** | Un large catalogue, avec des plugins écrits pour Vault. |
 | **Mises à jour invisibles** | Au lancement, Vault récupère les correctifs et affiche une notification **Restart**. Un clic et c'est à jour. |
 | **Thèmes sur-mesure** | Importez n'importe quel thème CSS, avec aperçu en direct. |
 | **Cloud & sauvegarde** | Synchronisez vos réglages entre appareils ou exportez-les en JSON. |

@@ -98,6 +98,7 @@ export default definePlugin({
     name: "BulkSend",
     description: "Adds a chat bar button to queue several messages (one per line) and send them all at once, in order.",
     authors: [EquicordDevs.eqen],
+    enabledByDefault: true,
     settings,
     chatBarButton: {
         icon: BulkSendIcon,

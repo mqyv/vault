@@ -148,6 +148,7 @@ export default definePlugin({
     name: "ClearMessages",
     description: "Deletes your own messages one by one (newest to oldest). 'Clear Messages' on a user clears a whole DM; 'Clear from this Message' on a message clears that message and everything after it. Re-open the user menu to stop.",
     authors: [EquicordDevs.eqen],
+    enabledByDefault: true,
     tags: ["Utility", "Chat"],
     contextMenus: {
         "user-context": patchUserContext,

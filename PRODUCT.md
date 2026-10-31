@@ -23,7 +23,7 @@ Success: a visitor installs Vault, and a stranger understands what Vault has tha
 
 ## Positioning
 
-Vault's own plugins, written for Vault and found nowhere else: BulkSend, ClearMessages, CopyProfile, FakeVoice, BetterMicrophone, VaultPerformance. This is the message a visitor must leave with. The rest of the catalogue (370+ plugins) comes from Equicord and Vencord and is credited to them.
+Vault's own plugins (the list grows over time), written for Vault and found nowhere else, currently: BulkSend, ClearMessages, CopyProfile, FakeVoice, BetterMicrophone, VaultPerformance. This is the message a visitor must leave with. The rest of the catalogue (370+ plugins) comes from Equicord and Vencord and is credited to them.
 
 ## Operating Context
 

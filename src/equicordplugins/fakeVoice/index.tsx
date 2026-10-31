@@ -30,11 +30,15 @@ function feedback(msg: string) {
     showToast({ text: msg, variant: "success" });
 }
 
-// force Discord to resend the voice state so the faked flags take effect now
+// The gateway socket and the arguments of the last voice state Discord sent, captured by the patch below.
+let lastVoiceState: [socket: { voiceStateUpdate(state: unknown): void; }, state: { channelId?: string | null; }] | null = null;
+
+// Resend Discord's own last voice state once, so the faked flags reach the server now. Toggling mute twice instead
+// sends three updates that can arrive out of order, and plays the mute sound.
 function resend() {
     try {
-        VoiceActions.toggleSelfMute();
-        VoiceActions.toggleSelfMute();
+        if (lastVoiceState?.[1]?.channelId != null) lastVoiceState[0].voiceStateUpdate(lastVoiceState[1]);
+        else { VoiceActions.toggleSelfMute(); VoiceActions.toggleSelfMute(); }
     } catch { /* not in a voice channel */ }
 }
 
@@ -76,6 +80,7 @@ export default definePlugin({
     name: "FakeVoice",
     description: "Appear muted and/or deafened to others while you keep talking and hearing. Ghost button next to mute/deafen: left-click = mute, right-click = deafen (independent). Experimental.",
     authors: [EquicordDevs.eqen],
+    enabledByDefault: true,
     tags: ["Voice"],
     dependencies: ["UserAreaAPI"],
     settings,
@@ -85,12 +90,25 @@ export default definePlugin({
         {
             // the gateway socket's voiceStateUpdate (".identifyStartTime))" now points at the incoming-state parser)
             find: /\.shouldIncludePreferredRegion\(\)&&\(\i\.preferred_region=/,
-            replacement: {
-                match: /self_mute:([^,]+),self_deaf:([^,]+)/,
-                replace: "self_mute:$self.fakeMute($1),self_deaf:$self.fakeDeaf($2)"
-            }
+            replacement: [
+                {
+                    match: /self_mute:([^,]+),self_deaf:([^,]+)/,
+                    replace: "self_mute:$self.fakeMute($1),self_deaf:$self.fakeDeaf($2)"
+                },
+                {
+                    // remember Discord's last voice state so a toggle can resend exactly it
+                    match: /voiceStateUpdate\((\i)\)\{/,
+                    replace: "$&$self.remember(this,$1);"
+                }
+            ]
         }
     ],
+
+    resend,
+
+    remember(socket: any, state: any) {
+        lastVoiceState = [socket, state];
+    },
 
     fakeMute(real: boolean) {
         return settings.store.appearMuted ? true : real;

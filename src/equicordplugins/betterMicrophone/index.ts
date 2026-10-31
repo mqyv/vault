@@ -13,6 +13,8 @@ import { MediaEngineStore } from "@webpack/common";
 // Discord sends your voice as mono Opus at the channel bitrate (64 kbps by default). This plugin rewrites the encoder
 // options of every voice connection: Opus at up to 510 kbps (its maximum), stereo, applied live to the current call and
 // to every call after. It can also add gain to the microphone on top of Discord's own input volume.
+// A higher bitrate alone changes little while Krisp, noise suppression and automatic gain reshape the voice before it
+// is encoded, so studio mode switches that processing off for calls without touching the user's Discord settings.
 
 const logger = new Logger("BetterMicrophone");
 
@@ -35,6 +37,18 @@ const settings = definePluginSettings({
         description: "Send in stereo (Discord sends mono). Keeps the full image of a stereo microphone or audio interface.",
         default: true,
         onChange: () => applyToAllConnections()
+    },
+    studioMode: {
+        type: OptionType.BOOLEAN,
+        description: "Studio mode: during calls, turn off Krisp, noise suppression and automatic gain so your real voice is what gets sent. Your Discord voice settings stay as they are.",
+        default: true,
+        onChange: () => applyProcessing()
+    },
+    noEchoCancellation: {
+        type: OptionType.BOOLEAN,
+        description: "Also turn off echo cancellation. Headphones only: with speakers, the others hear themselves.",
+        default: false,
+        onChange: () => applyProcessing()
     },
     gainDb: {
         type: OptionType.SLIDER,
@@ -79,6 +93,7 @@ function encoderOptions(c: VoiceConnection) {
 function hook(c: VoiceConnection) {
     // voice only: screen share audio ("stream") has its own settings
     if (c?.context !== "default" || typeof c.conn?.setTransportOptions !== "function" || originals.has(c)) return;
+    hookProcessing(c);
     const original = c.conn.setTransportOptions;
     originals.set(c, original);
     c.conn.setTransportOptions = function (this: unknown, options: Record<string, any>) {
@@ -86,6 +101,7 @@ function hook(c: VoiceConnection) {
         return Reflect.apply(original, this, [options]);
     };
     apply(c);
+    applyProcessing();
 }
 
 function apply(c: VoiceConnection) {
@@ -114,6 +130,77 @@ function unhookAll() {
         }
     });
     originals.clear();
+}
+
+// --- voice processing (studio mode) --------------------------------------------------------------
+
+// Discord applies Krisp, noise suppression, gain control and echo cancellation through these methods of its voice
+// connection class, which forward to the native voice engine. Wrapping them on the prototype catches both our calls and
+// Discord's own (on joining a call, or when the user changes a setting), so the processing stays off for the whole call.
+const PROCESSING = ["setNoiseCancellation", "setNoiseSuppression", "setAutomaticGainControl", "setEchoCancellation"] as const;
+type Processing = typeof PROCESSING[number];
+
+let processingProto: Record<Processing, (value: any) => unknown> | null = null;
+const originalProcessing = new Map<Processing, (value: any) => unknown>();
+let lastConnection: any = null;
+
+function forced(method: Processing, value: any) {
+    const { studioMode, noEchoCancellation } = settings.store;
+    switch (method) {
+        case "setNoiseCancellation":
+        case "setNoiseSuppression":
+            return studioMode ? false : value;
+        case "setAutomaticGainControl":
+            return studioMode && value && typeof value === "object" ? { ...value, enabled: false } : value;
+        case "setEchoCancellation":
+            return noEchoCancellation ? false : value;
+    }
+}
+
+function hookProcessing(c: any) {
+    lastConnection = c;
+    if (processingProto) return;
+    const proto = Object.getPrototypeOf(c);
+    if (!PROCESSING.every(m => typeof proto?.[m] === "function")) {
+        logger.warn("Voice processing methods not found, studio mode unavailable");
+        return;
+    }
+    processingProto = proto;
+    for (const m of PROCESSING) {
+        const original = proto[m];
+        originalProcessing.set(m, original);
+        proto[m] = function (this: unknown, value: any) {
+            let next = value;
+            try { next = forced(m, value); } catch (e) { logger.error("Could not adjust voice processing", e); }
+            return Reflect.apply(original, this, [next]);
+        };
+    }
+}
+
+/** Re-sends the user's own settings; while hooked, the wrappers above swap in the studio values. */
+function sendUserProcessing(c: any) {
+    try {
+        c.setNoiseCancellation(MediaEngineStore.getNoiseCancellation());
+        c.setNoiseSuppression(MediaEngineStore.getNoiseSuppression());
+        c.setEchoCancellation(MediaEngineStore.getEchoCancellation());
+        c.setAutomaticGainControl({ ...c.automaticGainControl, enabled: MediaEngineStore.getAutomaticGainControl() });
+    } catch (e) {
+        logger.error("Could not apply voice processing", e);
+    }
+}
+
+function applyProcessing() {
+    if (lastConnection && processingProto) sendUserProcessing(lastConnection);
+}
+
+function unhookProcessing() {
+    if (!processingProto) return;
+    for (const [m, original] of originalProcessing) processingProto[m] = original;
+    originalProcessing.clear();
+    processingProto = null;
+    // back to exactly what the user set in Discord
+    if (lastConnection) sendUserProcessing(lastConnection);
+    lastConnection = null;
 }
 
 // --- gain ----------------------------------------------------------------------------------------
@@ -153,9 +240,10 @@ const onConnection = (c: VoiceConnection) => hook(c);
 
 export default definePlugin({
     name: "BetterMicrophone",
-    description: "Best possible microphone quality in calls: Opus up to 510 kbps (Discord uses 64), stereo, applied right away. Optional extra gain in dB. Inspired by PhilsBetterMicrophone by philhk (Equicord).",
+    description: "Best possible microphone quality in calls: Opus up to 510 kbps (Discord uses 64), stereo, and studio mode, which turns off Krisp and the other voice filters during calls. Applied right away. Optional extra gain in dB. Inspired by PhilsBetterMicrophone by philhk (Equicord).",
     authors: [EquicordDevs.eqen],
     tags: ["Voice"],
+    enabledByDefault: true,
     settings,
 
     start() {
@@ -170,6 +258,7 @@ export default definePlugin({
         const engine: any = MediaEngineStore.getMediaEngine();
         engine.emitter?.removeListener?.("connection", onConnection);
         unhookAll();
+        unhookProcessing();
         unhookInputVolume(engine);
     }
 });
