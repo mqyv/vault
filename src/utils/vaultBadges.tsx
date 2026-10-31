@@ -289,7 +289,8 @@ export async function frameBadgeImage(file: Blob): Promise<string> {
 export function initVaultBadges() {
     loadBadgeTypes();
     checkOwnerKey();
-    addContextMenuPatch("user-context", userContextPatch);
+    // right-click on a user, and the "⋯" / actions menus of an open profile
+    addContextMenuPatch(["user-context", "user-profile-actions", "user-profile-overflow-menu"], userContextPatch);
     // Start loading a user's badges as soon as Discord starts fetching their profile, so they are ready on render.
     FluxDispatcher.subscribe("USER_PROFILE_FETCH_START", ({ userId }: { userId: string; }) => void info(userId));
     FluxDispatcher.subscribe("CONNECTION_OPEN", () => {
