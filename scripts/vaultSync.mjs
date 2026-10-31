@@ -23,9 +23,11 @@ const git = (...args) => execFileSync("git", args, { encoding: "utf-8", maxBuffe
 const SKIP_LINE = /^\s*(import\b|export\s*\{)|github\.com|equicord\.org|cdn\.|Equilotl|Equibop|Equicloud|Equibored|Equibuilds|\/\/\s*@|require\(|Contributor|infoLabel|Equicord Plugin|Show Equicord/;
 const EQUICORD = /(?<![\w/@.\-$])Equicord(?![\w.\-/]|\.\w)/g;
 const FILES = /^src\/.*\.(tsx?|html|css)$/;
+// Badges given by Equicord (donor, translator, contributor) are Equicord's: their labels must keep its name.
+const NEVER_REBRAND = /^src\/(plugins\/_api\/badges|equicordplugins\/showBadgesInChat)\//;
 
 function rebrand(before) {
-    const changed = git("diff", "--name-only", "--diff-filter=AM", before, "--", "src").split("\n").filter(f => FILES.test(f));
+    const changed = git("diff", "--name-only", "--diff-filter=AM", before, "--", "src").split("\n").filter(f => FILES.test(f) && !NEVER_REBRAND.test(f));
     let total = 0;
     for (const file of changed) {
         if (!existsSync(file)) continue;
@@ -122,7 +124,9 @@ const MUST_CONTAIN = [
     ["scripts/install-vault.sh", "discord_targets", "macOS installer"],
     ["src/main/updater/git.ts", ".vault\", \"node\"", "macOS updater finds Node installed by the macOS installer"],
     ["eslint.config.mjs", "@typescript-eslint/no-deprecated", "Vault code warned before upstream removes an API"],
-    [".github/workflows/sync-upstream.yml", "seen=again", "one failure email per problem, not every 3 hours"]
+    [".github/workflows/sync-upstream.yml", "seen=again", "one failure email per problem, not every 3 hours"],
+    ["src/plugins/_api/badges/index.tsx", "infoLabel: \"Equicord Donor\"", "Equicord badges keep Equicord's name"],
+    ["scripts/vaultSync.mjs", "NEVER_REBRAND", "Equicord badges keep Equicord's name"]
 ];
 
 function check() {
