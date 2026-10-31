@@ -420,7 +420,7 @@ summary{transition:color .25s}summary:hover{color:var(--gold2)}
               <div class="bars">
                 <div><span>Mémoire</span><i><b id="b1"></b></i><em id="v1"></em></div>
                 <div><span>Processeur</span><i><b id="b2"></b></i><em id="v2"></em></div>
-                <div><span>Fluidité</span><i><b id="b3"></b></i><em id="v3"></em></div>
+                <div><span>Démarrage</span><i><b id="b3"></b></i><em id="v3"></em></div>
               </div>
               <p class="note">Valeurs d'illustration, pas des mesures.</p>
             </section>
@@ -576,7 +576,7 @@ $('#chk').onclick=function(){const b=this;b.disabled=true;b.innerHTML='<span cla
 $('#exp').onclick=function(){const b=this;b.textContent='Exporté ✓';setTimeout(()=>{b.textContent='Exporter'},1800);
   try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({vault:"1.15.13.0",plugins:Object.fromEntries(PL.map(p=>[p[0],!!p[2]]))},null,2)],{type:'application/json'}));a.download='vault-settings.json';a.click()}catch{}};
 // performance
-const PERF=[[[64,48,70],["480 Mo","18 %","60 fps"]],[[42,30,88],["320 Mo","11 %","120 fps"]],[[28,20,96],["240 Mo","7 %","144 fps"]]];
+const PERF=[[[64,48,70],["480 Mo","18 %","2,4 s"]],[[42,30,52],["320 Mo","11 %","1,8 s"]],[[28,20,38],["240 Mo","7 %","1,3 s"]]];
 function perf(i){[1,2,3].forEach((n,k)=>{$('#b'+n).style.width=PERF[i][0][k]+'%';$('#v'+n).textContent=PERF[i][1][k]})}
 $$('#seg button').forEach(b=>b.onclick=()=>{$$('#seg button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)});perf(+b.dataset.p)});
 // tabs
