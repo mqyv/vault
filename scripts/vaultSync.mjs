@@ -120,7 +120,9 @@ const MUST_CONTAIN = [
     ["src/plugins/_api/badges/index.tsx", "useBadgeRefresh", "profiles re-render when a badge changes"],
     ["src/utils/vaultBadges.tsx", "refreshBadges()", "badge toggles show at once"],
     ["scripts/install-vault.sh", "discord_targets", "macOS installer"],
-    ["src/main/updater/git.ts", ".vault\", \"node\"", "macOS updater finds Node installed by the macOS installer"]
+    ["src/main/updater/git.ts", ".vault\", \"node\"", "macOS updater finds Node installed by the macOS installer"],
+    ["eslint.config.mjs", "@typescript-eslint/no-deprecated", "Vault code warned before upstream removes an API"],
+    [".github/workflows/sync-upstream.yml", "seen=again", "one failure email per problem, not every 3 hours"]
 ];
 
 function check() {

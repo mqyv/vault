@@ -144,5 +144,18 @@ export default defineConfig(
             "simple-import-sort/exports": "error",
             "unused-imports/no-unused-imports": "error"
         }
+    },
+    {
+        // Vault's own code: Equicord and Vencord delete deprecated APIs a few weeks after deprecating them, and the
+        // upstream sync only migrates their files, not ours. Failing here on main keeps every sync merge buildable.
+        files: [
+            "src/equicordplugins/{betterMicrophone,bulkSend,clearMessages,copyProfile,fakeVoice,vaultPerformance}/**",
+            "src/utils/vault*.{ts,tsx}",
+            "src/utils/pluginSource.ts",
+            "src/components/VaultIcons.tsx"
+        ],
+        rules: {
+            "@typescript-eslint/no-deprecated": "error"
+        }
     }
 );

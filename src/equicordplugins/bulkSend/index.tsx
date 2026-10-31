@@ -6,12 +6,14 @@
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
 import { definePluginSettings } from "@api/Settings";
+import { Paragraph } from "@components/Paragraph";
+import { Span } from "@components/Span";
 import { BulkSendIcon } from "@components/VaultIcons";
 import { EquicordDevs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { Modal, openModal, Text, TextArea, TextInput, useState } from "@webpack/common";
+import { Modal, openModal, TextArea, TextInput, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     delayMs: {
@@ -58,9 +60,9 @@ function BulkSendModal(props: RenderModalProps & { channelId: string; }) {
                 { text: "Cancel", variant: "link", onClick: props.onClose }
             ]}
         >
-            <Text variant="text-sm/normal" style={{ marginBottom: 10, color: "var(--text-muted)" }}>
+            <Paragraph color="text-muted" style={{ marginBottom: 10 }}>
                 One message per line. They are sent top to bottom, in order.
-            </Text>
+            </Paragraph>
             <TextArea
                 value={text}
                 onChange={setText}
@@ -69,7 +71,7 @@ function BulkSendModal(props: RenderModalProps & { channelId: string; }) {
                 autoFocus
             />
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>
-                <Text variant="text-sm/semibold" style={{ whiteSpace: "nowrap" }}>Delay between messages (ms)</Text>
+                <Span weight="semibold" style={{ whiteSpace: "nowrap" }}>Delay between messages (ms)</Span>
                 <div style={{ width: 110 }}>
                     <TextInput
                         type="number"

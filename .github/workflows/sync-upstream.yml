@@ -8,8 +8,10 @@ name: Sync with Equicord
 #  3. vérification que les personnalisations de Vault sont intactes (scripts/vaultSync.mjs check) ;
 #  4. build, types, lint et patchs doivent passer ;
 #  5. seulement alors, push sur main.
-# Si une étape échoue, rien n'arrive sur main : le job passe en rouge (GitHub t'envoie un email) et le
-# résultat est conservé sur la branche `sync/equicord` pour être corrigé à la main.
+# Si une étape échoue, rien n'arrive sur main et le résultat est conservé sur la branche `sync/equicord`.
+# Le job ne passe en rouge (un email de GitHub) qu'une fois par problème : tant que main n'a pas bougé
+# depuis l'échec déjà signalé, les essais suivants restent verts avec un avertissement. Dès qu'un correctif
+# arrive sur main, la synchro suivante réessaie normalement.
 #
 # Secret recommandé : SYNC_TOKEN (PAT fine-grained, Contents + Workflows en lecture/écriture).
 # Sans lui, GitHub refuse de pousser une fusion qui modifie des fichiers .github/workflows d'Equicord.
@@ -60,6 +62,7 @@ jobs:
           # Workflows propres à Vault : le reste de .github/workflows vient d'Equicord et ne nous concerne pas.
           KEEP="autofix.yml installer.yml sync-upstream.yml test.yml"
           before=$(git rev-parse HEAD)
+          echo "before=$before" >> "$GITHUB_OUTPUT"
 
           # -X theirs : sur un conflit de lignes, la version d'Equicord l'emporte (le rebranding est réappliqué après).
           git merge --no-commit --no-ff -X theirs upstream/main || true
@@ -93,6 +96,7 @@ jobs:
       - name: Check Vault customisations
         id: guard
         if: steps.merge.outputs.status == 'merged'
+        continue-on-error: true # jugé plus bas, dans « Report »
         run: node scripts/vaultSync.mjs check
 
       - name: Setup PNPM
@@ -105,6 +109,7 @@ jobs:
       - name: Test the merge
         id: test
         if: steps.merge.outputs.status == 'merged' && steps.guard.outcome == 'success'
+        continue-on-error: true # jugé plus bas, dans « Report »
         run: pnpm test && pnpm buildWeb && pnpm generatePluginJson > /dev/null
 
       - name: Push to main
@@ -120,17 +125,37 @@ jobs:
           fi
 
       - name: Keep the result for review
-        if: failure() && steps.merge.outputs.status == 'merged'
+        id: keep
+        if: steps.merge.outputs.status == 'merged' && (steps.guard.outcome == 'failure' || steps.test.outcome == 'failure' || failure())
         env:
           PAT: ${{ secrets.SYNC_TOKEN }}
+          BEFORE: ${{ steps.merge.outputs.before }}
         run: |
+          # Déjà signalé si la branche de revue part du même main : seul Equicord a avancé depuis.
+          git fetch -q origin sync/equicord 2>/dev/null || true
+          if [ "$(git rev-parse -q --verify 'FETCH_HEAD^1' 2>/dev/null)" = "$BEFORE" ]; then seen=again; else seen=new; fi
+          echo "seen=$seen" >> "$GITHUB_OUTPUT"
+
           if [ -n "$PAT" ]; then url="https://x-access-token:${PAT}@github.com/${GITHUB_REPOSITORY}.git"; else url=origin; fi
           git push --force "$url" HEAD:refs/heads/sync/equicord || echo "Impossible de pousser la branche de revue (fichiers .github/workflows modifiés ? ajoute le secret SYNC_TOKEN)."
           {
             echo "### Synchro Equicord à régler à la main"
             echo "La fusion a été préparée mais n'a pas été poussée sur \`main\`. Elle est sur la branche \`sync/equicord\` (si le push a réussi)."
             echo "Regarde l'étape en échec ci-dessus : personnalisation perdue, test en échec, ou push refusé."
+            if [ "$seen" = again ]; then echo "Ce problème a déjà été signalé (main n'a pas changé depuis), ce run reste donc vert."; fi
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report
+        if: steps.guard.outcome == 'failure' || steps.test.outcome == 'failure'
+        env:
+          SEEN: ${{ steps.keep.outputs.seen }}
+        run: |
+          if [ "$SEEN" = again ]; then
+            echo "::warning::La synchro Equicord échoue toujours pour la même raison, déjà signalée. Corrige main pour la débloquer."
+          else
+            echo "::error::La synchro Equicord a échoué (voir « Check Vault customisations » ou « Test the merge »)."
+            exit 1
+          fi
 
       - name: Fail on unresolved conflicts
         if: steps.merge.outputs.status == 'conflict'
