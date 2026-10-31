@@ -153,7 +153,6 @@ export default definePlugin({
                 // Create the isBetterFolders and betterFoldersExpandedIds variables in the GuildsBar component
                 // Needed because we access this from a non-arrow closure so we can't use arguments[0]
                 {
-                    // Discord may declare other variables first ("let n,i,{disableAppDownload:...}")
                     match: /{disableAppDownload:\i=\i\.isPlatformEmbedded,isOverlay:.+?(?=}=\i)/,
                     replace: "$&,isBetterFolders,betterFoldersExpandedIds"
                 },
@@ -218,7 +217,7 @@ export default definePlugin({
                 // If we are rendering the normal GuildsBar sidebar, we make Discord think the folder is always collapsed to show better icons (the mini guild icons) and avoid transitions
                 {
                     predicate: () => settings.store.keepIcons,
-                    match: /let ?(?:\i,)*?{folderNode:\i,setNodeRef:\i,.+?expanded:(\i),.+?;(?=let)/,
+                    match: /{folderNode:\i,setNodeRef:\i,.+?expanded:(\i),.+?;(?=let)/,
                     replace: (m, isExpanded) => `${m}${isExpanded}=!!arguments[0]?.isBetterFolders&&${isExpanded};`
                 },
                 // Disable expanding and collapsing folders transition in the normal GuildsBar sidebar
