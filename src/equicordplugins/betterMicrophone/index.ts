@@ -40,14 +40,14 @@ const settings = definePluginSettings({
     },
     studioMode: {
         type: OptionType.BOOLEAN,
-        description: "Studio mode: during calls, turn off Krisp, noise suppression and automatic gain so your real voice is what gets sent. Your Discord voice settings stay as they are.",
+        description: "Native microphone: during calls, send your microphone as it is. Turns off Krisp (noise suppression and its voice detection), standard noise suppression and automatic gain, bypasses Windows' own processing and lifts Discord's sample rate and channel caps. Your Discord voice settings stay as they are.",
         default: true,
-        onChange: () => applyProcessing()
+        onChange: () => { applyProcessing(); applyToAllConnections(); }
     },
-    noEchoCancellation: {
+    disableEchoCancellation: {
         type: OptionType.BOOLEAN,
-        description: "Also turn off echo cancellation. Headphones only: with speakers, the others hear themselves.",
-        default: false,
+        description: "Also turn off echo cancellation, for a fully untouched signal. Use headphones: with speakers, the others hear themselves.",
+        default: true,
         onChange: () => applyProcessing()
     },
     gainDb: {
@@ -76,17 +76,30 @@ interface VoiceConnection {
 /** connection -> Discord's own setTransportOptions */
 const originals = new Map<VoiceConnection, (options: Record<string, any>) => unknown>();
 
+/** Discord tells Opus to expect 30% packet loss, which spends part of the bitrate on redundancy. */
+const NATIVE_PACKET_LOSS = 0.05;
+
 function override(options: Record<string, any>) {
     if (!options) return options;
     if ("encodingVoiceBitRate" in options) options.encodingVoiceBitRate = bitrate();
     if (options.audioEncoder) options.audioEncoder = { ...options.audioEncoder, channels: channels(), rate: bitrate() };
+    if (settings.store.studioMode) {
+        if ("packetLossRate" in options) options.packetLossRate = NATIVE_PACKET_LOSS;
+        // voice activity still on, but decided by level instead of Krisp, which cuts music, breaths and quiet words
+        if (options.inputModeOptions && "vadUseKrisp" in options.inputModeOptions)
+            options.inputModeOptions = { ...options.inputModeOptions, vadUseKrisp: false };
+    }
     return options;
 }
 
 function encoderOptions(c: VoiceConnection) {
+    const t = (c as any).getConnectionTransportOptions?.() ?? {};
     return {
         encodingVoiceBitRate: bitrate(),
-        audioEncoder: { ...c.getCodecOptions("opus").audioEncoder, channels: channels(), rate: bitrate() }
+        audioEncoder: { ...c.getCodecOptions("opus").audioEncoder, channels: channels(), rate: bitrate() },
+        // re-sent so override() can apply (or, with native mode off, undo) its changes to them
+        ...(t.inputModeOptions && { inputMode: t.inputMode, inputModeOptions: t.inputModeOptions }),
+        ...("packetLossRate" in t && { packetLossRate: t.packetLossRate })
     };
 }
 
@@ -121,9 +134,12 @@ function unhookAll() {
         c.conn.setTransportOptions = original;
         // back to what Discord would send on its own
         try {
+            const t = (c as any).getConnectionTransportOptions?.() ?? {};
             original.call(c.conn, {
                 encodingVoiceBitRate: c.voiceBitrate ?? 64000,
-                audioEncoder: c.getCodecOptions("opus").audioEncoder
+                audioEncoder: c.getCodecOptions("opus").audioEncoder,
+                ...(t.inputModeOptions && { inputMode: t.inputMode, inputModeOptions: t.inputModeOptions }),
+                ...("packetLossRate" in t && { packetLossRate: t.packetLossRate })
             });
         } catch (e) {
             logger.error("Could not restore voice options", e);
@@ -137,7 +153,7 @@ function unhookAll() {
 // Discord applies Krisp, noise suppression, gain control and echo cancellation through these methods of its voice
 // connection class, which forward to the native voice engine. Wrapping them on the prototype catches both our calls and
 // Discord's own (on joining a call, or when the user changes a setting), so the processing stays off for the whole call.
-const PROCESSING = ["setNoiseCancellation", "setNoiseSuppression", "setAutomaticGainControl", "setEchoCancellation"] as const;
+const PROCESSING = ["setNoiseCancellation", "setNoiseSuppression", "setAutomaticGainControl", "setEchoCancellation", "setNoiseCancellationDuringProcessing"] as const;
 type Processing = typeof PROCESSING[number];
 
 let processingProto: Record<Processing, (value: any) => unknown> | null = null;
@@ -145,15 +161,16 @@ const originalProcessing = new Map<Processing, (value: any) => unknown>();
 let lastConnection: any = null;
 
 function forced(method: Processing, value: any) {
-    const { studioMode, noEchoCancellation } = settings.store;
+    const { studioMode, disableEchoCancellation } = settings.store;
     switch (method) {
         case "setNoiseCancellation":
         case "setNoiseSuppression":
+        case "setNoiseCancellationDuringProcessing":
             return studioMode ? false : value;
         case "setAutomaticGainControl":
             return studioMode && value && typeof value === "object" ? { ...value, enabled: false } : value;
         case "setEchoCancellation":
-            return noEchoCancellation ? false : value;
+            return disableEchoCancellation ? false : value;
     }
 }
 
@@ -169,7 +186,9 @@ function hookProcessing(c: any) {
     for (const m of PROCESSING) {
         const original = proto[m];
         originalProcessing.set(m, original);
-        proto[m] = function (this: unknown, value: any) {
+        proto[m] = function (this: any, value: any) {
+            // keep what Discord asked for, so it can be put back exactly when the plugin stops
+            this["__vaultUser_" + m] = value;
             let next = value;
             try { next = forced(m, value); } catch (e) { logger.error("Could not adjust voice processing", e); }
             return Reflect.apply(original, this, [next]);
@@ -184,8 +203,26 @@ function sendUserProcessing(c: any) {
         c.setNoiseSuppression(MediaEngineStore.getNoiseSuppression());
         c.setEchoCancellation(MediaEngineStore.getEchoCancellation());
         c.setAutomaticGainControl({ ...c.automaticGainControl, enabled: MediaEngineStore.getAutomaticGainControl() });
+        const ncdp = c.__vaultUser_setNoiseCancellationDuringProcessing ?? c.noiseCancellationDuringProcessing;
+        if (ncdp != null) c.setNoiseCancellationDuringProcessing(ncdp);
     } catch (e) {
         logger.error("Could not apply voice processing", e);
+    }
+    applyEngine();
+}
+
+// Engine-wide: Windows' own microphone processing, and Discord's caps on the voice sample rate and channel count.
+function applyEngine() {
+    try {
+        const engine: any = MediaEngineStore.getMediaEngine();
+        const native = settings.store.studioMode && processingProto != null;
+        engine.setAudioInputBypassSystemProcessing?.(native || MediaEngineStore.getBypassSystemInputProcessing());
+        if (native) {
+            engine.setVoiceSampleRateCap?.(48000);
+            engine.setVoiceChannelCountCap?.(channels());
+        }
+    } catch (e) {
+        logger.error("Could not apply engine options", e);
     }
 }
 

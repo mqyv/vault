@@ -205,23 +205,33 @@ export async function setBadge(key: string, label: string | null, iconUrl: strin
     await loadBadgeTypes();
 }
 
-const userContextPatch: NavContextMenuPatchCallback = (children, { user }: { user?: { id: string; username: string; }; }) => {
+/** Used by the menu until the real list has loaded. */
+const FALLBACK_TYPES: BadgeType[] = [
+    { key: "staff", label: "Vault Staff", icon_url: null, sort: 1 },
+    { key: "donor", label: "Vault Donateur", icon_url: null, sort: 2 },
+    { key: "bug_hunter", label: "Vault Bug Hunter", icon_url: null, sort: 3 },
+    { key: "helper", label: "Vault Helper", icon_url: null, sort: 4 }
+];
+
+const userContextPatch: NavContextMenuPatchCallback =(children, { user }: { user?: { id: string; username: string; }; }) => {
     const [, rerender] = React.useReducer((n: number) => n + 1, 0);
     React.useEffect(() => {
         listeners.add(rerender);
         return () => void listeners.delete(rerender);
     }, []);
 
-    // the key was never checked successfully (offline at startup, key just pasted...): check now, the menu shows next time
+    // The menu only needs a saved key, not a network check: at boot the network may not be up yet. The server still
+    // verifies the key on every change and refuses a wrong one, so this gives nobody any extra power.
     const key = settings().ownerKey?.trim();
     if (key && key !== ownerCheckedKey) void checkOwnerKey();
     if (!types.length) void loadBadgeTypes();
-    if (!user || !isOwner() || !types.length) return;
+    if (!user || !key) return;
+    const menuTypes = types.length ? types : FALLBACK_TYPES;
     const current = info(user.id);
     children.push(
         <Menu.MenuItem id="vault-badges" label="Badges Vault">
             {/* the owner badge is yours alone and Member comes with installing Vault: neither can be given */}
-            {types.filter(t => t.key !== "member" && t.key !== "owner").map(t => {
+            {menuTypes.filter(t => t.key !== "member" && t.key !== "owner").map(t => {
                 const has = !!current?.roles.includes(t.key);
                 return (
                     <Menu.MenuCheckboxItem
@@ -277,9 +287,21 @@ export async function frameBadgeImage(file: Blob): Promise<string> {
 
 // --- startup ----------------------------------------------------------------------------------
 
+/** Keeps trying until the badge list and the owner key are loaded: right after boot the network often isn't up yet. */
+function retryUntilLoaded(delay = 5000) {
+    setTimeout(async () => {
+        if (!types.length) await loadBadgeTypes();
+        const key = settings().ownerKey?.trim();
+        if (key && key !== ownerCheckedKey) await checkOwnerKey();
+        const done = types.length && (!settings().ownerKey?.trim() || settings().ownerKey?.trim() === ownerCheckedKey);
+        if (!done) retryUntilLoaded(Math.min(delay * 2, 60_000));
+    }, delay);
+}
+
 export function initVaultBadges() {
     loadBadgeTypes();
     checkOwnerKey();
+    retryUntilLoaded();
     // right-click on a user, and the "⋯" / actions menus of an open profile
     addContextMenuPatch(["user-context", "user-profile-actions", "user-profile-overflow-menu"], userContextPatch);
     // Start loading a user's badges as soon as Discord starts fetching their profile, so they are ready on render.
