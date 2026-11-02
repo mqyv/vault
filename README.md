@@ -23,7 +23,7 @@
 | Atout | Détail |
 |---|---|
 | **370+ plugins** | Un large catalogue, avec des plugins écrits pour Vault. |
-| **Mises à jour invisibles** | Au lancement, Vault récupère les correctifs et affiche une notification **Restart**. Un clic et c'est à jour. |
+| **Mises à jour invisibles** | Vault vérifie les correctifs chaque minute, sans relancer Discord, puis affiche une notification **Restart**. Un clic et c'est à jour. |
 | **Thèmes sur-mesure** | Importez n'importe quel thème CSS, avec aperçu en direct. |
 | **Cloud & sauvegarde** | Exportez vos réglages en JSON, ou synchronisez-les entre appareils si vous activez le cloud (service d'Equicord par défaut, voir la [politique de confidentialité](./PRIVACY_POLICY.md)). |
 | **Open source** | Code sous licence GPL-3.0, lisible et modifiable. |
