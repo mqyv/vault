@@ -3,16 +3,16 @@
     "private": "true",
     "version": "1.15.15.0",
     "description": "Vault - a personal Discord client mod built on Equicord",
-    "homepage": "https://github.com/Equicord/Equicord#readme",
+    "homepage": "https://vaultcord.fr",
     "bugs": {
-        "url": "https://github.com/Equicord/Equicord/issues"
+        "url": "https://github.com/mqyv/vault/issues"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/Equicord/Equicord.git"
+        "url": "git+https://github.com/mqyv/vault.git"
     },
     "license": "GPL-3.0-or-later",
-    "author": "Equicord",
+    "author": "mqyv",
     "scripts": {
         "build": "node --require=./scripts/suppressExperimentalWarnings.js scripts/build/build.mjs",
         "buildStandalone": "pnpm build --standalone",

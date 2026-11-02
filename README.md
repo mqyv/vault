@@ -4,7 +4,7 @@
 
 # Vault
 
-**Le mod Discord privé : 370+ plugins, thèmes sur-mesure, mises à jour automatiques.**
+**Le mod Discord aux plugins exclusifs : 370+ plugins, thèmes sur-mesure, mises à jour automatiques.**
 
 [![Télécharger](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-VaultSetup.exe-d8b46a?style=for-the-badge&logo=windows&logoColor=black)](https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe) [![macOS](https://img.shields.io/badge/macOS-une%20commande-d8b46a?style=for-the-badge&logo=apple&logoColor=black)](#macos--une-commande)
 
@@ -25,7 +25,7 @@
 | **370+ plugins** | Un large catalogue, avec des plugins écrits pour Vault. |
 | **Mises à jour invisibles** | Au lancement, Vault récupère les correctifs et affiche une notification **Restart**. Un clic et c'est à jour. |
 | **Thèmes sur-mesure** | Importez n'importe quel thème CSS, avec aperçu en direct. |
-| **Cloud & sauvegarde** | Synchronisez vos réglages entre appareils ou exportez-les en JSON. |
+| **Cloud & sauvegarde** | Exportez vos réglages en JSON, ou synchronisez-les entre appareils si vous activez le cloud (service d'Equicord par défaut, voir la [politique de confidentialité](./PRIVACY_POLICY.md)). |
 | **Open source** | Code sous licence GPL-3.0, lisible et modifiable. |
 
 ## Installation
@@ -85,11 +85,11 @@ curl -fsSL https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vau
 
 | Plugin | Ce qu'il fait |
 |---|---|
-| **BulkSend** | Envoie plusieurs messages d'un coup (une ligne = un message), délai réglable en ms. |
+| **BulkSend** | Envoie plusieurs messages d'un coup (une ligne = un message) ou tout le texte en un seul. Délai réglable, répétition, envoi continu avec bouton Stop, et bloc de caractères invisibles. |
 | **ClearMessages** | Supprime vos messages d'un salon, y compris depuis un message précis. |
 | **CopyProfile** | Clone la bannière, la couleur et le thème de profil d'un utilisateur. |
 | **FakeVoice** | Faux mute / sourd indépendants (clic gauche = mute, clic droit = sourd). |
-| **BetterMicrophone** | Débloque le bitrate du micro (expérimental). |
+| **BetterMicrophone** | Micro jusqu'à 510 kbps en stéréo, gain supplémentaire et mode studio qui coupe les traitements de Discord (expérimental). |
 | **VaultPerformance** | Préréglage de performance, activé par défaut. |
 
 ## Développeurs

@@ -73,7 +73,7 @@ jobs:
           done
 
           # Nos fichiers, jamais ceux d'Equicord
-          git checkout "$before" -- README.md 2>/dev/null || true
+          git checkout "$before" -- README.md CONTRIBUTING.md PRIVACY_POLICY.md .github/ISSUE_TEMPLATE .github/pull_request_template.md 2>/dev/null || true
           for f in .github/workflows/*; do
             [ -e "$f" ] || continue
             echo " $KEEP " | grep -q " $(basename "$f") " || git rm -q -f "$f"

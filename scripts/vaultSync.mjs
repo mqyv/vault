@@ -55,6 +55,10 @@ function fixPackage() {
     const pkg = JSON.parse(raw);
     pkg.name = "vault";
     pkg.description = "Vault - a personal Discord client mod built on Equicord";
+    pkg.homepage = "https://vaultcord.fr";
+    pkg.bugs = { url: "https://github.com/mqyv/vault/issues" };
+    pkg.repository = { type: "git", url: "git+https://github.com/mqyv/vault.git" };
+    pkg.author = "mqyv";
     // keep upstream's 4-space indent and its trailing-newline state so the file never shows noise in diffs
     writeFileSync("package.json", JSON.stringify(pkg, null, 4) + (raw.endsWith("\n") ? "\n" : ""));
     for (const script of ["update-vault"]) {
@@ -131,7 +135,12 @@ const MUST_CONTAIN = [
     ["src/api/SettingsSync/cloudSync.ts", "shareableSettings()", "owner key never uploaded to the cloud"],
     ["src/Vencord.ts", "must never take the owner's badge menu down", "badge menu starts before plugins, so none can prevent it"],
     ["src/api/PluginManager.ts", "one plugin failing here must not stop the others", "a failing plugin does not stop the others"],
-    ["src/utils/vaultBadges.tsx", "vault-badges-boots", "start-up journal for the badge menu"]
+    ["src/utils/vaultBadges.tsx", "vault-badges-boots", "start-up journal for the badge menu"],
+    ["package.json", "github.com/mqyv/vault", "package points to Vault's repository"],
+    [".github/workflows/sync-upstream.yml", ".github/ISSUE_TEMPLATE", "Vault's GitHub community files survive the sync"],
+    [".github/ISSUE_TEMPLATE/config.yml", "vaultcord.fr", "issue forms point to Vault"],
+    ["CONTRIBUTING.md", "Contribuer à Vault", "Vault's contribution guide"],
+    ["PRIVACY_POLICY.md", "cloud.equicord.org", "privacy policy says where the cloud goes"]
 ];
 
 function check() {
