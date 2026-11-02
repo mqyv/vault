@@ -9,7 +9,7 @@ import { UserAreaButton, UserAreaRenderProps } from "@api/UserArea";
 import { FakeVoiceIcon } from "@components/VaultIcons";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { MediaEngineStore, showToast, VoiceActions } from "@webpack/common";
+import { MediaEngineStore, VoiceActions } from "@webpack/common";
 
 // Independent fake states. Your REAL mute/deafen stay off, so you always keep
 // talking and hearing — only what others see is faked.
@@ -27,10 +27,6 @@ const settings = definePluginSettings({
         onChange: () => resend()
     }
 });
-
-function feedback(msg: string) {
-    showToast({ text: msg, variant: "success" });
-}
 
 // The gateway socket and the arguments of the last voice state Discord sent, captured by the patch below.
 let lastVoiceState: [socket: { voiceStateUpdate(state: unknown): void; }, state: { channelId?: string | null; }] | null = null;
@@ -67,12 +63,10 @@ function FakeVoiceButton({ iconForeground, hideTooltips, nameplate }: UserAreaRe
             plated={nameplate != null}
             onClick={() => {
                 settings.store.appearMuted = !settings.store.appearMuted; // onChange resends
-                feedback(describe(settings.store.appearMuted, settings.store.appearDeafened));
             }}
             onContextMenu={e => {
                 e.preventDefault();
                 settings.store.appearDeafened = !settings.store.appearDeafened; // onChange resends
-                feedback(describe(settings.store.appearMuted, settings.store.appearDeafened));
             }}
         />
     );
