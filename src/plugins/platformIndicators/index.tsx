@@ -181,7 +181,7 @@ const settings = definePluginSettings({
         restartNeeded: true,
         options: [
             {
-                label: "Vault",
+                label: "Equicord",
                 value: "equicord",
                 default: true
             },

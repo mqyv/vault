@@ -24,7 +24,8 @@ const SKIP_LINE = /^\s*(import\b|export\s*\{)|github\.com|equicord\.org|cdn\.|Eq
 const EQUICORD = /(?<![\w/@.\-$])Equicord(?![\w.\-/]|\.\w)/g;
 const FILES = /^src\/.*\.(tsx?|html|css)$/;
 // Badges given by Equicord (donor, translator, contributor) are Equicord's: their labels must keep its name.
-const NEVER_REBRAND = /^src\/(plugins\/_api\/badges|equicordplugins\/showBadgesInChat)\//;
+// So must PlatformIndicators' icon choices, which name the client each icon comes from.
+const NEVER_REBRAND = /^src\/(plugins\/_api\/badges|plugins\/platformIndicators|equicordplugins\/showBadgesInChat)\//;
 
 function rebrand(before) {
     const changed = git("diff", "--name-only", "--diff-filter=AM", before, "--", "src").split("\n").filter(f => FILES.test(f) && !NEVER_REBRAND.test(f));
@@ -131,6 +132,7 @@ const MUST_CONTAIN = [
     [".github/workflows/sync-upstream.yml", "seen=again", "one failure email per problem, not every 3 hours"],
     ["src/plugins/_api/badges/index.tsx", "infoLabel: \"Equicord Donor\"", "Equicord badges keep Equicord's name"],
     ["scripts/vaultSync.mjs", "NEVER_REBRAND", "Equicord badges keep Equicord's name"],
+    ["src/plugins/platformIndicators/index.tsx", "label: \"Equicord\"", "Equicord's console icon keeps Equicord's name"],
     ["src/api/SettingsSync/offline.ts", "shareableSettings", "owner key never leaves the computer in backups"],
     ["src/api/SettingsSync/cloudSync.ts", "shareableSettings()", "owner key never uploaded to the cloud"],
     ["src/Vencord.ts", "must never take the owner's badge menu down", "badge menu starts before plugins, so none can prevent it"],
