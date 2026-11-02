@@ -105,6 +105,8 @@ const MUST_CONTAIN = [
     ["src/components/settings/tabs/sync/CloudTab.tsx", "Equicord Cloud", "the default cloud is named as Equicord's"],
     ["src/main/updater/git.ts", "installDependenciesIfNeeded", "safe updater (deps + rollback)"],
     ["src/main/updater/git.ts", "rollback", "safe updater (deps + rollback)"],
+    ["src/main/updater/git.ts", "windowsHide", "update checks never flash a console window"],
+    ["src/Vencord.ts", "UPDATE_CHECK_INTERVAL", "updates are found while Discord is open"],
     ["src/main/about.html", "data:image/svg+xml", "about window logo"],
     ["src/utils/constants.ts", "eqen", "owner dev entry used by Vault plugins"],
     ["src/equicordplugins/bulkSend/index.tsx", "BulkSend", "Vault plugin"],

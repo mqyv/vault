@@ -36,7 +36,8 @@ const isFlatpak = process.platform === "linux" && !!process.env.FLATPAK_ID;
 if (process.platform === "darwin") process.env.PATH = [join(homedir(), ".vault", "node", "bin"), "/opt/homebrew/bin", "/usr/local/bin", process.env.PATH].join(":");
 
 function git(...args: string[]) {
-    const opts = { cwd: VENCORD_SRC_DIR };
+    // windowsHide: these now run every minute, a console window must not flash each time
+    const opts = { cwd: VENCORD_SRC_DIR, windowsHide: true };
 
     if (isFlatpak) return execFile("flatpak-spawn", ["--host", "git", ...args], opts);
     else return execFile("git", args, opts);
@@ -83,7 +84,7 @@ async function installDependenciesIfNeeded(from: string) {
     const changed = (await git("diff", "--name-only", from, "HEAD", "--", "package.json", "pnpm-lock.yaml")).stdout.trim();
     if (!changed) return;
 
-    const opts = { cwd: EQUICORD_DIR, shell: process.platform === "win32" };
+    const opts = { cwd: EQUICORD_DIR, shell: process.platform === "win32", windowsHide: true };
     const args = ["install", "--frozen-lockfile", "--prefer-offline"];
     try {
         if (isFlatpak) await execFile("flatpak-spawn", ["--host", "pnpm", ...args], opts);
@@ -116,7 +117,7 @@ async function pull() {
 }
 
 async function build() {
-    const opts = { cwd: EQUICORD_DIR };
+    const opts = { cwd: EQUICORD_DIR, windowsHide: true };
 
     const command = isFlatpak ? "flatpak-spawn" : "node";
     const args = isFlatpak ? ["--host", "node", "scripts/build/build.mjs"] : ["scripts/build/build.mjs"];

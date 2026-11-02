@@ -38,13 +38,13 @@ import { StartAt } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
 import { get as dsGet } from "./api/DataStore";
-import { showNotice } from "./api/Notices";
-import { NotificationData, showNotification } from "./api/Notifications";
+import { currentNotice, noticesQueue, showNotice } from "./api/Notices";
+import { showNotification } from "./api/Notifications";
 import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
 import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
 import { areLocalSettingsDirty, getCloudSettings, getCloudSyncDirection, markLocalSettingsDirty, putCloudSettings, shouldCloudSync } from "./api/SettingsSync/cloudSync";
 import { relaunch } from "./utils/native";
-import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
+import { changes, checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { initVaultBadges } from "./utils/vaultBadges";
 import { onceReady } from "./webpack";
 import { patches } from "./webpack/patchWebpack";
@@ -120,34 +120,37 @@ async function syncSettings() {
     });
 }
 
-let notifiedForUpdatesThisSession = false;
+// New versions show up while Discord is open, without waiting for its next start
+const UPDATE_CHECK_INTERVAL = 60_000;
+const UPDATED_MESSAGE = "Vault has been updated!";
+
+let checkingForUpdates = false;
+// a version that failed to install or was already announced: nothing more to do until a newer one comes out
+let failedUpdate: string | undefined;
+let announcedUpdate: string | undefined;
 
 async function runUpdateCheck() {
-    if (IS_UPDATER_DISABLED) return;
-
-    const notify = (data: NotificationData) => {
-        if (notifiedForUpdatesThisSession) return;
-        notifiedForUpdatesThisSession = true;
-
-        setTimeout(() => showNotification({
-            permanent: true,
-            noPersist: true,
-            ...data
-        }), 10_000);
-    };
+    if (IS_UPDATER_DISABLED || checkingForUpdates) return;
+    checkingForUpdates = true;
 
     try {
         const isOutdated = await checkForUpdates();
         if (!isOutdated) return;
 
-        if (Settings.autoUpdate) {
-            await update();
-            if (Settings.autoUpdateNotification) {
-                if (notifiedForUpdatesThisSession) return;
-                notifiedForUpdatesThisSession = true;
+        const latest = changes[0]?.hash;
 
+        if (Settings.autoUpdate) {
+            if (latest === failedUpdate) return;
+
+            failedUpdate = latest;
+            if (!await update()) return;
+            failedUpdate = undefined;
+
+            // an update installed while the notice is still up is covered by that same notice
+            const noticeIsUp = currentNotice?.[1] === UPDATED_MESSAGE || noticesQueue.some(n => n[1] === UPDATED_MESSAGE);
+            if (Settings.autoUpdateNotification && !noticeIsUp) {
                 showNotice(
-                    "Vault has been updated!",
+                    UPDATED_MESSAGE,
                     "Restart",
                     relaunch
                 );
@@ -155,8 +158,8 @@ async function runUpdateCheck() {
             return;
         }
 
-        if (notifiedForUpdatesThisSession) return;
-        notifiedForUpdatesThisSession = true;
+        if (latest === announcedUpdate) return;
+        announcedUpdate = latest;
 
         showNotice(
             "A new version of Vault is available!",
@@ -165,6 +168,8 @@ async function runUpdateCheck() {
         );
     } catch (err) {
         UpdateLogger.error("Failed to check for updates", err);
+    } finally {
+        checkingForUpdates = false;
     }
 }
 
@@ -178,11 +183,7 @@ async function init() {
 
     if (!IS_DEV && !IS_WEB && !IS_UPDATER_DISABLED) {
         runUpdateCheck();
-
-        // this tends to get really annoying, so only do this if the user has auto-update without notification enabled
-        if (Settings.autoUpdate && !Settings.autoUpdateNotification) {
-            setInterval(runUpdateCheck, 1000 * 60 * 30); // 30 minutes
-        }
+        setInterval(runUpdateCheck, UPDATE_CHECK_INTERVAL);
     }
 
     if (IS_DEV) {
