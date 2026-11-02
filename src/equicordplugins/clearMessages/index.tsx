@@ -6,11 +6,20 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
+import { definePluginSettings } from "@api/Settings";
 import { ClearMessagesIcon } from "@components/VaultIcons";
 import { EquicordDevs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Message, User } from "@vencord/discord-types";
 import { ChannelStore, Menu, MessageActions, RestAPI, showToast, UserStore } from "@webpack/common";
+
+const settings = definePluginSettings({
+    delayMs: {
+        type: OptionType.NUMBER,
+        description: "Delay between each deleted message, in milliseconds (0 = as fast as Discord allows).",
+        default: 350
+    }
+});
 
 interface UserContextProps {
     channel?: Channel;
@@ -79,8 +88,8 @@ async function clearMessages(channelId: string, fromMessageId?: string) {
                 } catch {
                     // skip messages we can't delete
                 }
-                // small delay to stay gentle (RestAPI also auto-handles rate limits)
-                await sleep(350);
+                // RestAPI also auto-handles rate limits
+                await sleep(Math.max(0, settings.store.delayMs || 0));
             }
 
             if (reachedEnd) break;
@@ -150,6 +159,7 @@ export default definePlugin({
     authors: [EquicordDevs.eqen],
     enabledByDefault: true,
     tags: ["Utility", "Chat"],
+    settings,
     contextMenus: {
         "user-context": patchUserContext,
         "message": patchMessageContext

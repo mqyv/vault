@@ -86,7 +86,7 @@ curl -fsSL https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vau
 | Plugin | Ce qu'il fait |
 |---|---|
 | **BulkSend** | Envoie plusieurs messages d'un coup (une ligne = un message) ou tout le texte en un seul. Délai réglable, répétition, envoi continu avec bouton Stop, et bloc de caractères invisibles. |
-| **ClearMessages** | Supprime vos messages d'un salon, y compris depuis un message précis. |
+| **ClearMessages** | Supprime vos messages d'un salon, y compris depuis un message précis, avec un délai réglable en ms. |
 | **CopyProfile** | Clone la bannière, la couleur et le thème de profil d'un utilisateur. |
 | **FakeVoice** | Faux mute / sourd indépendants (clic gauche = mute, clic droit = sourd). |
 | **BetterMicrophone** | Micro jusqu'à 510 kbps en stéréo, gain supplémentaire et mode studio qui coupe les traitements de Discord (expérimental). |
