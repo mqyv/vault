@@ -128,7 +128,10 @@ const MUST_CONTAIN = [
     ["src/plugins/_api/badges/index.tsx", "infoLabel: \"Equicord Donor\"", "Equicord badges keep Equicord's name"],
     ["scripts/vaultSync.mjs", "NEVER_REBRAND", "Equicord badges keep Equicord's name"],
     ["src/api/SettingsSync/offline.ts", "shareableSettings", "owner key never leaves the computer in backups"],
-    ["src/api/SettingsSync/cloudSync.ts", "shareableSettings()", "owner key never uploaded to the cloud"]
+    ["src/api/SettingsSync/cloudSync.ts", "shareableSettings()", "owner key never uploaded to the cloud"],
+    ["src/Vencord.ts", "must never take the owner's badge menu down", "badge menu starts before plugins, so none can prevent it"],
+    ["src/api/PluginManager.ts", "one plugin failing here must not stop the others", "a failing plugin does not stop the others"],
+    ["src/utils/vaultBadges.tsx", "vault-badges-boots", "start-up journal for the badge menu"]
 ];
 
 function check() {

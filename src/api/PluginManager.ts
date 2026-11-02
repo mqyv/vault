@@ -139,7 +139,13 @@ export const startAllPlugins = traceFunction("startAllPlugins", function startAl
             const startAt = p.startAt ?? StartAt.WebpackReady;
             if (startAt !== target) continue;
 
-            startPlugin(Plugins[name]);
+            // Vault: one plugin failing here must not stop the others, nor what runs after this loop
+            try {
+                startPlugin(Plugins[name]);
+            } catch (e) {
+                logger.error(`Failed to start ${name}
+`, e);
+            }
         }
     }
 });

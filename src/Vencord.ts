@@ -170,8 +170,9 @@ async function runUpdateCheck() {
 
 async function init() {
     await onceReady;
-    startAllPlugins(StartAt.WebpackReady);
+    // first and on its own: a plugin failing to start must never take the owner's badge menu down with it
     initVaultBadges();
+    startAllPlugins(StartAt.WebpackReady);
 
     syncSettings();
 

@@ -10,6 +10,7 @@
 
 import { addProfileBadge, BadgePosition, BadgeRarity, ProfileBadge, refreshBadges, removeProfileBadge } from "@api/Badges";
 import { addContextMenuPatch, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import * as DataStore from "@api/DataStore";
 import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { FluxDispatcher, Menu, React, showToast, UserStore } from "@webpack/common";
@@ -153,10 +154,12 @@ export async function checkOwnerKey(): Promise<string | null> {
     try {
         ownerId = await rpc<string | null>("vault_owner_whoami", { owner_key: key });
         ownerCheckedKey = key;
+        diagnose({ ownerChecked: ownerId != null });
         notify();
     } catch (err) {
         // keep the previous answer; the check is retried on the next connection or context menu
         logger.warn("Could not check the owner key", err);
+        diagnose({ ownerCheckError: String(err) });
     }
     return ownerId;
 }
@@ -214,17 +217,24 @@ const FALLBACK_TYPES: BadgeType[] = [
 ];
 
 const userContextPatch: NavContextMenuPatchCallback =(children, { user }: { user?: { id: string; username: string; }; }) => {
-    const [, rerender] = React.useReducer((n: number) => n + 1, 0);
-    React.useEffect(() => {
-        listeners.add(rerender);
-        return () => void listeners.delete(rerender);
-    }, []);
+    // Only refreshes the ticks while the menu is open. Hooks can throw here (the menu's own hook order changes between
+    // renders) and the context menu API swallows that, which would silently drop the whole item: never let it.
+    try {
+        const [, rerender] = React.useReducer((n: number) => n + 1, 0);
+        React.useEffect(() => {
+            listeners.add(rerender);
+            return () => void listeners.delete(rerender);
+        }, []);
+    } catch (err) {
+        diagnose({ hookError: String(err) });
+    }
 
     // The menu only needs a saved key, not a network check: at boot the network may not be up yet. The server still
     // verifies the key on every change and refuses a wrong one, so this gives nobody any extra power.
     const key = settings().ownerKey?.trim();
     if (key && key !== ownerCheckedKey) void checkOwnerKey();
     if (!types.length) void loadBadgeTypes();
+    diagnose({ menuOpened: true, keySaved: !!key, typesLoaded: types.length });
     if (!user || !key) return;
     const menuTypes = types.length ? types : FALLBACK_TYPES;
     const current = info(user.id);
@@ -298,12 +308,34 @@ function retryUntilLoaded(delay = 5000) {
     }, delay);
 }
 
+// --- start-up journal --------------------------------------------------------------------------
+
+// What happened on each of the last launches, kept across restarts: start-up problems can't be observed live, as
+// they only happen when the PC boots. Read it with Vencord.Api.DataStore.get("vault-badges-boots").
+const BOOTS_KEY = "vault-badges-boots";
+const bootEntry: Record<string, unknown> = { at: new Date().toISOString(), hidden: document.hidden };
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
+function diagnose(facts: Record<string, unknown>) {
+    Object.assign(bootEntry, facts);
+    saveTimer ??= setTimeout(async () => {
+        saveTimer = null;
+        try {
+            const boots = (await DataStore.get<Record<string, unknown>[]>(BOOTS_KEY)) ?? [];
+            const others = boots.filter(b => b.at !== bootEntry.at);
+            await DataStore.set(BOOTS_KEY, [...others, bootEntry].slice(-10));
+        } catch { /* only a journal */ }
+    }, 1000);
+}
+
 export function initVaultBadges() {
+    // the menu first: it needs nothing else, so nothing below can prevent it
+    addContextMenuPatch(["user-context", "user-profile-actions", "user-profile-overflow-menu"], userContextPatch);
+    diagnose({ menuRegistered: true, keySaved: !!settings()?.ownerKey?.trim() });
+
     loadBadgeTypes();
     checkOwnerKey();
     retryUntilLoaded();
-    // right-click on a user, and the "⋯" / actions menus of an open profile
-    addContextMenuPatch(["user-context", "user-profile-actions", "user-profile-overflow-menu"], userContextPatch);
     // Start loading a user's badges as soon as Discord starts fetching their profile, so they are ready on render.
     FluxDispatcher.subscribe("USER_PROFILE_FETCH_START", ({ userId }: { userId: string; }) => void info(userId));
     FluxDispatcher.subscribe("CONNECTION_OPEN", () => {
