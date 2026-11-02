@@ -52,9 +52,9 @@ const TrustedRolesIds = [
     VC_CONTRIB_ROLE_ID, // Vencord Contributor
     VC_REGULAR_ROLE_ID, // Vencord Regular
     VC_DONOR_ROLE_ID, // Vencord Donor
-    EQUICORD_TEAM, // Vault Team
-    DONOR_ROLE_ID, // Vault Donor
-    CONTRIB_ROLE_ID, // Vault Contributor
+    EQUICORD_TEAM, // Equicord Team
+    DONOR_ROLE_ID, // Equicord Donor
+    CONTRIB_ROLE_ID, // Equicord Contributor
     VENCORD_CONTRIB_ROLE_ID, // Vencord Contributor
 ];
 
@@ -141,7 +141,7 @@ async function generateDebugInfoMessage() {
 
     const info = {
         Vault:
-            `v${VERSION} • [${gitHashShort}](<https://github.com/Equicord/Equicord/commit/${gitHash}>)` +
+            `v${VERSION} • [${gitHashShort}](<https://github.com/mqyv/vault/commit/${gitHash}>)` +
             `${IS_EQUIBOP ? "" : SettingsPlugin.getVersionInfo()} - ${Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(BUILD_TIMESTAMP)}`,
         Client: `${RELEASE_CHANNEL} ~ ${clientString}`,
         Platform: platformDisplay
@@ -410,7 +410,7 @@ export default definePlugin({
                         <div>
                             <Paragraph>You are using an externally updated Vault version, which we do not provide support for!</Paragraph>
                             <Paragraph className={Margins.top8}>
-                                Please either switch to an <Link href="https://equicord.org/download">officially supported version of Vault</Link>, or
+                                Please either switch to an <Link href="https://vaultcord.fr">officially supported version of Vault</Link>, or
                                 contact your package maintainer for support instead.
                             </Paragraph>
                         </div>
@@ -506,7 +506,7 @@ export default definePlugin({
 
         return (
             <Card variant="warning" className={Margins.top8} defaultPadding>
-                Please do not private message Vault & Vencord plugin developers for support!
+                Please do not private message Equicord & Vencord plugin developers for support!
                 <br />
                 Instead, use the support channel: {Parser.parse("https://discord.com/channels/1173279886065029291/1297590739911573585")}
                 {!ChannelStore.getChannel(SUPPORT_CHANNEL_ID) && " (Click the link to join)"}

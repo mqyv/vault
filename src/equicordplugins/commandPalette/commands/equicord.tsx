@@ -8,18 +8,18 @@ import type { PaletteCommand } from "../api/types";
 import { BoltIcon, GearIcon, PaintIcon, RestartIcon } from "../ui/icons";
 import { openSettingsPage } from "./openSettings";
 
-const SECTION = "Equicord";
+const SECTION = "Vault";
 
 export const equicordCommands: PaletteCommand[] = [
     {
         id: "equicord.settings",
-        title: "Open Equicord Settings",
+        title: "Open Vault Settings",
         section: SECTION,
-        keywords: ["equicord", "vencord", "settings"],
+        keywords: ["vault", "equicord", "vencord", "settings"],
         icon: GearIcon,
         actions: [{
             id: "run",
-            label: "Open Equicord Settings",
+            label: "Open Vault Settings",
             run: () => void openSettingsPage("equicord_main")
         }]
     },

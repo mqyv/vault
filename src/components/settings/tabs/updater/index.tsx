@@ -48,8 +48,8 @@ function EquibopSection() {
     return (
         <Flex className={Margins.bottom20} flexDirection="column" gap="1em">
             <Card variant="brand">
-                <Heading tag="h3" className={Margins.bottom8}>Equibop & Equicord</Heading>
-                <Paragraph>Equibop and Equicord are two separate things. This updater is for Equicord.</Paragraph>
+                <Heading tag="h3" className={Margins.bottom8}>Equibop & Vault</Heading>
+                <Paragraph>Equibop and Vault are two separate things. This updater is for Vault.</Paragraph>
                 <Paragraph className={Margins.top8}>
                     You receive separate popups for Equibop updates. You can also manually update by installing the <Link href="https://equibop.org/install">latest version</Link>.
                 </Paragraph>

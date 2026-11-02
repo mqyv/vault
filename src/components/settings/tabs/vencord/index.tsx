@@ -190,10 +190,10 @@ function EquicordSettings() {
                     subtitle="Thank you for donating!"
                     description={
                         isEquicordDonor(user?.id) && isVencordDonor(user?.id)
-                            ? "All Vencord users can see your Vencord donor badge, and Vault users can see your Vault donor badge. To change your Vencord donor badge, contact @vending.machine. For your Vault donor badge, make a ticket in Vault's server."
+                            ? "All Vencord users can see your Vencord donor badge, and Vault users can see your Equicord donor badge. To change your Vencord donor badge, contact @vending.machine. For your Equicord donor badge, make a ticket in Equicord's server."
                             : isVencordDonor(user?.id)
                                 ? "All Vencord users can see your badge! You can manage your perks by messaging @vending.machine."
-                                : "All Vault users can see your badge! You can manage your perks by making a ticket in Vault's server."
+                                : "All Vault users can see your badge! You can manage your perks by making a ticket in Equicord's server."
                     }
                     cardImage={VENNIE_DONATOR_IMAGE}
                     backgroundImage={DONOR_BACKGROUND_IMAGE}
@@ -203,8 +203,8 @@ function EquicordSettings() {
                 </SpecialCard>
             ) : (
                 <SpecialCard
-                    title="Support the Project"
-                    description="Please consider supporting the development of Vault by donating!"
+                    title="Support Equicord"
+                    description="Please consider supporting the development of Equicord, which Vault is built on, by donating!"
                     cardImage={donateImage}
                     backgroundImage={DONOR_BACKGROUND_IMAGE}
                     backgroundColor="#c3a3ce"
@@ -216,7 +216,7 @@ function EquicordSettings() {
                 <SpecialCard
                     title="Contributions"
                     subtitle="Thank you for contributing!"
-                    description="Since you've contributed to Vault you now have a cool new badge!"
+                    description="Since you've contributed a plugin you now have a cool new badge!"
                     cardImage={COZY_CONTRIB_IMAGE}
                     backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"

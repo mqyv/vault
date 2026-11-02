@@ -107,7 +107,7 @@ export default definePlugin({
                 return Alerts.show({
                     title: "Vencord Support Channel Warning",
                     body: "Before asking for help. Check updates and if this issue is actually caused by Vault!",
-                    confirmText: "Vault Support",
+                    confirmText: "Equicord Support",
                     onConfirm() {
                         NavigationRouter.transitionTo(`/channels/${GUILD_ID}/${SUPPORT_CHANNEL_ID}`);
                     },

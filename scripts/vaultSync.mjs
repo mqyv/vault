@@ -20,7 +20,7 @@ const git = (...args) => execFileSync("git", args, { encoding: "utf-8", maxBuffe
 
 // "Equicord" -> "Vault" only where it is user-visible text: never in identifiers, property access,
 // URLs, domains or other projects' names. Credits stay accurate: contributor badges and plugin-origin labels keep "Equicord".
-const SKIP_LINE = /^\s*(import\b|export\s*\{)|github\.com|equicord\.org|cdn\.|Equilotl|Equibop|Equicloud|Equibored|Equibuilds|\/\/\s*@|require\(|Contributor|infoLabel|Equicord Plugin|Show Equicord/;
+const SKIP_LINE = /^\s*(import\b|export\s*\{)|github\.com|equicord\.org|cdn\.|Equilotl|Equibop|Equicloud|Equibored|Equibuilds|\/\/\s*@|require\(|Contributor|infoLabel|Equicord Plugin|Show Equicord|Equicord Cloud|Equicord's|Equicord Support|Support Equicord|development of Equicord|Equicord donor|Equicord & Vencord|Equicord Team|Equicord Donor/;
 const EQUICORD = /(?<![\w/@.\-$])Equicord(?![\w.\-/]|\.\w)/g;
 const FILES = /^src\/.*\.(tsx?|html|css)$/;
 // Badges given by Equicord (donor, translator, contributor) are Equicord's: their labels must keep its name.
@@ -102,7 +102,7 @@ const MUST_CONTAIN = [
     ["src/shared/vencordUserAgent.ts", "Vault/", "user agent"],
     ["src/utils/vaultLogo.ts", "VAULT_LOGO_URI", "embedded logo"],
     ["src/components/settings/tabs/plugins/PluginCard.tsx", "VAULT_LOGO_URI", "plugin badge logo"],
-    ["src/components/settings/tabs/sync/CloudTab.tsx", "VAULT_LOGO_URI", "cloud tab logo"],
+    ["src/components/settings/tabs/sync/CloudTab.tsx", "Equicord Cloud", "the default cloud is named as Equicord's"],
     ["src/main/updater/git.ts", "installDependenciesIfNeeded", "safe updater (deps + rollback)"],
     ["src/main/updater/git.ts", "rollback", "safe updater (deps + rollback)"],
     ["src/main/about.html", "data:image/svg+xml", "about window logo"],
@@ -133,6 +133,9 @@ const MUST_CONTAIN = [
     ["src/plugins/_api/badges/index.tsx", "infoLabel: \"Equicord Donor\"", "Equicord badges keep Equicord's name"],
     ["scripts/vaultSync.mjs", "NEVER_REBRAND", "Equicord badges keep Equicord's name"],
     ["src/plugins/platformIndicators/index.tsx", "label: \"Equicord\"", "Equicord's console icon keeps Equicord's name"],
+    ["src/components/settings/tabs/vencord/index.tsx", "development of Equicord", "donations go to Equicord and say so"],
+    ["src/equicordplugins/commandPalette/commands/openSettings.ts", "label: \"Vault Plugins\"", "command palette opens Vault's tabs"],
+    ["src/plugins/_core/supportHelper.tsx", "github.com/mqyv/vault/commit", "debug info links to Vault's commit"],
     ["src/api/SettingsSync/offline.ts", "shareableSettings", "owner key never leaves the computer in backups"],
     ["src/api/SettingsSync/cloudSync.ts", "shareableSettings()", "owner key never uploaded to the cloud"],
     ["src/Vencord.ts", "must never take the owner's badge menu down", "badge menu starts before plugins, so none can prevent it"],
