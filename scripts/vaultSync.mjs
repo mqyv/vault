@@ -133,7 +133,7 @@ const MUST_CONTAIN = [
     ["src/plugins/_api/badges/index.tsx", "infoLabel: \"Equicord Donor\"", "Equicord badges keep Equicord's name"],
     ["scripts/vaultSync.mjs", "NEVER_REBRAND", "Equicord badges keep Equicord's name"],
     ["src/plugins/platformIndicators/index.tsx", "label: \"Equicord\"", "Equicord's console icon keeps Equicord's name"],
-    ["src/components/settings/tabs/vencord/index.tsx", "development of Equicord", "donations go to Equicord and say so"],
+    ["src/components/settings/tabs/vencord/index.tsx", "Vault doesn't ask for donations", "no donation card in Vault's settings"],
     ["src/equicordplugins/commandPalette/commands/openSettings.ts", "label: \"Vault Plugins\"", "command palette opens Vault's tabs"],
     ["src/plugins/_core/supportHelper.tsx", "github.com/mqyv/vault/commit", "debug info links to Vault's commit"],
     ["src/components/settings/tabs/plugins/ContributorModal.tsx", "mqyv/vault", "the owner's contributions link to Vault"],

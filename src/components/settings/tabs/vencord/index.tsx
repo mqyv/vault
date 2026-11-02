@@ -28,17 +28,13 @@ import { Margins } from "@utils/margins";
 import { isAnyPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { promptToRestart } from "@utils/promptToRestart";
-import { VAULT_LOGO_URI } from "@utils/vaultLogo";
-import { GuildMemberStore, React, useMemo, UserStore } from "@webpack/common";
+import { GuildMemberStore, React, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent } from "./DonateButton";
 import { MacOSVibrancySettings } from "./MacVibrancySettings";
 import { NotificationSection } from "./NotificationSettings";
 import { VaultBadgesSection } from "./VaultBadgesSection";
 import { WindowsMaterialSettings } from "./WindowsMaterialSettings";
-
-const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
-const SHIGGY_DONATE_IMAGE = VAULT_LOGO_URI;
 
 const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
 const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/1026533070955872337.png";
@@ -175,16 +171,12 @@ function Switches() {
 }
 
 function EquicordSettings() {
-    const donateImage = useMemo(() =>
-        Math.random() > 0.5 ? DEFAULT_DONATE_IMAGE : SHIGGY_DONATE_IMAGE,
-        []
-    );
-
     const user = UserStore?.getCurrentUser();
 
     return (
         <SettingsTab>
-            {(isEquicordDonor(user?.id) || isVencordDonor(user?.id)) ? (
+            {/* Vault doesn't ask for donations: this card only thanks people who already gave to Equicord or Vencord */}
+            {(isEquicordDonor(user?.id) || isVencordDonor(user?.id)) && (
                 <SpecialCard
                     title="Donations"
                     subtitle="Thank you for donating!"
@@ -200,16 +192,6 @@ function EquicordSettings() {
                     backgroundColor="#ED87A9"
                 >
                     <DonateButtonComponent donated={true} />
-                </SpecialCard>
-            ) : (
-                <SpecialCard
-                    title="Support Equicord"
-                    description="Please consider supporting the development of Equicord, which Vault is built on, by donating!"
-                    cardImage={donateImage}
-                    backgroundImage={DONOR_BACKGROUND_IMAGE}
-                    backgroundColor="#c3a3ce"
-                >
-                    <DonateButtonComponent />
                 </SpecialCard>
             )}
             {isAnyPluginDev(user?.id) && (
