@@ -136,6 +136,7 @@ const MUST_CONTAIN = [
     ["src/components/settings/tabs/vencord/index.tsx", "development of Equicord", "donations go to Equicord and say so"],
     ["src/equicordplugins/commandPalette/commands/openSettings.ts", "label: \"Vault Plugins\"", "command palette opens Vault's tabs"],
     ["src/plugins/_core/supportHelper.tsx", "github.com/mqyv/vault/commit", "debug info links to Vault's commit"],
+    ["src/components/settings/tabs/plugins/ContributorModal.tsx", "mqyv/vault", "the owner's contributions link to Vault"],
     ["src/api/SettingsSync/offline.ts", "shareableSettings", "owner key never leaves the computer in backups"],
     ["src/api/SettingsSync/cloudSync.ts", "shareableSettings()", "owner key never uploaded to the cloud"],
     ["src/Vencord.ts", "must never take the owner's badge menu down", "badge menu starts before plugins, so none can prevent it"],

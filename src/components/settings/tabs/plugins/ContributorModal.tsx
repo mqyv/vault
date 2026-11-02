@@ -10,7 +10,7 @@ import { useSettings } from "@api/Settings";
 import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
-import { EquicordDevsById, VencordDevsById } from "@utils/constants";
+import { EquicordDevs, EquicordDevsById, VencordDevsById } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { fetchUserProfile } from "@utils/discord";
 import { pluralize } from "@utils/misc";
@@ -55,7 +55,11 @@ function ContributorModal({ user, modalProps }: { user: User; modalProps: Render
             .sort((a, b) => Number(a.required ?? false) - Number(b.required ?? false));
     }, [user.id, user.username]);
 
-    const ContributedHyperLink = <Link href="https://github.com/Equicord/Equicord">contributed</Link>;
+    // the project this person actually contributed to
+    const contributedRepo = user.id === EquicordDevs.eqen.id.toString()
+        ? "mqyv/vault"
+        : VencordDevsById[user.id] ? "Vendicated/Vencord" : "Equicord/Equicord";
+    const ContributedHyperLink = <Link href={`https://github.com/${contributedRepo}`}>contributed</Link>;
 
     const hasLinks = website || githubName;
 
