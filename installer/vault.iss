@@ -46,6 +46,10 @@ french.FinishedLabelNoIcons=Vault est installé et Discord le charge bien.%n%nOu
 ; Le script de bootstrap est exécuté pendant l'installation puis supprimé.
 Source: "..\scripts\install-vault.ps1"; DestDir: "{tmp}"; Flags: ignoreversion deleteafterinstall
 
+[Icons]
+; Désinstallation en un clic depuis le menu Démarrer (en plus de Paramètres > Applications).
+Name: "{autoprograms}\Désinstaller Vault"; Filename: "{uninstallexe}"
+
 [UninstallRun]
 ; Retire Vault de Discord (restaure le Discord d'origine) avant de supprimer les fichiers.
 Filename: "powershell.exe"; \

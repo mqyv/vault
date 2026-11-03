@@ -69,7 +69,7 @@ Vault se met à jour tout seul. Si une mise à jour de Discord casse quelque cho
 
 ## Désinstaller
 
-Windows : via *Ajout/Suppression de programmes* si vous avez utilisé l'installeur graphique, sinon :
+Windows : menu Démarrer → *Désinstaller Vault* (ou *Paramètres → Applications*) si vous avez utilisé l'installeur graphique, sinon :
 
 ```powershell
 pnpm -C "$HOME\Vault" uninject
