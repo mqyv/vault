@@ -93,7 +93,7 @@ export function VaultBadgesSection() {
             <Paragraph className={Margins.bottom8}>
                 {owner
                     ? "Owner reconnu. Clic droit sur un utilisateur → Badges Vault pour lui donner ou retirer un badge."
-                    : "Réservé à l'owner de Vault : colle ici ta clé."}
+                    : "Réservé aux owners de Vault : colle ici ta clé."}
             </Paragraph>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <div style={{ flex: 1 }}>
