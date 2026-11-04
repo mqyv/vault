@@ -94,7 +94,7 @@ function Updater() {
             <div className="vc-settings-switches">
                 <FormSwitch
                     title="Automatically update"
-                    description="When enabled, Vault will automatically download and install updates in the background without asking for confirmation. You'll need to restart Discord to apply the changes."
+                    description="Off by default: Vault shows a notice at the top and installs the update only when you click “Update & restart”. When enabled, updates are downloaded and installed in the background without asking, and you restart Discord to apply them."
                     value={settings.autoUpdate}
                     onChange={(v: boolean) => settings.autoUpdate = v}
                     hideBorder

@@ -32,10 +32,9 @@ export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
 
 import { enableStyle, initStyles } from "@api/Styles";
-import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { StartAt } from "@utils/types";
-import { SettingsRouter } from "@webpack/common";
+import { SettingsRouter, showToast } from "@webpack/common";
 
 import { get as dsGet } from "./api/DataStore";
 import { currentNotice, noticesQueue, showNotice } from "./api/Notices";
@@ -161,10 +160,21 @@ async function runUpdateCheck() {
         if (latest === announcedUpdate) return;
         announcedUpdate = latest;
 
+        // Nothing is installed without the person's say-so. Closing the notice leaves the update waiting: it comes back at
+        // the next start of Discord, every time, until they accept it.
         showNotice(
             "A new version of Vault is available!",
-            "View Update",
-            () => openSettingsTabModal(UpdaterTab!)
+            "Update & restart",
+            async () => {
+                showToast({ text: "Updating Vault…" });
+                try {
+                    if (await update()) relaunch();
+                    else showToast({ text: "Vault could not be updated. Try again from the Updater tab.", variant: "critical" });
+                } catch (err) {
+                    UpdateLogger.error("Failed to update", err);
+                    showToast({ text: "Vault could not be updated. Try again from the Updater tab.", variant: "critical" });
+                }
+            }
         );
     } catch (err) {
         UpdateLogger.error("Failed to check for updates", err);
@@ -182,6 +192,11 @@ async function init() {
     syncSettings();
 
     if (!IS_DEV && !IS_WEB && !IS_UPDATER_DISABLED) {
+        // Updates used to install silently. Once, everyone is moved to "ask first" (it can be switched back in the Updater tab)
+        if (!Settings.updateAskMigrated) {
+            Settings.autoUpdate = false;
+            Settings.updateAskMigrated = true;
+        }
         runUpdateCheck();
         setInterval(runUpdateCheck, UPDATE_CHECK_INTERVAL);
     }
