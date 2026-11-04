@@ -11,6 +11,8 @@ export default definePlugin({
     name: "HeaderBarAPI",
     description: "API to add buttons to the header bar and channel toolbar.",
     authors: [Devs.prism],
+    // Vault's own "New Vault update" pill lives in the header bar, so it can't depend on another plugin being on
+    required: true,
 
     patches: [
         {

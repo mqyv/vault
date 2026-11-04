@@ -45,6 +45,7 @@ import { areLocalSettingsDirty, getCloudSettings, getCloudSyncDirection, markLoc
 import { relaunch } from "./utils/native";
 import { changes, checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { initVaultBadges } from "./utils/vaultBadges";
+import { getUpdateState, setUpdateState } from "./utils/vaultUpdateButton";
 import { onceReady } from "./webpack";
 import { patches } from "./webpack/patchWebpack";
 
@@ -134,7 +135,10 @@ async function runUpdateCheck() {
 
     try {
         const isOutdated = await checkForUpdates();
-        if (!isOutdated) return;
+        if (!isOutdated) {
+            if (getUpdateState() === "available") setUpdateState(null);
+            return;
+        }
 
         const latest = changes[0]?.hash;
 
@@ -144,6 +148,7 @@ async function runUpdateCheck() {
             failedUpdate = latest;
             if (!await update()) return;
             failedUpdate = undefined;
+            setUpdateState("installed");
 
             // an update installed while the notice is still up is covered by that same notice
             const noticeIsUp = currentNotice?.[1] === UPDATED_MESSAGE || noticesQueue.some(n => n[1] === UPDATED_MESSAGE);
@@ -156,6 +161,9 @@ async function runUpdateCheck() {
             }
             return;
         }
+
+        // the green pill in the top bar stays for as long as the update waits; the notice below is shown once per version
+        setUpdateState("available");
 
         if (latest === announcedUpdate) return;
         announcedUpdate = latest;
