@@ -17,6 +17,7 @@
 */
 
 import "./updater";
+import "./uninstall";
 import "./ipcPlugins";
 import "./settings";
 

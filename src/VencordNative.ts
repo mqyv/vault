@@ -51,6 +51,7 @@ export default {
         getUpdates: () => invoke<IpcRes<UpdateData[]>>(IpcEvents.UPDATER_LIST_UPDATES),
         fetchUpdate: () => invoke<IpcRes<boolean>>(IpcEvents.UPDATER_FETCH_UPDATE),
         applyUpdate: () => invoke<IpcRes<boolean>>(IpcEvents.UPDATER_APPLY_UPDATE),
+        uninstall: () => invoke<IpcRes<"uninstaller" | "script">>(IpcEvents.UNINSTALL_VAULT),
     },
 
     settings: {

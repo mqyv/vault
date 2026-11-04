@@ -12,7 +12,7 @@ import { Button } from "@components/Button";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
-import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
+import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon, TrashIcon } from "@components/Icons";
 import { Notice } from "@components/Notice";
 import { Paragraph } from "@components/Paragraph";
 import { openContributorModal, openPluginModal, SettingsTab, wrapTab } from "@components/settings";
@@ -28,7 +28,7 @@ import { Margins } from "@utils/margins";
 import { isAnyPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { promptToRestart } from "@utils/promptToRestart";
-import { GuildMemberStore, React, UserStore } from "@webpack/common";
+import { Alerts, GuildMemberStore, React, showToast, UserStore } from "@webpack/common";
 
 import { DonateButtonComponent } from "./DonateButton";
 import { MacOSVibrancySettings } from "./MacVibrancySettings";
@@ -43,6 +43,20 @@ const DONOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070116
 const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070166481895484.png?size=2048";
 
 const cl = classNameFactory("vc-vencord-tab-");
+
+// Windows desktop only: the uninstaller closes Discord, takes Vault out of it, deletes Vault's folder and reopens Discord
+function confirmUninstall() {
+    Alerts.show({
+        title: "Uninstall Vault?",
+        body: "Discord will close, go back to normal and reopen without Vault. Vault's files are deleted. You can install Vault again at any time.",
+        confirmText: "Uninstall",
+        cancelText: "Cancel",
+        onConfirm: async () => {
+            const res = await VencordNative.updater.uninstall();
+            if (!res.ok) showToast({ text: `Could not start the uninstaller: ${res.error?.message ?? res.error}`, variant: "critical" });
+        }
+    });
+}
 
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
@@ -244,6 +258,13 @@ function EquicordSettings() {
                         Icon={FolderIcon}
                         text="Open Settings Folder"
                         action={() => VencordNative.settings.openFolder()}
+                    />
+                )}
+                {!IS_WEB && IS_WINDOWS && (
+                    <QuickAction
+                        Icon={TrashIcon}
+                        text="Uninstall Vault"
+                        action={confirmUninstall}
                     />
                 )}
                 <QuickAction
