@@ -69,7 +69,7 @@ function EquibopSection() {
 }
 
 function Updater() {
-    const settings = useSettings(["autoUpdate", "autoUpdateNotification"]);
+    const settings = useSettings(["autoUpdate", "autoUpdateNotification", "autoRestartAfterUpdate"]);
 
     const [repo, err, repoPending] = useAwaiter(getRepo, { fallbackValue: "Loading..." });
 
@@ -104,6 +104,14 @@ function Updater() {
                     description="Receive a notification when Vault finishes downloading an update in the background, so you know when to restart Discord."
                     value={settings.autoUpdateNotification}
                     onChange={(v: boolean) => settings.autoUpdateNotification = v}
+                    disabled={!settings.autoUpdate}
+                    hideBorder
+                />
+                <FormSwitch
+                    title="Restart Discord right after an update"
+                    description="As soon as Vault has installed an update, Discord restarts by itself after a few seconds. It never restarts while you are in a voice call: you get the usual Restart notice instead."
+                    value={settings.autoRestartAfterUpdate}
+                    onChange={(v: boolean) => settings.autoRestartAfterUpdate = v}
                     disabled={!settings.autoUpdate}
                     hideBorder
                 />

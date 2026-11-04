@@ -35,7 +35,7 @@ import { enableStyle, initStyles } from "@api/Styles";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { StartAt } from "@utils/types";
-import { SettingsRouter } from "@webpack/common";
+import { SelectedChannelStore, SettingsRouter, showToast } from "@webpack/common";
 
 import { get as dsGet } from "./api/DataStore";
 import { currentNotice, noticesQueue, showNotice } from "./api/Notices";
@@ -148,6 +148,12 @@ async function runUpdateCheck() {
 
             // an update installed while the notice is still up is covered by that same notice
             const noticeIsUp = currentNotice?.[1] === UPDATED_MESSAGE || noticesQueue.some(n => n[1] === UPDATED_MESSAGE);
+            // never cut a voice call short: in one, the usual Restart notice is shown instead
+            if (Settings.autoRestartAfterUpdate && !SelectedChannelStore.getVoiceChannelId()) {
+                showToast({ text: "Vault has been updated, restarting Discord…", variant: "success" });
+                setTimeout(relaunch, 4000);
+                return;
+            }
             if (Settings.autoUpdateNotification && !noticeIsUp) {
                 showNotice(
                     UPDATED_MESSAGE,
