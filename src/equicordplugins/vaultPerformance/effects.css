@@ -1,15 +1,34 @@
-/* VaultPerformance, level 3 (Maximum): also remove shadows and visual filters, which the GPU repaints constantly */
+/*
+ * VaultPerformance, level 3 (Maximum): also remove what the GPU repaints constantly.
+ * Everything below is cosmetic only: no layout, no sizes and no colours that carry meaning are touched.
+ */
 
+/* every backdrop blur, whatever its class name */
 *,
 *::before,
 *::after {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
     box-shadow: none !important;
     text-shadow: none !important;
     will-change: auto !important;
 }
 
+/* decorative blur, glow and shadow filters (not the filters that colour icons) */
 [class*="shadow"],
 [class*="glow"],
 [class*="blur"] {
     filter: none !important;
+}
+
+/* purely decorative animated overlays: profile effects, Nitro sparkles, confetti */
+[class*="profileEffect"],
+[class*="sparkle"],
+[class*="confetti"] {
+    display: none !important;
+}
+
+/* quicker text layout */
+body {
+    text-rendering: optimizeSpeed;
 }
