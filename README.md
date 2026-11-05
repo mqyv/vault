@@ -45,7 +45,7 @@ Réglages de Discord → onglet Vault → *Désinstaller Vault*, ou menu Démarr
 | **CopyProfile** | Clone la bannière, la couleur et le thème de profil d'un utilisateur. |
 | **FakeVoice** | Faux mute / sourd indépendants (clic gauche = mute, clic droit = sourd). |
 | **BetterMicrophone** | Micro jusqu'à 510 kbps en stéréo, gain supplémentaire et mode studio qui coupe les traitements de Discord (expérimental). |
-| **VaultPerformance** | Préréglage de performance, activé par défaut. |
+| **VaultPerformance** | Trois préréglages pour alléger Discord : Équilibré (sans flou), Performance (sans animations non plus, par défaut) et Maximum (sans ombres ni filtres). |
 
 ## Développeurs
 

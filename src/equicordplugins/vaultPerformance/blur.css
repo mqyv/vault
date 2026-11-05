@@ -1,0 +1,7 @@
+/* VaultPerformance, level 1 (Balanced): remove the expensive backdrop blur (popouts, modals, tooltips, acrylic) */
+
+[class*="backdrop"],
+[class*="acrylic"],
+[class*="blur"] {
+    backdrop-filter: none !important;
+}

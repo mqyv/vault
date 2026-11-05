@@ -1,0 +1,15 @@
+/* VaultPerformance, level 3 (Maximum): also remove shadows and visual filters, which the GPU repaints constantly */
+
+*,
+*::before,
+*::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    will-change: auto !important;
+}
+
+[class*="shadow"],
+[class*="glow"],
+[class*="blur"] {
+    filter: none !important;
+}

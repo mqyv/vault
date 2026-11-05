@@ -449,7 +449,7 @@ summary{transition:color .25s}summary:hover{color:var(--gold2)}
       <li class="rv"><h3>CopyProfile</h3><p>Copie l'avatar, la bannière, la bio et les pronoms d'un utilisateur sur ton propre compte, après confirmation.</p></li>
       <li class="rv"><h3>FakeVoice</h3><p>Apparais muet ou sourd pour les autres tout en continuant à parler et à entendre. Clic gauche pour le micro, clic droit pour le casque. Expérimental.</p></li>
       <li class="rv"><h3>BetterMicrophone</h3><p>Débloque un débit d'encodage plus élevé pour le micro. Expérimental : une mise à jour de Discord peut le casser.</p></li>
-      <li class="rv"><h3>VaultPerformance</h3><p>Désactive les animations, les transitions et les flous coûteux pour alléger Discord. Activé par défaut.</p></li>
+      <li class="rv"><h3>VaultPerformance</h3><p>Trois préréglages pour alléger Discord : Équilibré (sans flou), Performance (sans animations non plus) et Maximum (sans ombres ni filtres). Activé par défaut en Performance.</p></li>
     </ol>
   </div>
 </section>
@@ -540,6 +540,32 @@ function renderPlugins(){
   $('#empty').hidden=list.length>0;count()}
 $('#rows').addEventListener('click',e=>{const b=e.target.closest('.tg');if(!b)return;const n=b.dataset.n;if(ON.has(n))ON.delete(n);else ON.add(n);setTg(b,ON.has(n));count()});
 $('#q').addEventListener('input',renderPlugins);renderPlugins();
+// tabs
+const sideBtns=$$('.side button');
+function openTab(t){const L={plugins:"Plugins",themes:"Thèmes",updates:"Mises à jour",cloud:"Cloud",perf:"Performance"};$("#crumb").textContent="Réglages › Vault › "+L[t];sideBtns.forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1});$$('.tp').forEach(p=>p.classList.toggle('on',p.id==='tp-'+t));if(t==='perf')perf(+$('#seg .on').dataset.p)}
+sideBtns.forEach((b,i)=>{b.onclick=()=>openTab(b.dataset.tab);b.onkeydown=e=>{const d={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[e.key];if(!d)return;e.preventDefault();const n=sideBtns[(i+d+sideBtns.length)%sideBtns.length];n.focus();openTab(n.dataset.tab)}});
+// themes
+const TH=[["Or","Le classique",["#f3dca6","#d8b46a","#8f7236"]],["Saphir","Bleu profond",["#b9d4ff","#6aa2f2","#2f5da8"]],["Rubis","Rouge intense",["#ffc2c2","#ec6b6b","#9c3030"]],["Émeraude","Vert profond",["#bff3d3","#5fd49b","#2a7a55"]]];
+const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(',');
+function applyTheme(i){const c=TH[i][2],r=document.documentElement.style;r.setProperty('--gold2',c[0]);r.setProperty('--gold',c[1]);r.setProperty('--goldd',c[2]);r.setProperty('--gold-rgb',hex2rgb(c[1]));$$('.theme').forEach((b,j)=>b.setAttribute('aria-pressed',j===i));try{localStorage.setItem('vault-theme',i)}catch{}}
+$('#themes').innerHTML=TH.map((t,i)=>`<button class="theme" aria-pressed="false" data-i="${i}"><i style="background:${t[2][1]};color:${t[2][1]}"></i><div><p>${t[0]}</p><small>${t[1]}</small></div></button>`).join('');
+$('#themes').addEventListener('click',e=>{const b=e.target.closest('.theme');if(b)applyTheme(+b.dataset.i)});
+let saved=0;try{saved=+localStorage.getItem('vault-theme')||0}catch{}
+applyTheme(TH[saved]?saved:0);
+// generic switches
+$$('#tp-updates .tg,#cloudtg').forEach(b=>b.addEventListener('click',()=>setTg(b,!b.classList.contains('on'))));
+$('#cloudtg').addEventListener('click',e=>{$('#cloudmsg').textContent=e.currentTarget.classList.contains('on')?'Tes réglages sont sauvegardés et partagés entre tes appareils':'Synchronisation désactivée : tes réglages restent sur cet appareil'});
+// update check
+$('#chk').onclick=function(){const b=this;b.disabled=true;b.innerHTML='<span class="spin"></span>Recherche…';$('#updmsg').textContent='Contact du serveur…';
+  setTimeout(()=>{b.disabled=false;b.textContent='Rechercher';$('#updmsg').textContent='Tu utilises la dernière version ✓'},1400)};
+// export
+$('#exp').onclick=function(){const b=this;b.textContent='Exporté ✓';setTimeout(()=>{b.textContent='Exporter'},1800);
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({vault:"1.15.13.0",plugins:Object.fromEntries(PL.map(p=>[p[0],!!p[2]]))},null,2)],{type:'application/json'}));a.download='vault-settings.json';a.click()}catch{}};
+// performance
+const PERF=[[[64,48,70],["480 Mo","18 %","2,4 s"]],[[42,30,52],["320 Mo","11 %","1,8 s"]],[[28,20,38],["240 Mo","7 %","1,3 s"]]];
+function perf(i){[1,2,3].forEach((n,k)=>{$('#b'+n).style.width=PERF[i][0][k]+'%';$('#v'+n).textContent=PERF[i][1][k]})}
+$$('#seg button').forEach(b=>b.onclick=()=>{$$('#seg button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)});perf(+b.dataset.p)});
+// tabs
 // copy
 document.querySelectorAll('.copy').forEach(b=>b.onclick=async()=>{const t=b.parentElement.querySelector('pre').innerText.trim();
   try{await navigator.clipboard.writeText(t);b.textContent='Copié ✓';setTimeout(()=>b.textContent='Copier',1800)}catch{}});
