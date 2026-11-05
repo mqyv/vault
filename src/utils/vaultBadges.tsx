@@ -211,9 +211,9 @@ export async function setBadge(key: string, label: string | null, iconUrl: strin
 /** Used by the menu until the real list has loaded. */
 const FALLBACK_TYPES: BadgeType[] = [
     { key: "staff", label: "Vault Staff", icon_url: null, sort: 1 },
-    { key: "donor", label: "Vault Donateur", icon_url: null, sort: 2 },
+    { key: "helper", label: "Vault Helper", icon_url: null, sort: 2 },
     { key: "bug_hunter", label: "Vault Bug Hunter", icon_url: null, sort: 3 },
-    { key: "helper", label: "Vault Helper", icon_url: null, sort: 4 }
+    { key: "donor", label: "Vault Donateur", icon_url: null, sort: 4 }
 ];
 
 const userContextPatch: NavContextMenuPatchCallback =(children, { user }: { user?: { id: string; username: string; }; }) => {
