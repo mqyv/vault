@@ -33,6 +33,8 @@ const queued = new Set<string>();
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let registered: ProfileBadge[] = [];
 let types: BadgeType[] = [];
+let typesLoadedAt = 0; // the list is read again when the menu opens, so an order change shows up without restarting Discord
+const TYPES_REFRESH_MS = 30_000;
 let ownerId: string | null = null;
 let ownerCheckedKey: string | null = null; // key the last successful check was made with
 const listeners = new Set<() => void>();
@@ -105,6 +107,7 @@ function shows(type: BadgeType, userId: string) {
 export async function loadBadgeTypes() {
     try {
         types = await rpc<BadgeType[]>("vault_badge_types", {});
+        typesLoadedAt = Date.now();
     } catch (err) {
         logger.warn("Could not load badge types", err);
         return;
@@ -233,7 +236,7 @@ const userContextPatch: NavContextMenuPatchCallback =(children, { user }: { user
     // verifies the key on every change and refuses a wrong one, so this gives nobody any extra power.
     const key = settings().ownerKey?.trim();
     if (key && key !== ownerCheckedKey) void checkOwnerKey();
-    if (!types.length) void loadBadgeTypes();
+    if (!types.length || Date.now() - typesLoadedAt > TYPES_REFRESH_MS) void loadBadgeTypes();
     diagnose({ menuOpened: true, keySaved: !!key, typesLoaded: types.length });
     if (!user || !key) return;
     const menuTypes = types.length ? types : FALLBACK_TYPES;
