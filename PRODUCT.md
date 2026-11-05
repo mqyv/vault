@@ -27,8 +27,8 @@ Vault's own plugins (the list grows over time), written for Vault and found nowh
 
 ## Operating Context
 
-- Windows: graphical installer `VaultSetup.exe` (GitHub release) or one PowerShell command.
-- macOS: one Terminal command (`scripts/install-vault.sh`), no administrator password.
+- Private: access is requested on the Discord, then activated with a personal key (one person, one device). No public installer.
+- If access is revoked or expires, Vault removes itself and Discord restarts without it.
 - Updates arrive by themselves; Discord shows a "Restart" notification.
 - Vault badges are visible between Vault users; only the owner grants them.
 

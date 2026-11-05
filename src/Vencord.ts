@@ -34,10 +34,9 @@ export { PlainSettings, Settings };
 import { enableStyle, initStyles } from "@api/Styles";
 import { debounce } from "@shared/debounce";
 import { StartAt } from "@utils/types";
-import { SettingsRouter, showToast } from "@webpack/common";
+import { SettingsRouter } from "@webpack/common";
 
 import { get as dsGet } from "./api/DataStore";
-import { currentNotice, noticesQueue, showNotice } from "./api/Notices";
 import { showNotification } from "./api/Notifications";
 import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
 import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
@@ -45,6 +44,7 @@ import { areLocalSettingsDirty, getCloudSettings, getCloudSyncDirection, markLoc
 import { relaunch } from "./utils/native";
 import { changes, checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { initVaultBadges } from "./utils/vaultBadges";
+import { startVaultLicence } from "./utils/vaultLicence";
 import { getUpdateState, setUpdateState } from "./utils/vaultUpdateButton";
 import { onceReady } from "./webpack";
 import { patches } from "./webpack/patchWebpack";
@@ -122,12 +122,10 @@ async function syncSettings() {
 
 // New versions show up while Discord is open, without waiting for its next start
 const UPDATE_CHECK_INTERVAL = 60_000;
-const UPDATED_MESSAGE = "Vault has been updated!";
 
 let checkingForUpdates = false;
-// a version that failed to install or was already announced: nothing more to do until a newer one comes out
+// a version that failed to install: nothing more to do until a newer one comes out
 let failedUpdate: string | undefined;
-let announcedUpdate: string | undefined;
 
 async function runUpdateCheck() {
     if (IS_UPDATER_DISABLED || checkingForUpdates) return;
@@ -148,42 +146,14 @@ async function runUpdateCheck() {
             failedUpdate = latest;
             if (!await update()) return;
             failedUpdate = undefined;
-            setUpdateState("installed");
-
-            // an update installed while the notice is still up is covered by that same notice
-            const noticeIsUp = currentNotice?.[1] === UPDATED_MESSAGE || noticesQueue.some(n => n[1] === UPDATED_MESSAGE);
-            if (Settings.autoUpdateNotification && !noticeIsUp) {
-                showNotice(
-                    UPDATED_MESSAGE,
-                    "Restart",
-                    relaunch
-                );
-            }
+            // the green pill in the top bar is the only reminder: no second notice
+            if (Settings.autoUpdateNotification) setUpdateState("installed");
             return;
         }
 
-        // the green pill in the top bar stays for as long as the update waits; the notice below is shown once per version
+        // Nothing is installed without the person's say-so. The green pill stays in the top bar for as long as the update
+        // waits and comes back at every start of Discord; a click on it updates Vault and restarts Discord.
         setUpdateState("available");
-
-        if (latest === announcedUpdate) return;
-        announcedUpdate = latest;
-
-        // Nothing is installed without the person's say-so. Closing the notice leaves the update waiting: it comes back at
-        // the next start of Discord, every time, until they accept it.
-        showNotice(
-            "A new version of Vault is available!",
-            "Update & restart",
-            async () => {
-                showToast({ text: "Updating Vault…" });
-                try {
-                    if (await update()) relaunch();
-                    else showToast({ text: "Vault could not be updated. Try again from the Updater tab.", variant: "critical" });
-                } catch (err) {
-                    UpdateLogger.error("Failed to update", err);
-                    showToast({ text: "Vault could not be updated. Try again from the Updater tab.", variant: "critical" });
-                }
-            }
-        );
     } catch (err) {
         UpdateLogger.error("Failed to check for updates", err);
     } finally {
@@ -207,6 +177,8 @@ async function init() {
         }
         runUpdateCheck();
         setInterval(runUpdateCheck, UPDATE_CHECK_INTERVAL);
+        // private build: an access that ended removes Vault and restarts Discord without it
+        startVaultLicence();
     }
 
     if (IS_DEV) {

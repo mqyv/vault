@@ -51,7 +51,10 @@ export default {
         getUpdates: () => invoke<IpcRes<UpdateData[]>>(IpcEvents.UPDATER_LIST_UPDATES),
         fetchUpdate: () => invoke<IpcRes<boolean>>(IpcEvents.UPDATER_FETCH_UPDATE),
         applyUpdate: () => invoke<IpcRes<boolean>>(IpcEvents.UPDATER_APPLY_UPDATE),
-        uninstall: () => invoke<IpcRes<"uninstaller" | "script">>(IpcEvents.UNINSTALL_VAULT),
+        /** forced: no confirmation window, used when Vault removes itself because the licence ended */
+        uninstall: (forced = false) => invoke<IpcRes<"uninstaller" | "script">>(IpcEvents.UNINSTALL_VAULT, forced),
+        /** Anonymous hash of this computer, the licence key is bound to it */
+        getDeviceId: () => invoke<IpcRes<string>>(IpcEvents.VAULT_DEVICE_ID),
     },
 
     settings: {

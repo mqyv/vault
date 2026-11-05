@@ -60,7 +60,7 @@ jobs:
         if: steps.fetch.outputs.behind != '0'
         run: |
           # Workflows propres à Vault : le reste de .github/workflows vient d'Equicord et ne nous concerne pas.
-          KEEP="autofix.yml installer.yml sync-upstream.yml test.yml"
+          KEEP="autofix.yml sync-upstream.yml test.yml"
           before=$(git rev-parse HEAD)
           echo "before=$before" >> "$GITHUB_OUTPUT"
 

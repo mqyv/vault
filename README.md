@@ -6,13 +6,11 @@
 
 **Le mod Discord aux plugins exclusifs : 370+ plugins, thèmes sur-mesure, mises à jour automatiques.**
 
-[![Télécharger](https://img.shields.io/badge/T%C3%A9l%C3%A9charger-VaultSetup.exe-d8b46a?style=for-the-badge&logo=windows&logoColor=black)](https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe) [![macOS](https://img.shields.io/badge/macOS-une%20commande-d8b46a?style=for-the-badge&logo=apple&logoColor=black)](#macos--une-commande)
+[![Demander l'accès](https://img.shields.io/badge/Demander%20l'acc%C3%A8s-Discord-d8b46a?style=for-the-badge&logo=discord&logoColor=black)](https://discord.gg/q97W6EfMV6)
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/mqyv/vault/test.yml?branch=main&label=tests&style=flat-square)](https://github.com/mqyv/vault/actions/workflows/test.yml)
-[![Licence](https://img.shields.io/badge/licence-GPL--3.0-blue?style=flat-square)](./LICENSE)
-[![Dernière version](https://img.shields.io/github/v/release/mqyv/vault?style=flat-square&label=installeur)](https://github.com/mqyv/vault/releases/latest)
 
-[Site](https://vaultcord.fr) · [Installation](#installation) · [Plugins exclusifs](#plugins-exclusifs) · [Développeurs](#développeurs)
+[Site](https://vaultcord.fr) · [Accès](#accès) · [Plugins exclusifs](#plugins-exclusifs) · [Développeurs](#développeurs)
 
 </div>
 
@@ -26,60 +24,17 @@
 | **Mises à jour invisibles** | Vault vérifie les correctifs chaque minute, sans relancer Discord, puis affiche une notification **Restart**. Un clic et c'est à jour. |
 | **Thèmes sur-mesure** | Importez n'importe quel thème CSS, avec aperçu en direct. |
 | **Cloud & sauvegarde** | Exportez vos réglages en JSON, ou synchronisez-les entre appareils si vous activez le cloud (service d'Equicord par défaut, voir la [politique de confidentialité](./PRIVACY_POLICY.md)). |
-| **Open source** | Code sous licence GPL-3.0, lisible et modifiable. |
+| **Accès privé** | Vault se demande sur le Discord et s'active avec une clé personnelle, liée à un compte et à un appareil. |
 
-## Installation
+## Accès
 
-### Windows : installeur graphique (recommandé)
+Vault est privé : il n'y a pas d'installeur public. Rejoignez le [Discord](https://discord.gg/q97W6EfMV6), demandez l'accès dans le salon prévu, puis activez votre clé avec `/claim`. Elle se lie au premier appareil où elle est utilisée.
 
-1. Téléchargez **[VaultSetup.exe](https://github.com/mqyv/vault/releases/latest/download/VaultSetup.exe)**
-2. Lancez-le puis **Suivant → Installer** (il installe Git et Node.js si besoin)
-3. Rouvrez Discord : Vault est dans vos **Réglages**, onglet « Vault »
-
-> Windows peut afficher « Windows a protégé votre PC » (installeur non signé) : cliquez sur **Informations complémentaires → Exécuter quand même**.
-
-### Windows : une commande
-
-Dans PowerShell :
-
-```powershell
-irm https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.ps1 | iex
-```
-
-En cas de problème, le journal complet est dans `%TEMP%\vault-install.log`.
-
-### macOS : une commande
-
-Dans le Terminal :
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.sh | bash
-```
-
-La commande ne demande pas votre mot de passe administrateur. S'il vous manque les outils de développement d'Apple, une fenêtre propose de les installer : acceptez, puis relancez la commande. S'il vous manque Node.js, le script en installe une copie réservée à Vault dans `~/.vault/node`.
-
-> Si macOS refuse de modifier Discord, ouvrez **Réglages Système → Confidentialité et sécurité → Gestion des apps**, activez **Terminal**, puis relancez.
-> Après une grosse mise à jour de Discord, relancez la même commande pour remettre Vault.
-
-Le journal complet est dans `$TMPDIR/vault-install.log`.
-
-## Mises à jour
-
-Vault se met à jour tout seul. Si une mise à jour de Discord casse quelque chose, relancez la commande d'installation de votre système, elle remet aussi Vault à jour.
+Si l'accès est retiré ou arrive à son terme, Vault se désinstalle et Discord redémarre sans lui.
 
 ## Désinstaller
 
-Windows : menu Démarrer → *Désinstaller Vault* (ou *Paramètres → Applications*) si vous avez utilisé l'installeur graphique, sinon :
-
-```powershell
-pnpm -C "$HOME\Vault" uninject
-```
-
-macOS :
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/mqyv/vault/main/scripts/install-vault.sh | bash -s -- --uninstall
-```
+Réglages de Discord → onglet Vault → *Désinstaller Vault*, ou menu Démarrer → *Désinstaller Vault* (ou *Paramètres → Applications*).
 
 ## Plugins exclusifs
 
@@ -112,7 +67,7 @@ pnpm inject        # Discord fermé
 | `pnpm update-vault` | `git pull` + dépendances + build |
 | `pnpm inject` / `pnpm uninject` | Ajoute / retire Vault de Discord |
 
-Le site vitrine est dans [`site/`](./site) (HTML statique, aucune étape de build). L'installeur Windows (`installer/vault.iss`) est recompilé automatiquement par GitHub Actions.
+Le site vitrine est dans [`site/`](./site) (HTML statique, aucune étape de build).
 
 ## Licence et avertissement
 

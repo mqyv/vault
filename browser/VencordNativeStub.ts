@@ -78,6 +78,7 @@ window.VencordNative = {
         fetchUpdate: async () => ({ ok: true, value: false }),
         applyUpdate: async () => ({ ok: true, value: true }),
         uninstall: async () => ({ ok: false, error: { message: "Not available in the browser version" } }),
+        getDeviceId: async () => ({ ok: false, error: { message: "Not available in the browser version" } }),
     },
 
     quickCss: {

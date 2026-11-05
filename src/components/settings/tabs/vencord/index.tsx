@@ -34,6 +34,7 @@ import { DonateButtonComponent } from "./DonateButton";
 import { MacOSVibrancySettings } from "./MacVibrancySettings";
 import { NotificationSection } from "./NotificationSettings";
 import { VaultBadgesSection } from "./VaultBadgesSection";
+import { VaultLicenceSection } from "./VaultLicenceSection";
 import { WindowsMaterialSettings } from "./WindowsMaterialSettings";
 
 const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
@@ -301,6 +302,8 @@ function EquicordSettings() {
             <WindowsMaterialSettings />
 
             <NotificationSection />
+
+            <VaultLicenceSection />
 
             <VaultBadgesSection />
         </SettingsTab >

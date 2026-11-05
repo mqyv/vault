@@ -39,6 +39,7 @@ export const enum IpcEvents {
     UPDATER_APPLY_UPDATE = "VencordApplyUpdate",
 
     UNINSTALL_VAULT = "VencordUninstallVault",
+    VAULT_DEVICE_ID = "VencordVaultDeviceId",
 
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
     GET_MONACO_THEME = "VencordGetMonacoTheme",
