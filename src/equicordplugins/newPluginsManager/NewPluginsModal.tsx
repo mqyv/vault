@@ -16,6 +16,7 @@ import { PluginCard } from "@components/settings/tabs/plugins/PluginCard";
 import { ChangeList } from "@utils/ChangeList";
 import { classNameFactory } from "@utils/css";
 import { useForceUpdater } from "@utils/react";
+import { VAULT_OWNER_ID } from "@utils/vaultOwner";
 import { RenderModalProps } from "@vencord/discord-types";
 import { closeModal, Modal, openModal, Tooltip, useMemo } from "@webpack/common";
 import { ReactNode } from "react";
@@ -107,6 +108,8 @@ function NewPluginsModal({ modalProps, newPlugins, newSettings }: ModalComponent
     }
 
     const totalCount = pluginCards.length + requiredPluginCards.length;
+    // what is new comes from the Vault owner: the support link goes to Vault instead of Equicord
+    const fromVault = sortedPlugins.length > 0 && sortedPlugins.every(p => p.authors?.some(a => String(a.id) === VAULT_OWNER_ID));
 
     const handleContinue = async () => {
         await writeKnownSettings();
@@ -135,7 +138,9 @@ function NewPluginsModal({ modalProps, newPlugins, newSettings }: ModalComponent
                     </BaseText>
                     <br />
                     <Notice.Info className={cl("notice")}>
-                        Equicord is Open Source Software. If you enjoy using it, consider supporting us <Link href="https://github.com/sponsors/thororen1234" target="_blank" rel="noopener noreferrer">here</Link>.
+                        {fromVault
+                            ? <>Vault is made by eqen. If you enjoy using it, consider supporting it <Link href="https://github.com/mqyv/vault" target="_blank" rel="noopener noreferrer">here</Link>.</>
+                            : <>Equicord is Open Source Software. If you enjoy using it, consider supporting us <Link href="https://github.com/sponsors/thororen1234" target="_blank" rel="noopener noreferrer">here</Link>.</>}
                     </Notice.Info>
                 </>
             }
