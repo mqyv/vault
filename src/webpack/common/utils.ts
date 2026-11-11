@@ -70,7 +70,21 @@ waitFor("parseTopic", m => Parser = m);
 export let Alerts: t.Alerts;
 waitFor(["show", "close"], m => Alerts = m);
 
-export const showToast: t.showToast = findByCodeLazy(".currentToastMap.has(");
+// Discord rewrote its toast module: the function no longer contains ".currentToastMap.has(" (that search then finds nothing, and
+// every showToast call threw "apply was called on null", which silently stopped whatever called it). Both versions are tried.
+const showToastNew = findByCodeLazy("queuedToastsMap", ".toastKey");
+const showToastOld = findByCodeLazy(".currentToastMap.has(");
+export const showToast: t.showToast = ((...args: Parameters<t.showToast>) => {
+    let lastError: unknown;
+    for (const show of [showToastNew, showToastOld]) {
+        try {
+            return (show as t.showToast)(...args);
+        } catch (err) {
+            lastError = err; // not found in this Discord version: try the other one
+        }
+    }
+    console.error("[Vault] could not show a toast", lastError);
+}) as t.showToast;
 
 export const UserUtils = {
     getUser: findByCodeLazy(".USER(")
