@@ -11,7 +11,7 @@ import { ClearMessagesIcon } from "@components/VaultIcons";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Message, User } from "@vencord/discord-types";
-import { ChannelStore, Menu, MessageActions, RestAPI, showToast, UserStore } from "@webpack/common";
+import { ChannelStore, Menu, RestAPI, showToast, UserStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     delayMs: {
@@ -52,6 +52,9 @@ async function clearMessages(channelId: string, fromMessageId?: string) {
 
     let before: string | undefined;
     let deleted = 0;
+    let failed = 0;
+    let failedInARow = 0;
+    let lastError = "";
 
     try {
         // paginate from newest to oldest using snowflake "before" cursor
@@ -83,12 +86,24 @@ async function clearMessages(channelId: string, fromMessageId?: string) {
                 if (!DELETABLE_TYPES.includes(msg.type)) continue;
 
                 try {
-                    await MessageActions.deleteMessage(channelId, msg.id);
+                    // the same route Discord itself calls; RestAPI also waits out rate limits
+                    await RestAPI.del({ url: `/channels/${channelId}/messages/${msg.id}` });
                     deleted++;
-                } catch {
-                    // skip messages we can't delete
+                    failedInARow = 0;
+                } catch (err: any) {
+                    // already gone: nothing to do
+                    if (err?.status === 404) continue;
+                    failed++;
+                    failedInARow++;
+                    lastError = err?.body?.message ?? err?.message ?? String(err);
+                    // a refusal that repeats (no permission, session problem) would only hammer Discord: stop and say why
+                    if (failedInARow >= 5) {
+                        toast(`Discord keeps refusing to delete (${lastError}). Stopping.`, "critical");
+                        clearing.delete(channelId);
+                        reachedEnd = true;
+                        break;
+                    }
                 }
-                // RestAPI also auto-handles rate limits
                 await sleep(Math.max(0, settings.store.delayMs || 0));
             }
 
@@ -99,7 +114,7 @@ async function clearMessages(channelId: string, fromMessageId?: string) {
         clearing.delete(channelId);
         showNotification({
             title: "Clear Messages",
-            body: `Done — deleted ${deleted} message${deleted === 1 ? "" : "s"}.`
+            body: `Done — deleted ${deleted} message${deleted === 1 ? "" : "s"}${failed ? `, ${failed} failed (${lastError})` : ""}.`
         });
     }
 }
