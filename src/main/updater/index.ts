@@ -9,6 +9,7 @@ import { ipcMain } from "electron";
 
 import gitRemote from "~git-remote";
 
+import { hasLicenceFile } from "../licence";
 import { serializeErrors } from "./common";
 
 export type UpdateData = Record<"hash" | "message" | "author", string>;
@@ -27,7 +28,8 @@ const updater: Updater = IS_UPDATER_DISABLED
         fetchUpdate: async () => false,
         applyUpdate: async () => false,
     }
-    : require(IS_STANDALONE ? "./http" : "./git").default;
+    // a licensed install (its key is in licence.json) updates from the private release gate; the owner's own copy keeps using Git
+    : require(IS_STANDALONE ? "./http" : hasLicenceFile() ? "./gate" : "./git").default;
 
 ipcMain.handle(IpcEvents.UPDATER_GET_REPO, serializeErrors(updater.getRepo));
 ipcMain.handle(IpcEvents.UPDATER_LIST_UPDATES, serializeErrors(updater.listUpdates));

@@ -55,6 +55,10 @@ export default {
         uninstall: (forced = false) => invoke<IpcRes<"uninstaller" | "script">>(IpcEvents.UNINSTALL_VAULT, forced),
         /** Anonymous hash of this computer, the licence key is bound to it */
         getDeviceId: () => invoke<IpcRes<string>>(IpcEvents.VAULT_DEVICE_ID),
+        /** The licence key kept in Vault's folder, where the installer also writes it */
+        getLicence: () => invoke<IpcRes<{ key: string; verified: boolean; } | null>>(IpcEvents.VAULT_LICENCE_GET),
+        setLicence: (licence: { key: string; verified: boolean; }) => invoke<IpcRes<void>>(IpcEvents.VAULT_LICENCE_SET, licence),
+        clearLicence: () => invoke<IpcRes<void>>(IpcEvents.VAULT_LICENCE_CLEAR),
     },
 
     settings: {

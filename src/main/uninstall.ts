@@ -5,17 +5,13 @@
  */
 
 import { IpcEvents } from "@shared/IpcEvents";
-import { execFileSync, spawn } from "child_process";
-import { createHash } from "crypto";
+import { spawn } from "child_process";
 import { ipcMain } from "electron";
-import { existsSync, readFileSync } from "fs";
-import { hostname, userInfo } from "os";
+import { existsSync } from "fs";
 import { join } from "path";
 
+import { VAULT_DIR } from "./licence";
 import { serializeErrors } from "./updater/common";
-
-// Vault's folder: dist/ (where this file is bundled) sits directly inside it
-const VAULT_DIR = join(__dirname, "..");
 
 /**
  * Starts Vault's uninstaller in its own process and returns, because it closes Discord (this very process) to take Vault
@@ -42,27 +38,4 @@ function uninstallVault(_: unknown, forced = false) {
     return "script";
 }
 
-function readMachineId(): string | null {
-    try {
-        if (process.platform === "win32") {
-            const out = execFileSync("reg.exe", ["query", String.raw`HKLM\SOFTWARE\Microsoft\Cryptography`, "/v", "MachineGuid"], { encoding: "utf8", windowsHide: true });
-            return /MachineGuid\s+REG_SZ\s+(\S+)/.exec(out)?.[1] ?? null;
-        }
-        if (process.platform === "darwin") {
-            const out = execFileSync("ioreg", ["-rd1", "-c", "IOPlatformExpertDevice"], { encoding: "utf8" });
-            return /"IOPlatformUUID" = "([^"]+)"/.exec(out)?.[1] ?? null;
-        }
-        return readFileSync("/etc/machine-id", "utf8").trim() || null;
-    } catch {
-        return null;
-    }
-}
-
-/** The licence key is tied to this value: a hash of the computer's id, never the id itself. */
-function getDeviceId() {
-    const id = readMachineId() ?? `${hostname()}|${userInfo().username}`;
-    return createHash("sha256").update(`vault-device:${id}`).digest("hex");
-}
-
 ipcMain.handle(IpcEvents.UNINSTALL_VAULT, serializeErrors(uninstallVault));
-ipcMain.handle(IpcEvents.VAULT_DEVICE_ID, serializeErrors(getDeviceId));

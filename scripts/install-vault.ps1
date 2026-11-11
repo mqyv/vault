@@ -1,36 +1,36 @@
 #Requires -Version 5.1
 <#
-    Vault - installeur automatique.
-    Installe les prerequis (Git, Node.js, pnpm) s'ils manquent, telecharge Vault,
-    le compile et l'ajoute a Discord. Un seul fichier, zero config.
+    Vault - installeur (acces prive).
+    Verifie la cle aupres du service de Vault, telecharge Vault deja compile, l'installe et l'ajoute a Discord.
+    Ni Git, ni Node.js, ni depot public : tout passe par le service, avec la cle.
 
-    Journal complet : %TEMP%\vault-install.log
+    Journal complet : %TEMP%ault-install.log
 
-    L'assistant .exe lance les etapes une par une (-Stage) pour faire avancer sa barre de progression.
-    En cas d'echec, le script ecrit "DONE|1|CODE|detail" dans -ProgressFile ; l'assistant traduit CODE en message clair.
-    En ligne de commande (irm | iex), tout s'enchaine.
+    L'assistant .exe lance les etapes une par une (-Stage) pour faire avancer sa barre de progression et lui passe la cle
+    dans un fichier (-KeyFile). En cas d'echec, le script ecrit "DONE|1|CODE|detail" dans -ProgressFile ; l'assistant
+    traduit CODE en message clair.
 #>
 
 param(
-    [string]$InstallDir = (Join-Path $HOME "Vault"),
+    [string]$InstallDir = (Join-Path $env:LOCALAPPDATA "Vault"),
     [switch]$Yes,  # auto-confirme (ferme Discord sans demander) - utilise par l'assistant .exe
     [string]$ProgressFile = "",
-    [ValidateSet("all", "prereq", "clone", "deps", "build", "inject", "uninject")][string]$Stage = "all"
+    [string]$KeyFile = "",  # fichier qui contient la cle d'acces (ecrit par l'assistant .exe)
+    [ValidateSet("all", "download", "extract", "inject", "uninject")][string]$Stage = "all"
 )
 
 $ErrorActionPreference = "Stop"
-$RepoUrl = "https://github.com/mqyv/vault.git"
+$GateUrl = "https://zjppxtnfohjvsjfqioqh.supabase.co/functions/v1/vault-release"
 $LogFile = Join-Path $env:TEMP "vault-install.log"
 $Flavors = "Discord", "DiscordPTB", "DiscordCanary", "DiscordDevelopment"
 
 $Messages = @{
-    NO_WINGET      = "Git ou Node.js manque et winget n'est pas disponible. Installe Node.js (nodejs.org) et Git (git-scm.com), puis relance."
-    NO_GIT         = "Git n'a pas pu etre installe. Installe-le depuis git-scm.com, puis relance."
-    NO_NODE        = "Node.js 22 ou plus n'a pas pu etre installe. Installe-le depuis nodejs.org, puis relance."
-    NO_PNPM        = "pnpm n'a pas pu etre installe."
-    CLONE          = "Le telechargement de Vault a echoue. Verifie ta connexion Internet."
-    DEPS           = "L'installation des dependances a echoue. Verifie ta connexion Internet."
-    BUILD          = "La compilation de Vault a echoue."
+    NETWORK        = "Impossible de joindre le service de Vault. Verifie ta connexion Internet."
+    REFUSED        = "Ta cle n'est pas acceptee."
+    NO_RELEASE     = "Aucune version de Vault n'est publiee pour l'instant."
+    DOWNLOAD       = "Le telechargement de Vault a echoue. Verifie ta connexion Internet."
+    HASH           = "Le fichier telecharge est corrompu. Relance l'installation."
+    EXTRACT        = "Les fichiers de Vault n'ont pas pu etre installes."
     NO_DISCORD     = "Discord est introuvable. Installe-le depuis discord.com, lance-le une fois, puis relance."
     DISCORD_LOCKED = "Discord est encore ouvert. Ferme-le completement (icone pres de l'horloge), puis relance."
     INJECT         = "Vault n'a pas pu etre ajoute a Discord."
@@ -58,36 +58,6 @@ function Refresh-Path {
 }
 function Have($cmd) { [bool](Get-Command $cmd -ErrorAction SilentlyContinue) }
 function Want([string]$name) { $Stage -eq "all" -or $Stage -eq $name }
-
-# Lance une commande native, ecrit sa sortie dans le journal, et s'arrete avec $code si elle echoue.
-# Windows PowerShell 5.1 traite tout texte ecrit sur stderr comme une erreur fatale ; or Git, pnpm et npm y ecrivent
-# leur progression. On repasse donc en mode "Continue" le temps de la commande et on ne juge que le code de sortie.
-function Run([string]$code, [scriptblock]$cmd) {
-    $old = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    $lines = New-Object System.Collections.Generic.List[string]
-    try {
-        & $cmd 2>&1 | ForEach-Object { $s = "$_"; Log $s; $lines.Add($s) }
-        $exit = $LASTEXITCODE
-    } finally {
-        $ErrorActionPreference = $old
-    }
-    if ($exit -ne 0) {
-        # detail : la derniere ligne qui ressemble a une erreur, sinon la derniere ligne non vide
-        $hint = ($lines | Where-Object { $_ -match '(?i)\b(error|fatal|err_|failed|denied|not found)\b' } | Select-Object -Last 1)
-        if (-not $hint) { $hint = ($lines | Where-Object { $_.Trim() } | Select-Object -Last 1) }
-        $hint = "$hint".Trim()
-        if ($hint.Length -gt 180) { $hint = $hint.Substring(0, 180) + "..." }
-        Die $code $hint
-    }
-}
-
-function Install-With-Winget($id, $code) {
-    if (-not (Have winget)) { Die "NO_WINGET" }
-    Step "Installation de $id (une fenetre Windows peut demander l'autorisation)"
-    Run $code { winget install --id $id -e --silent --accept-package-agreements --accept-source-agreements }
-    Refresh-Path
-}
 
 # --- Discord ---------------------------------------------------------------------------------
 
@@ -191,85 +161,66 @@ function Start-DiscordAgain([string[]]$names) {
 
 # --- Etapes ----------------------------------------------------------------------------------
 
+# Meme valeur que le calcul de Vault dans Discord (src/main/licence.ts) : empreinte de l'identifiant de l'ordinateur.
+function Get-DeviceId {
+    $key = [Microsoft.Win32.RegistryKey]::OpenBaseKey("LocalMachine", "Registry64").OpenSubKey("SOFTWAREMicrosoftCryptography")
+    $guid = if ($key) { "$($key.GetValue("MachineGuid"))" } else { "" }
+    $bytes = [Text.Encoding]::UTF8.GetBytes("vault-device:$guid")
+    return -join ([Security.Cryptography.SHA256]::Create().ComputeHash($bytes) | ForEach-Object { $_.ToString("x2") })
+}
+
+function Read-Key {
+    if (-not $KeyFile -or -not (Test-Path $KeyFile)) { Die "REFUSED" "cle absente" }
+    $k = (Get-Content -LiteralPath $KeyFile -Raw).Trim()
+    if (-not $k) { Die "REFUSED" "cle vide" }
+    return $k
+}
+
+function Call-Gate($body) {
+    try {
+        return Invoke-RestMethod -Method Post -Uri $GateUrl -ContentType "application/json" -Body ($body | ConvertTo-Json -Compress) -TimeoutSec 30
+    } catch {
+        Die "NETWORK" $_.Exception.Message
+    }
+}
+
+$ZipPath = Join-Path $env:TEMP "vault-download.zip"
+
 try {
-    if ($Stage -eq "all" -or $Stage -eq "prereq") {
+    if ($Stage -eq "all" -or $Stage -eq "download") {
         "=== Vault install $(Get-Date -Format s) ===" | Out-File $LogFile -Encoding utf8
     }
     Refresh-Path
 
-    if ($Stage -eq "all") {
-        Write-Host ""
-        Write-Host "  ============================" -ForegroundColor Yellow
-        Write-Host "      V A U L T  -  installer" -ForegroundColor Yellow
-        Write-Host "  ============================" -ForegroundColor Yellow
-    }
-
-    if (Want "prereq") {
-        Step "Verification de Git"
-        if (-not (Have git)) { Install-With-Winget "Git.Git" "NO_GIT" }
-        if (-not (Have git)) { Die "NO_GIT" "git introuvable apres installation" }
-        Ok "Git pret"
-
-        Step "Verification de Node.js"
-        $needNode = $true
-        if (Have node) {
-            $major = [int](((node -v) -replace '^v', '').Split('.')[0])
-            if ($major -ge 22) { $needNode = $false } else { Warn "Node.js $(node -v) est trop ancien (22 minimum)." }
+    if (Want "download") {
+        Step "Verification de la cle et telechargement de Vault"
+        $answer = Call-Gate @{ action = "download"; licence_key = (Read-Key); device = (Get-DeviceId) }
+        if (-not $answer.ok) {
+            if ($answer.reason -eq "no_release") { Die "NO_RELEASE" }
+            Die "REFUSED" "$($answer.reason)"
         }
-        if ($needNode) { Install-With-Winget "OpenJS.NodeJS.LTS" "NO_NODE" }
-        if (-not (Have node)) { Die "NO_NODE" "node introuvable apres installation" }
-        Ok "Node.js pret ($(node -v))"
-
-        Step "Verification de pnpm"
-        $pnpmOk = $false
-        if (Have pnpm) { $pnpmOk = ([int]((pnpm -v).Split('.')[0]) -ge 9) }
-        if (-not $pnpmOk) {
-            Run "NO_PNPM" { npm install -g pnpm@latest }
-            Refresh-Path
-        }
-        if (-not (Have pnpm)) { Die "NO_PNPM" "pnpm introuvable apres installation" }
-        Ok "pnpm pret ($(pnpm -v))"
+        try { Invoke-WebRequest -Uri $answer.url -OutFile $ZipPath -UseBasicParsing -TimeoutSec 300 } catch { Die "DOWNLOAD" $_.Exception.Message }
+        $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $ZipPath).Hash.ToLowerInvariant()
+        if ($hash -ne "$($answer.sha256)".ToLowerInvariant()) { Remove-Item $ZipPath -Force -ErrorAction SilentlyContinue; Die "HASH" }
+        Ok "Vault $($answer.version) telecharge et verifie"
     }
 
-    if (Want "clone") {
-        if (Test-Path (Join-Path $InstallDir ".git")) {
-            Step "Mise a jour de Vault ($InstallDir)"
-            Run "CLONE" { git -C $InstallDir fetch --depth 1 origin main }
-            Run "CLONE" { git -C $InstallDir reset --hard FETCH_HEAD }
-        } else {
-            Step "Telechargement de Vault dans $InstallDir"
-            # Le dossier peut deja contenir des fichiers (le desinstalleur de l'assistant .exe), ce que `git clone`
-            # refuse : on initialise le depot sur place, puis on recupere seulement la derniere version
-            # (--depth 1 : pas les milliers de commits d'historique, bien plus rapide).
-            New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
-            Run "CLONE" { git -C $InstallDir init -q -b main }
-            Run "CLONE" { git -C $InstallDir config core.longpaths true }
-            Run "CLONE" { git -C $InstallDir remote add origin $RepoUrl }
-            Run "CLONE" { git -C $InstallDir fetch --depth 1 origin main }
-            Run "CLONE" { git -C $InstallDir checkout -f -B main FETCH_HEAD }
-            Run "CLONE" { git -C $InstallDir branch --set-upstream-to=origin/main main }
-        }
-        if (-not (Test-Path (Join-Path $InstallDir "package.json"))) { Die "CLONE" "package.json absent" }
-        Ok "Code recupere"
-    }
-
-    if (Want "deps") {
-        Step "Installation des dependances"
-        Run "DEPS" { pnpm -C $InstallDir install --frozen-lockfile --prefer-offline }
-        Ok "Dependances installees"
-    }
-
-    if (Want "build") {
-        Step "Compilation de Vault"
-        Run "BUILD" { pnpm -C $InstallDir build }
-        if (-not (Test-Path (Join-Path $InstallDir "dist\desktop\patcher.js"))) { Die "BUILD" "dist\desktop\patcher.js absent" }
-        Ok "Compile"
+    if (Want "extract") {
+        Step "Installation des fichiers dans $InstallDir"
+        if (-not (Test-Path $ZipPath)) { Die "EXTRACT" "archive absente" }
+        New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+        try { Expand-Archive -LiteralPath $ZipPath -DestinationPath $InstallDir -Force } catch { Die "EXTRACT" $_.Exception.Message }
+        Remove-Item $ZipPath -Force -ErrorAction SilentlyContinue
+        if (-not (Test-Path (Join-Path $InstallDir "distdesktoppatcher.js"))) { Die "EXTRACT" "patcher.js absent" }
+        # la cle reste dans le dossier de Vault : Vault la relit pour se mettre a jour et verifier l'acces
+        Write-Utf8 (Join-Path $InstallDir "licence.json") ((@{ key = (Read-Key); verified = $true } | ConvertTo-Json -Compress) + "`n")
+        Ok "Fichiers installes"
     }
 
     if (Want "inject") {
         Step "Ajout de Vault a Discord"
         $patcher = Join-Path ([IO.Path]::GetFullPath($InstallDir)) "dist\desktop\patcher.js"
-        if (-not (Test-Path $patcher)) { Die "BUILD" "dist\desktop\patcher.js absent" }
+        if (-not (Test-Path $patcher)) { Die "EXTRACT" "dist\desktop\patcher.js absent" }
         $wasRunning = Close-Discord
         Inject-Discord $patcher
         if (-not (Test-Injected $InstallDir)) { Die "INJECT" "Discord ne pointe pas vers Vault apres l'injection" }

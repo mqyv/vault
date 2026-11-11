@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { del as dsDel, get as dsGet, set as dsSet } from "@api/DataStore";
+import { del as dsDel, get as dsGet } from "@api/DataStore";
 import { showNotification } from "@api/Notifications";
 import { Logger } from "@utils/Logger";
 import { SettingsRouter, UserStore } from "@webpack/common";
@@ -16,8 +16,9 @@ import { VAULT_OWNER_ID } from "./vaultOwner";
 const API = "https://zjppxtnfohjvsjfqioqh.supabase.co/rest/v1/rpc";
 const KEY = "sb_publishable_um7nFUOFF1T2qbzVsfQaow_SzIjrW9k";
 
-const STORE_KEY = "Vault_licenceKey";
-const STORE_VERIFIED = "Vault_licenceVerified";
+// Older versions kept the key in the browser storage; it is moved to licence.json (Vault's folder) the first time it is read
+const OLD_STORE_KEY = "Vault_licenceKey";
+const OLD_STORE_VERIFIED = "Vault_licenceVerified";
 const CHECK_EVERY_MS = 5 * 60_000;
 const FIRST_CHECK_MS = 8_000;
 // time to read the message before Discord closes
@@ -62,8 +63,23 @@ async function ask(key: string) {
     return await res.json() as { ok: boolean; reason?: string; access_until?: string | null; };
 }
 
+async function readStored(): Promise<{ key: string; verified: boolean; } | null> {
+    const res = await VencordNative.updater.getLicence();
+    if (res.ok && res.value) return res.value;
+
+    const old = await dsGet<string>(OLD_STORE_KEY);
+    if (!old) return null;
+    const moved = { key: old, verified: !!(await dsGet(OLD_STORE_VERIFIED)) };
+    const saved = await VencordNative.updater.setLicence(moved);
+    if (saved.ok) {
+        await dsDel(OLD_STORE_KEY);
+        await dsDel(OLD_STORE_VERIFIED);
+    }
+    return moved;
+}
+
 export async function getSavedKey(): Promise<string | null> {
-    return (await dsGet<string>(STORE_KEY)) ?? null;
+    return (await readStored())?.key ?? null;
 }
 
 export function isOwnerAccount() {
@@ -77,8 +93,8 @@ export async function saveKey(raw: string): Promise<{ ok: true; until: string | 
     try {
         const res = await ask(key);
         if (!res.ok) return { ok: false, message: REASONS[res.reason ?? ""] ?? "Cette clé n'est pas valide." };
-        await dsSet(STORE_KEY, key);
-        await dsSet(STORE_VERIFIED, true);
+        const saved = await VencordNative.updater.setLicence({ key, verified: true });
+        if (!saved.ok) return { ok: false, message: "La clé n'a pas pu être enregistrée sur cet appareil." };
         remindedNoKey = false;
         return { ok: true, until: res.access_until ?? null };
     } catch (err) {
@@ -88,8 +104,9 @@ export async function saveKey(raw: string): Promise<{ ok: true; until: string | 
 }
 
 export async function forgetKey() {
-    await dsDel(STORE_KEY);
-    await dsDel(STORE_VERIFIED);
+    await VencordNative.updater.clearLicence();
+    await dsDel(OLD_STORE_KEY);
+    await dsDel(OLD_STORE_VERIFIED);
 }
 
 function endAccess(reason: string) {
@@ -119,7 +136,8 @@ export async function checkLicence(): Promise<LicenceState> {
     if (!user) return { status: "offline" };
     if (user.id === VAULT_OWNER_ID) return { status: "owner" };
 
-    const key = await getSavedKey();
+    const stored = await readStored();
+    const key = stored?.key;
     if (!key) {
         if (!remindedNoKey) {
             remindedNoKey = true;
@@ -137,7 +155,7 @@ export async function checkLicence(): Promise<LicenceState> {
         if (res.ok) return { status: "ok", until: res.access_until ?? null };
 
         const reason = res.reason ?? "";
-        if (ENDED.has(reason) && await dsGet(STORE_VERIFIED)) {
+        if (ENDED.has(reason) && stored?.verified) {
             endAccess(reason);
             return { status: "ended", reason };
         }

@@ -40,7 +40,8 @@
         "lint:patches": "node scripts/lintPatches.mjs",
         "test": "pnpm buildStandalone && pnpm testTsc && pnpm lint:fix && pnpm lint-styles && pnpm lint:intl && pnpm lint:patches && pnpm generatePluginJson",
         "testWeb": "pnpm lint:fix && pnpm buildWeb && pnpm testTsc",
-        "testTsc": "tsc --noEmit"
+        "testTsc": "tsc --noEmit",
+        "release": "node scripts/packRelease.mjs"
     },
     "dependencies": {
         "@ffmpeg/ffmpeg": "catalog:",

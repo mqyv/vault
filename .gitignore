@@ -42,3 +42,4 @@ misc/bundle
 # intl scripts
 misc/scripts
 .claude/
+dist-release

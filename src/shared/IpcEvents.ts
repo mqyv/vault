@@ -40,6 +40,9 @@ export const enum IpcEvents {
 
     UNINSTALL_VAULT = "VencordUninstallVault",
     VAULT_DEVICE_ID = "VencordVaultDeviceId",
+    VAULT_LICENCE_GET = "VencordVaultLicenceGet",
+    VAULT_LICENCE_SET = "VencordVaultLicenceSet",
+    VAULT_LICENCE_CLEAR = "VencordVaultLicenceClear",
 
     OPEN_MONACO_EDITOR = "VencordOpenMonacoEditor",
     GET_MONACO_THEME = "VencordGetMonacoTheme",
