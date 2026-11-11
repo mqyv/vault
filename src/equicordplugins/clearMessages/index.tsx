@@ -43,7 +43,7 @@ function toast(text: string, variant: "success" | "critical" = "success") {
 // targeted message itself + everything newer than it).
 async function clearMessages(channelId: string, fromMessageId?: string) {
     const myId = UserStore.getCurrentUser()?.id;
-    if (!myId) return;
+    if (!myId) return toast("Could not tell who you are yet. Try again in a moment.", "critical");
 
     clearing.add(channelId);
     toast(fromMessageId
@@ -55,6 +55,8 @@ async function clearMessages(channelId: string, fromMessageId?: string) {
     let failed = 0;
     let failedInARow = 0;
     let lastError = "";
+    let looked = 0; // messages read
+    let mine = 0; // of which yours
 
     try {
         // paginate from newest to oldest using snowflake "before" cursor
@@ -66,12 +68,15 @@ async function clearMessages(channelId: string, fromMessageId?: string) {
             try {
                 const res = await RestAPI.get({ url: `/channels/${channelId}/messages`, query } as any);
                 body = res.body;
-            } catch {
-                toast("Failed to fetch messages, stopping.", "critical");
+            } catch (err: any) {
+                const why = err?.body?.message ?? err?.message ?? String(err);
+                console.error("[ClearMessages] could not read the channel", err);
+                toast(`Could not read this channel (${why}). Stopping.`, "critical");
                 break;
             }
 
             if (!Array.isArray(body) || body.length === 0) break;
+            looked += body.length;
 
             // body is newest-first, which is exactly the order we want to delete in
             let reachedEnd = false;
@@ -83,6 +88,7 @@ async function clearMessages(channelId: string, fromMessageId?: string) {
                 if (fromMessageId && BigInt(msg.id) < BigInt(fromMessageId)) { reachedEnd = true; break; }
 
                 if (msg.author?.id !== myId) continue;
+                mine++;
                 if (!DELETABLE_TYPES.includes(msg.type)) continue;
 
                 try {
@@ -114,7 +120,7 @@ async function clearMessages(channelId: string, fromMessageId?: string) {
         clearing.delete(channelId);
         showNotification({
             title: "Clear Messages",
-            body: `Done — deleted ${deleted} message${deleted === 1 ? "" : "s"}${failed ? `, ${failed} failed (${lastError})` : ""}.`
+            body: `Done — deleted ${deleted} message${deleted === 1 ? "" : "s"}${failed ? `, ${failed} failed (${lastError})` : ""}. Looked at ${looked}, ${mine} ${mine === 1 ? "was" : "were"} yours.`
         });
     }
 }
