@@ -83,7 +83,7 @@ async function main() {
     }
 
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
-    const dirty = git("status", "--porcelain", "--", "src", "scripts", "package.json").length > 0;
+    const dirty = git("status", "--porcelain", "--untracked-files=no", "--", "src", "scripts", "package.json").length > 0;
     const version = `${pkg.version}-${git("rev-parse", "--short=7", "HEAD")}${dirty ? "-dev" : ""}`;
     if (dirty) console.warn("Warning: uncommitted changes in src/ or scripts/, the version is marked -dev.");
 

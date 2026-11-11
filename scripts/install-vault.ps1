@@ -163,7 +163,7 @@ function Start-DiscordAgain([string[]]$names) {
 
 # Meme valeur que le calcul de Vault dans Discord (src/main/licence.ts) : empreinte de l'identifiant de l'ordinateur.
 function Get-DeviceId {
-    $key = [Microsoft.Win32.RegistryKey]::OpenBaseKey("LocalMachine", "Registry64").OpenSubKey("SOFTWAREMicrosoftCryptography")
+    $key = [Microsoft.Win32.RegistryKey]::OpenBaseKey("LocalMachine", "Registry64").OpenSubKey("SOFTWARE\Microsoft\Cryptography")
     $guid = if ($key) { "$($key.GetValue("MachineGuid"))" } else { "" }
     $bytes = [Text.Encoding]::UTF8.GetBytes("vault-device:$guid")
     return -join ([Security.Cryptography.SHA256]::Create().ComputeHash($bytes) | ForEach-Object { $_.ToString("x2") })
@@ -211,7 +211,7 @@ try {
         New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
         try { Expand-Archive -LiteralPath $ZipPath -DestinationPath $InstallDir -Force } catch { Die "EXTRACT" $_.Exception.Message }
         Remove-Item $ZipPath -Force -ErrorAction SilentlyContinue
-        if (-not (Test-Path (Join-Path $InstallDir "distdesktoppatcher.js"))) { Die "EXTRACT" "patcher.js absent" }
+        if (-not (Test-Path (Join-Path $InstallDir "dist\desktop\patcher.js"))) { Die "EXTRACT" "patcher.js absent" }
         # la cle reste dans le dossier de Vault : Vault la relit pour se mettre a jour et verifier l'acces
         Write-Utf8 (Join-Path $InstallDir "licence.json") ((@{ key = (Read-Key); verified = $true } | ConvertTo-Json -Compress) + "`n")
         Ok "Fichiers installes"

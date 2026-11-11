@@ -21,6 +21,7 @@ AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 DefaultDirName={localappdata}\Vault
 DisableProgramGroupPage=yes
+DisableWelcomePage=no
 DisableDirPage=yes
 UninstallDisplayName={#MyAppName}
 UninstallDisplayIcon={uninstallexe}
@@ -72,9 +73,6 @@ Type: filesandordirs; Name: "{app}"
 
 const
   GateUrl = '{#GateUrl}';
-  ColorOk = $80DE4A;    // vert  (#4ADE80, en BGR)
-  ColorBad = $7171F8;   // rouge (#F87171, en BGR)
-  ColorGold = $6AB4E6;  // or de Vault (#E6B46A, en BGR)
 
 var
   InstallFailed: Boolean;
@@ -183,9 +181,8 @@ begin
   Result := 'Accès valable jusqu''au ' + Copy(D, 9, 2) + '/' + Copy(D, 6, 2) + '/' + Copy(D, 1, 4) + '.';
 end;
 
-procedure SetStatus(Text: String; Color: TColor);
+procedure SetStatus(Text: String);
 begin
-  KeyStatus.Font.Color := Color;
   KeyStatus.Caption := Text;
 end;
 
@@ -245,7 +242,6 @@ begin
   Help.Width := KeyPage.SurfaceWidth;
   Help.Cursor := crHand;
   Help.Font.Style := [fsUnderline];
-  Help.Font.Color := ColorGold;
   Help.Caption := 'Pas de clé ? Demande l''accès sur le Discord de Vault.';
   Help.OnClick := @HelpClick;
 end;
@@ -277,18 +273,18 @@ begin
   Key := Trim(KeyEdit.Text);
   if not KeyIsClean(Key) then
   begin
-    SetStatus('La clé ne contient que des lettres, des chiffres et des tirets. Vérifie ce que tu as collé.', ColorBad);
+    SetStatus('✖  La clé ne contient que des lettres, des chiffres et des tirets. Vérifie ce que tu as collé.');
     Result := False;
     Exit;
   end;
 
-  SetStatus('Vérification de ta clé…', WizardForm.Font.Color);
+  SetStatus('Vérification de ta clé…');
   WizardForm.NextButton.Enabled := False;
   WizardForm.Repaint;
 
   if not GateCheck(Key, Response) then
   begin
-    SetStatus('Impossible de joindre le service de Vault. Vérifie ta connexion Internet, puis réessaie.', ColorBad);
+    SetStatus('✖  Impossible de joindre le service de Vault. Vérifie ta connexion Internet, puis réessaie.');
     WizardForm.NextButton.Enabled := True;
     Result := False;
     Exit;
@@ -296,14 +292,14 @@ begin
 
   if Pos('"ok":true', Response) = 0 then
   begin
-    SetStatus(ReasonText(JsonString(Response, 'reason')), ColorBad);
+    SetStatus('✖  ' + ReasonText(JsonString(Response, 'reason')));
     WizardForm.NextButton.Enabled := True;
     Result := False;
     Exit;
   end;
 
   VerifiedKey := Key;
-  SetStatus('Clé valide. ' + UntilText(Response), ColorOk);
+  SetStatus('✔  Clé valide. ' + UntilText(Response));
 end;
 
 // ---- installation ----------------------------------------------------------------------------------------------------------
