@@ -26,10 +26,11 @@
 {"@type":"SoftwareApplication","name":"Vault","url":"https://vaultcord.fr/","description":"Mod du client Discord de bureau : plus de 370 plugins, thèmes et mises à jour automatiques.","applicationCategory":"UtilitiesApplication","operatingSystem":"Windows 10, Windows 11, macOS","inLanguage":"fr","isAccessibleForFree":false},
 {"@type":"FAQPage","mainEntity":[
 {"@type":"Question","name":"Comment avoir accès à Vault ?","acceptedAnswer":{"@type":"Answer","text":"Vault est privé. Rejoins le Discord, fais ta demande dans le salon prévu : si elle est acceptée, tu reçois une clé personnelle en message privé."}},
+{"@type":"Question","name":"J'ai ma clé, comment j'installe Vault ?","acceptedAnswer":{"@type":"Answer","text":"Sur Windows, télécharge l'installeur, lance-le et colle ta clé. Sur Mac, colle la commande du Terminal : elle te demande ta clé. Active d'abord ta clé avec /claim sur le Discord."}},
 {"@type":"Question","name":"Comment fonctionnent les mises à jour ?","acceptedAnswer":{"@type":"Answer","text":"Vault vérifie les correctifs chaque minute, sans relancer Discord, et affiche une notification « Restart ». Un clic et tu es à jour."}},
 {"@type":"Question","name":"Comment désinstaller Vault ?","acceptedAnswer":{"@type":"Answer","text":"Dans les Réglages de Discord, onglet Vault, action « Désinstaller Vault », ou via « Ajout/Suppression de programmes »."}},
 {"@type":"Question","name":"Y a-t-il un risque pour mon compte Discord ?","acceptedAnswer":{"@type":"Answer","text":"Modifier le client Discord enfreint ses conditions d'utilisation. Aucun bannissement n'est connu pour l'usage d'un client mod, mais si ton compte est essentiel, évite tout client mod."}},
-{"@type":"Question","name":"Sur quels systèmes Vault fonctionne-t-il ?","acceptedAnswer":{"@type":"Answer","text":"Windows 10 et 11, et macOS."}}]}]}
+{"@type":"Question","name":"Sur quels systèmes Vault fonctionne-t-il ?","acceptedAnswer":{"@type":"Answer","text":"Windows 10 et 11 avec l'installeur, et macOS avec une commande dans le Terminal."}}]}]}
 </script>
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="icon" href="icon.png" sizes="512x512" type="image/png">
@@ -461,9 +462,23 @@ summary{transition:color .25s}summary:hover{color:var(--gold2)}
       <div class="steps">
         <div class="step"><div><b>Rejoins le Discord</b><span>Candidature d'entrée, puis un seul salon visible&nbsp;: «&nbsp;demander-accès&nbsp;».</span></div></div>
         <div class="step"><div><b>Demande l'accès</b><span>Un bouton envoie ta demande. Tu reçois ta clé en message privé si elle est acceptée.</span></div></div>
-        <div class="step"><div><b>Active ta clé</b><span>La commande /claim ouvre le serveur et te donne les instructions pour installer Vault.</span></div></div>
+        <div class="step"><div><b>Active ta clé</b><span>La commande /claim ouvre le serveur pour toi.</span></div></div>
+        <div class="step"><div><b>Installe Vault</b><span>Lance l'installeur et colle la même clé : il vérifie ton accès, télécharge Vault et l'ajoute à Discord.</span></div></div>
       </div>
       <p style="margin-top:28px"><a class="btn primary" href="https://discord.gg/q97W6EfMV6" target="_blank" rel="noopener">Rejoindre le Discord</a></p>
+    </div>
+    <div class="term rv">
+      <div class="pane on">
+        <p><b style="color:var(--text)">Windows 10 et 11</b><br>Lance l'installeur et colle ta clé. Windows peut afficher «&nbsp;Windows a protégé votre PC&nbsp;» car l'installeur n'est pas signé&nbsp;: Informations complémentaires → Exécuter quand même.</p>
+        <a class="btn primary" href="https://zjppxtnfohjvsjfqioqh.supabase.co/storage/v1/object/public/vault-public/VaultSetup.exe">Télécharger l'installeur</a>
+      </div>
+      <div class="pane on" style="border-top:1px solid var(--line2)">
+        <p><b style="color:var(--text)">macOS</b><br>Colle cette commande dans le Terminal (Applications → Utilitaires) : elle te demande ta clé. Si macOS refuse de modifier Discord, active Terminal dans Réglages Système → Confidentialité et sécurité → Gestion des apps.</p>
+        <div class="code"><button class="copy">Copier</button><pre>curl -fsSL https://zjppxtnfohjvsjfqioqh.supabase.co/storage/v1/object/public/vault-public/install-vault.sh | bash</pre></div>
+      </div>
+      <div class="pane on" style="border-top:1px solid var(--line2)">
+        <p style="margin:0">Il te faut ta clé personnelle : l'installeur ne marche pas sans.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -473,10 +488,11 @@ summary{transition:color .25s}summary:hover{color:var(--gold2)}
     <div class="head rv" style="margin-inline:auto;text-align:center"><h2 class="serif">Questions fréquentes</h2></div>
     <div class="faq rv">
       <details><summary>Comment avoir accès à Vault&nbsp;?</summary><p>Vault est privé. Rejoins le Discord et fais ta demande dans le salon prévu. Si elle est acceptée, tu reçois une clé personnelle en message privé. Elle ne marche que pour ton compte et sur un seul appareil.</p></details>
+      <details><summary>J'ai ma clé, comment j'installe Vault&nbsp;?</summary><p>Sur Windows, télécharge l'installeur (section «&nbsp;Accès&nbsp;» plus haut), lance-le et colle ta clé. Sur Mac, colle la commande du Terminal : elle te demande ta clé. Dans les deux cas, active d'abord ta clé avec /claim sur le Discord. La clé se lie à ton ordinateur au premier usage.</p></details>
       <details><summary>Comment fonctionnent les mises à jour&nbsp;?</summary><p>Vault vérifie les correctifs chaque minute, sans relancer Discord, et affiche une notification «&nbsp;Restart&nbsp;». Un clic et tu es à jour.</p></details>
       <details><summary>Comment désinstaller Vault&nbsp;?</summary><p>Dans les Réglages de Discord, onglet Vault, action «&nbsp;Désinstaller Vault&nbsp;». Si ton accès est retiré, Vault se désinstalle tout seul et Discord redémarre sans lui.</p></details>
       <details><summary>Y a-t-il un risque pour mon compte Discord&nbsp;?</summary><p>Modifier le client Discord enfreint ses conditions d'utilisation. Aucun bannissement n'est connu pour l'usage d'un client mod, mais si ton compte est essentiel, évite tout client mod.</p></details>
-      <details><summary>Sur quels systèmes Vault fonctionne-t-il&nbsp;?</summary><p>Windows 10 et 11, et macOS.</p></details>
+      <details><summary>Sur quels systèmes Vault fonctionne-t-il&nbsp;?</summary><p>Windows 10 et 11 (avec l'installeur) et macOS (avec une commande dans le Terminal).</p></details>
     </div>
   </div>
 </section>

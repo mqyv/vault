@@ -90,13 +90,19 @@ async function publishInstaller(key) {
     execFileSync(iscc, ["installer\\vault.iss"], { cwd: ROOT, stdio: "ignore" });
     const exe = readFileSync(join(ROOT, "installer", "Output", "VaultSetup.exe"));
 
-    const { url, public_url } = await gate({ action: "publish_installer_url", owner_key: key });
+    await uploadPublic(key, "VaultSetup.exe", exe);
+    // the macOS installer is a plain script, run with `curl … | bash`
+    await uploadPublic(key, "install-vault.sh", readFileSync(join(ROOT, "scripts", "install-vault.sh")));
+}
+
+async function uploadPublic(key, file, bytes) {
+    const { url, public_url } = await gate({ action: "publish_installer_url", owner_key: key, file });
     const form = new FormData();
     form.append("cacheControl", "300");
-    form.append("", new Blob([exe], { type: "application/octet-stream" }));
+    form.append("", new Blob([bytes], { type: "application/octet-stream" }));
     const up = await fetch(url, { method: "PUT", headers: { "x-upsert": "true" }, body: form });
-    if (!up.ok) throw new Error(`Installer upload failed: ${up.status} ${(await up.text()).slice(0, 200)}`);
-    console.log(`Installer published (${(exe.length / 1e6).toFixed(1)} MB): ${public_url}`);
+    if (!up.ok) throw new Error(`Upload of ${file} failed: ${up.status} ${(await up.text()).slice(0, 200)}`);
+    console.log(`${file} published (${(bytes.length / 1e6).toFixed(1)} MB): ${public_url}`);
 }
 
 async function main() {

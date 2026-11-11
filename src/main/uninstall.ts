@@ -21,7 +21,14 @@ import { serializeErrors } from "./updater/common";
  * `forced` is for when the licence ended: the uninstaller runs without asking anything, so Discord comes back without Vault.
  */
 function uninstallVault(_: unknown, forced = false) {
-    if (process.platform !== "win32") throw new Error("Uninstalling from Vault is only available on Windows");
+    if (process.platform === "darwin") {
+        // no uninstaller app on macOS: the install script does it (it closes Discord, restores it and opens it again)
+        const mac = join(VAULT_DIR, "scripts", "install-vault.sh");
+        if (!existsSync(mac)) throw new Error("Vault's uninstall script was not found");
+        spawn("/bin/bash", [mac, "--uninstall", "--yes"], { detached: true, stdio: "ignore", env: { ...process.env, VAULT_DIR } }).unref();
+        return "script";
+    }
+    if (process.platform !== "win32") throw new Error("Uninstalling from Vault is only available on Windows and macOS");
 
     const uninstaller = join(VAULT_DIR, "unins000.exe");
     if (existsSync(uninstaller)) {

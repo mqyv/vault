@@ -22,7 +22,7 @@ import BadgeAPI from "@plugins/_api/badges";
 import NoTrack from "@plugins/_core/noTrack";
 import SettingsPlugin from "@plugins/_core/settings";
 import { gitRemote } from "@shared/vencordUserAgent";
-import { DONOR_ROLE_ID, GUILD_ID, IS_WINDOWS, VC_DONOR_ROLE_ID, VC_GUILD_ID } from "@utils/constants";
+import { DONOR_ROLE_ID, GUILD_ID, IS_MAC, IS_WINDOWS, VC_DONOR_ROLE_ID, VC_GUILD_ID } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { isAnyPluginDev } from "@utils/misc";
@@ -261,7 +261,7 @@ function EquicordSettings() {
                         action={() => VencordNative.settings.openFolder()}
                     />
                 )}
-                {!IS_WEB && IS_WINDOWS && (
+                {!IS_WEB && (IS_WINDOWS || IS_MAC) && (
                     <QuickAction
                         Icon={TrashIcon}
                         text="Uninstall Vault"
