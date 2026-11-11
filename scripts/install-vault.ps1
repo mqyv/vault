@@ -49,14 +49,6 @@ function Finish([string]$line) {
     try { [IO.File]::WriteAllText($ProgressFile, "$line`r`n") } catch { }
 }
 
-function Refresh-Path {
-    $m = [Environment]::GetEnvironmentVariable("Path", "Machine")
-    $u = [Environment]::GetEnvironmentVariable("Path", "User")
-    $env:Path = "$m;$u"
-    $npmBin = Join-Path $env:APPDATA "npm"
-    if ((Test-Path $npmBin) -and ($env:Path -notlike "*$npmBin*")) { $env:Path += ";$npmBin" }
-}
-function Have($cmd) { [bool](Get-Command $cmd -ErrorAction SilentlyContinue) }
 function Want([string]$name) { $Stage -eq "all" -or $Stage -eq $name }
 
 # --- Discord ---------------------------------------------------------------------------------
@@ -190,7 +182,6 @@ try {
     if ($Stage -eq "all" -or $Stage -eq "download") {
         "=== Vault install $(Get-Date -Format s) ===" | Out-File $LogFile -Encoding utf8
     }
-    Refresh-Path
 
     if (Want "download") {
         Step "Verification de la cle et telechargement de Vault"

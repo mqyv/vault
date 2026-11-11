@@ -10,6 +10,8 @@
 //   pnpm release --no-build      use the dist/ that already exists
 //   pnpm release --dry           build the zip into dist-release/ and publish nothing
 //   pnpm release --notes "text"  short note stored next to the version
+//   pnpm release --installer     also compile VaultSetup.exe and publish it to the public bucket (the bot links to it)
+//   pnpm release --installer-only  only that: no build, no new version
 //
 // The zip holds only what a user needs: the compiled files, without source maps (they contain the original source) and
 // without the repository. Needs the owner key: VAULT_OWNER_KEY, or the one saved in Vault's own settings.
@@ -76,7 +78,30 @@ function collect(version) {
     return files;
 }
 
+// The installer holds no secret (the licence key protects Vault), so it sits in a public bucket with a stable link.
+async function publishInstaller(key) {
+    const iscc = [
+        process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, "Programs", "Inno Setup 6", "ISCC.exe"),
+        join(process.env["ProgramFiles(x86)"] ?? "C:\\Program Files (x86)", "Inno Setup 6", "ISCC.exe")
+    ].find(p => p && existsSync(p));
+    if (!iscc) throw new Error("Inno Setup not found (winget install JRSoftware.InnoSetup).");
+
+    console.log("Compiling the installer…");
+    execFileSync(iscc, ["installer\\vault.iss"], { cwd: ROOT, stdio: "ignore" });
+    const exe = readFileSync(join(ROOT, "installer", "Output", "VaultSetup.exe"));
+
+    const { url, public_url } = await gate({ action: "publish_installer_url", owner_key: key });
+    const form = new FormData();
+    form.append("cacheControl", "300");
+    form.append("", new Blob([exe], { type: "application/octet-stream" }));
+    const up = await fetch(url, { method: "PUT", headers: { "x-upsert": "true" }, body: form });
+    if (!up.ok) throw new Error(`Installer upload failed: ${up.status} ${(await up.text()).slice(0, 200)}`);
+    console.log(`Installer published (${(exe.length / 1e6).toFixed(1)} MB): ${public_url}`);
+}
+
 async function main() {
+    if (flag("--installer-only")) return publishInstaller(ownerKey());
+
     if (!flag("--no-build")) {
         console.log("Building Vault…");
         execFileSync("node", ["scripts/build/build.mjs"], { cwd: ROOT, stdio: "inherit" });
@@ -111,6 +136,8 @@ async function main() {
 
     await gate({ action: "publish_done", owner_key: key, version, sha256, size: zip.length, notes });
     console.log(`Published ${version}. It is now the version every licensed install receives.`);
+
+    if (flag("--installer")) await publishInstaller(key);
 }
 
 main().catch(err => {

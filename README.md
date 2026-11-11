@@ -28,9 +28,15 @@
 
 ## Accès
 
-Vault est privé : il n'y a pas d'installeur public. Rejoignez le [Discord](https://discord.gg/q97W6EfMV6), demandez l'accès dans le salon prévu, puis activez votre clé avec `/claim`. Elle se lie au premier appareil où elle est utilisée.
+Vault est privé : le code n'est pas distribué et il faut une clé personnelle pour l'installer.
 
-Si l'accès est retiré ou arrive à son terme, Vault se désinstalle et Discord redémarre sans lui.
+1. Rejoignez le [Discord](https://discord.gg/q97W6EfMV6) et demandez l'accès dans le salon prévu.
+2. Si c'est accepté, VaultBot vous envoie une clé en message privé. Activez-la avec `/claim` : le serveur s'ouvre.
+3. Téléchargez l'installeur avec le bouton du bot, lancez-le et collez la même clé. Elle se lie à votre ordinateur au premier usage.
+
+L'installeur vérifie la clé, télécharge Vault et l'ajoute à Discord. Vault se met ensuite à jour par le même service, tant que l'accès est valide. Si l'accès est retiré ou arrive à son terme, Vault se désinstalle et Discord redémarre sans lui.
+
+Pour publier une version (propriétaire) : `pnpm release` (ajouter `--installer` pour republier aussi l'installeur).
 
 ## Désinstaller
 
