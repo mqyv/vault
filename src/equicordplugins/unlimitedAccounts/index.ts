@@ -33,6 +33,8 @@ export default definePlugin({
     name: "UnlimitedAccounts",
     description: "Increases the amount of accounts you can add.",
     tags: ["Utility"],
+    // Vault: switching between any number of accounts is part of the client, so it is on unless someone turns it off
+    enabledByDefault: true,
     authors: [Devs.thororen],
     settings,
     patches: [
