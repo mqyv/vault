@@ -65,7 +65,19 @@ async function fetchLastMessageIds(): Promise<Record<string, string>> {
     return result;
 }
 
-function listFriends(fetched: Record<string, string> = {}): Friend[] {
+/**
+ * For friends without an open DM: asks Discord for the conversation (which opens it), reads its last message, then closes it
+ * again so nothing changes in your DM list. Slow on purpose, one friend at a time.
+ */
+async function checkClosedDm(userId: string): Promise<string | null> {
+    const ch = (await RestAPI.post({ url: "/users/@me/channels", body: { recipients: [userId] } })).body;
+    try {
+        await RestAPI.del({ url: `/channels/${ch.id}` });
+    } catch { /* it stays open: harmless */ }
+    return ch.last_message_id ?? null;
+}
+
+function listFriends(fetched: Record<string, string> = {}, verified: Set<string> = new Set()): Friend[] {
     return RelationshipStore.getFriendIDs().map(id => {
         const user: any = UserStore.getUser(id);
         const dmId = (ChannelStore as any).getDMFromUserId?.(id);
@@ -74,7 +86,7 @@ function listFriends(fetched: Record<string, string> = {}): Friend[] {
             id,
             name: user?.globalName || user?.username || id,
             lastMessageAt: lastId ? SnowflakeUtils.extractTimestamp(lastId) : null,
-            hasDm: !!dmId || id in fetched
+            hasDm: !!dmId || id in fetched || verified.has(id)
         };
     });
 }
@@ -137,19 +149,54 @@ function CleanupModal(props: RenderModalProps) {
     const [confirm, setConfirm] = useState<"selected" | "all" | null>(null);
     const [removed, setRemoved] = useState<Set<string>>(new Set());
     const [fetched, setFetched] = useState<Record<string, string> | null>(null);
+    const [verified, setVerified] = useState<Set<string>>(new Set());
+    const [checking, setChecking] = useState<{ done: number; total: number; } | null>(null);
+    const stopCheck = useRef(false);
     const job = useJob();
 
-    useEffect(() => { fetchLastMessageIds().then(setFetched); }, []);
+    useEffect(() => {
+        fetchLastMessageIds().then(res => {
+            setFetched(res);
+            // friends without an open DM are not verified: they start unselected, so "Remove selected" never takes them by surprise
+            setUnselected(new Set(listFriends(res).filter(f => !f.hasDm).map(f => f.id)));
+        });
+    }, []);
 
     const cutoff = date ? new Date(date + "T23:59:59").getTime() : 0;
+    const everyone = useMemo(() => fetched == null ? [] : listFriends(fetched, verified), [fetched, verified]);
     const inactive = useMemo(
-        () => fetched == null ? [] : listFriends(fetched)
+        () => everyone
             .filter(f => (f.lastMessageAt == null || f.lastMessageAt < cutoff) && !removed.has(f.id))
             .sort((a, b) => (a.lastMessageAt ?? 0) - (b.lastMessageAt ?? 0)),
-        [cutoff, removed, fetched]
+        [everyone, cutoff, removed]
     );
+    const unchecked = everyone.filter(f => !f.hasDm);
+
+    async function checkClosed() {
+        const list = unchecked.slice();
+        stopCheck.current = false;
+        setChecking({ done: 0, total: list.length });
+        let done = 0;
+        const found: Record<string, string> = {};
+        const nowVerified = new Set(verified);
+        for (const f of list) {
+            if (stopCheck.current) break;
+            try {
+                const last = await checkClosedDm(f.id);
+                if (last) found[f.id] = last;
+                nowVerified.add(f.id);
+            } catch { /* leave this friend unverified */ }
+            setChecking({ done: ++done, total: list.length });
+            await sleep(700);
+        }
+        setFetched(prev => ({ ...(prev ?? {}), ...found }));
+        setVerified(nowVerified);
+        // the ones we could read are now trustworthy: select them if they are inactive
+        setUnselected(prev => { const next = new Set(prev); nowVerified.forEach(id => next.delete(id)); return next; });
+        setChecking(null);
+    }
     const selected = inactive.filter(f => !unselected.has(f.id));
-    const busy = job.state.running;
+    const busy = job.state.running || checking != null;
     const targets = confirm === "all" ? inactive : selected;
 
     async function run() {
@@ -173,7 +220,7 @@ function CleanupModal(props: RenderModalProps) {
                 confirm
                     ? { text: "Back", variant: "secondary", disabled: busy, onClick: () => setConfirm(null) }
                     : { text: `Remove all listed (${inactive.length})`, variant: "secondary", disabled: busy || inactive.length === 0, onClick: () => setConfirm("all") },
-                busy ? { text: "Stop", variant: "link", onClick: job.stop } : { text: "Close", variant: "link", onClick: props.onClose }
+                busy ? { text: "Stop", variant: "link", onClick: () => { stopCheck.current = true; job.stop(); } } : { text: "Close", variant: "link", onClick: props.onClose }
             ]}
         >
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -199,6 +246,11 @@ function CleanupModal(props: RenderModalProps) {
             <div style={{ display: "flex", gap: 8, margin: "10px 0" }}>
                 <Button size="small" variant="secondary" disabled={busy} onClick={() => { setUnselected(new Set()); setConfirm(null); }}>Select all</Button>
                 <Button size="small" variant="secondary" disabled={busy} onClick={() => { setUnselected(new Set(inactive.map(f => f.id))); setConfirm(null); }}>Select none</Button>
+                {unchecked.length > 0 && (
+                    <Button size="small" variant="secondary" disabled={busy} onClick={checkClosed}>
+                        {checking ? `Checking ${checking.done} / ${checking.total}...` : `Check closed DMs (${unchecked.length})`}
+                    </Button>
+                )}
             </div>
             <div style={{ maxHeight: 320, overflowY: "auto", border: "1px solid var(--border-subtle)", borderRadius: 6, padding: "4px 10px" }}>
                 {fetched == null && <Paragraph color="text-muted" style={{ padding: "10px 0" }}>Reading your DMs...</Paragraph>}
