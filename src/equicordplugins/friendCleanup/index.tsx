@@ -15,11 +15,18 @@ import definePlugin, { OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
 import { ChannelStore, Menu, Modal, openModal, RelationshipStore, RestAPI, showToast, SnowflakeUtils, TextArea, TextInput, useEffect, useMemo, useRef, UserStore, useState } from "@webpack/common";
 
+import { saveBackup } from "../accountBackup";
+
 const settings = definePluginSettings({
     inactiveDays: {
         type: OptionType.NUMBER,
         description: "A friend counts as inactive when your last message with them is older than this many days (you can also pick the exact date in the window).",
         default: 180
+    },
+    backupBeforeRemove: {
+        type: OptionType.BOOLEAN,
+        description: "Save your friends, blocked accounts and servers to a JSON file in your downloads before removing friends.",
+        default: true
     },
     removeDelayMs: {
         type: OptionType.NUMBER,
@@ -202,6 +209,16 @@ function CleanupModal(props: RenderModalProps) {
     async function run() {
         const list = targets.slice();
         setConfirm(null);
+        // a removal cannot be undone: the full friend list goes to a file first, and nothing is removed if that fails
+        if (settings.store.backupBeforeRemove) {
+            try {
+                const file = await saveBackup("before-friend-cleanup");
+                showToast({ text: `Backup saved before removing: ${file}`, variant: "success" });
+            } catch (err: any) {
+                showToast({ text: `Backup failed, nothing was removed (${err?.message ?? err}). You can turn the backup off in the plugin settings.`, variant: "critical" });
+                return;
+            }
+        }
         const result = await job.start(list, Math.max(0, settings.store.removeDelayMs || 0), async f => {
             await RestAPI.del({ url: `/users/@me/relationships/${f.id}` });
             setRemoved(prev => new Set(prev).add(f.id));

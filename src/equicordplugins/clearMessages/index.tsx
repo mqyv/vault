@@ -10,8 +10,8 @@ import { definePluginSettings } from "@api/Settings";
 import { ClearMessagesIcon } from "@components/VaultIcons";
 import { EquicordDevs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import type { Channel, Message, User } from "@vencord/discord-types";
-import { ChannelStore, Menu, RestAPI, showToast, UserStore } from "@webpack/common";
+import type { Channel, Guild, Message, User } from "@vencord/discord-types";
+import { Alerts, ChannelStore, Menu, RestAPI, showToast, UserStore } from "@webpack/common";
 
 const settings = definePluginSettings({
     delayMs: {
@@ -125,6 +125,122 @@ async function clearMessages(channelId: string, fromMessageId?: string) {
     }
 }
 
+/**
+ * Deletes every message you sent in a whole server. Discord's own search finds them (author = you) across all channels and
+ * threads you can see, so we do not have to walk each channel. Results are read page by page while deleting.
+ */
+async function clearGuild(guildId: string, guildName: string) {
+    const myId = UserStore.getCurrentUser()?.id;
+    if (!myId) return toast("Could not tell who you are yet. Try again in a moment.", "critical");
+
+    const key = `guild:${guildId}`;
+    clearing.add(key);
+    toast(`Clearing your messages in ${guildName}... (open the server menu again to stop)`);
+
+    const seen = new Set<string>();
+    let offset = 0;
+    let deleted = 0;
+    let failed = 0;
+    let failedInARow = 0;
+    let lastError = "";
+
+    try {
+        while (clearing.has(key)) {
+            let res: any;
+            try {
+                res = await RestAPI.get({
+                    url: `/guilds/${guildId}/messages/search`,
+                    query: { author_id: myId, include_nsfw: true, sort_by: "timestamp", sort_order: "desc", offset }
+                } as any);
+            } catch (err: any) {
+                const why = err?.body?.message ?? err?.message ?? String(err);
+                console.error("[ClearMessages] search failed", err);
+                toast(`Could not search this server (${why}). Stopping.`, "critical");
+                break;
+            }
+
+            // 202: Discord is still indexing this server, ask again shortly
+            if (res.status === 202) {
+                await sleep(Math.max(1, Number(res.body?.retry_after) || 2) * 1000);
+                continue;
+            }
+
+            const hits: any[] = (res.body?.messages ?? []).flat().filter((m: any) => m.hit && m.author?.id === myId);
+            const total: number = res.body?.total_results ?? 0;
+            if (hits.length === 0) break;
+
+            let fresh = 0;
+            let kept = 0; // results that stay in the search (not deletable, or refused): the next page must skip them
+            for (const msg of hits) {
+                if (!clearing.has(key)) break;
+                if (seen.has(msg.id)) continue; // deleted already, the search index has not caught up yet
+                seen.add(msg.id);
+                fresh++;
+
+                if (!DELETABLE_TYPES.includes(msg.type)) { kept++; continue; }
+                try {
+                    await RestAPI.del({ url: `/channels/${msg.channel_id}/messages/${msg.id}` });
+                    deleted++;
+                    failedInARow = 0;
+                } catch (err: any) {
+                    if (err?.status === 404) continue; // already gone
+                    failed++;
+                    kept++;
+                    failedInARow++;
+                    lastError = err?.body?.message ?? err?.message ?? String(err);
+                    if (failedInARow >= 5) {
+                        toast(`Discord keeps refusing to delete (${lastError}). Stopping.`, "critical");
+                        clearing.delete(key);
+                        break;
+                    }
+                }
+                await sleep(Math.max(0, settings.store.delayMs || 0));
+            }
+
+            // only stale results came back: step past them instead of reading them forever
+            offset += fresh === 0 ? hits.length : kept;
+            if (offset >= total) break;
+            await sleep(1000); // the search route has its own, stricter rate limit
+        }
+    } finally {
+        clearing.delete(key);
+        showNotification({
+            title: "Clear Messages",
+            body: `Done in ${guildName} — deleted ${deleted} message${deleted === 1 ? "" : "s"}${failed ? `, ${failed} failed (${lastError})` : ""}.`
+        });
+    }
+}
+
+const patchGuildContext: NavContextMenuPatchCallback = (children, { guild }: { guild?: Guild; }) => {
+    if (!guild) return;
+    const key = `guild:${guild.id}`;
+    const isClearing = clearing.has(key);
+
+    children.push(
+        <Menu.MenuItem
+            id="vault-clear-server"
+            label={isClearing ? "Stop Clearing Server" : "Clear My Messages in this Server"}
+            color="danger"
+            icon={() => <ClearMessagesIcon size={18} />}
+            action={() => {
+                if (clearing.has(key)) {
+                    clearing.delete(key);
+                    toast("Stopped clearing.");
+                    return;
+                }
+                Alerts.show({
+                    title: `Clear your messages in ${guild.name}?`,
+                    body: "This deletes every message you sent in this server, in all the channels and threads you can see. It cannot be undone and can take a long time.",
+                    confirmColor: "danger",
+                    confirmText: "Clear",
+                    cancelText: "Cancel",
+                    onConfirm: () => void clearGuild(guild.id, guild.name)
+                });
+            }}
+        />
+    );
+};
+
 const patchUserContext: NavContextMenuPatchCallback = (children, { user, channel }: UserContextProps) => {
     if (!user) return;
 
@@ -176,16 +292,18 @@ const patchMessageContext: NavContextMenuPatchCallback = (children, { message }:
 
 export default definePlugin({
     name: "ClearMessages",
-    description: "Deletes your own messages one by one (newest to oldest). 'Clear Messages' on a user clears a whole DM; 'Clear from this Message' on a message clears that message and everything after it. Re-open the user menu to stop.",
+    description: "Deletes your own messages one by one (newest to oldest). 'Clear Messages' on a user clears a whole DM; 'Clear from this Message' on a message clears that message and everything after it; 'Clear My Messages in this Server' on a server clears it everywhere. Re-open the same menu to stop.",
     authors: [EquicordDevs.eqen],
     enabledByDefault: true,
     tags: ["Utility", "Chat"],
     settings,
     contextMenus: {
         "user-context": patchUserContext,
-        "message": patchMessageContext
+        "message": patchMessageContext,
+        "guild-context": patchGuildContext
     },
 
     // for checking from the console
-    clearMessages
+    clearMessages,
+    clearGuild
 });
