@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { ApplicationCommandInputType } from "@api/Commands";
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Paragraph } from "@components/Paragraph";
@@ -285,6 +286,23 @@ export default definePlugin({
     enabledByDefault: true,
     tags: ["Utility", "Friends"],
     settings,
+    dependencies: ["CommandsAPI"],
+
+    // also reachable from the chat box, for people who do not use the Toolbox
+    commands: [
+        {
+            name: "friend cleanup",
+            description: "Remove friends you have not messaged since a date you choose.",
+            inputType: ApplicationCommandInputType.BUILT_IN,
+            execute: () => void openModal(p => <CleanupModal {...p} />)
+        },
+        {
+            name: "dm all friends",
+            description: "Send one preset message by DM to all your friends.",
+            inputType: ApplicationCommandInputType.BUILT_IN,
+            execute: () => void openModal(p => <DmAllModal {...p} />)
+        }
+    ],
 
     toolboxActions() {
         return (
