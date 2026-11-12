@@ -13,7 +13,7 @@ import { EquicordDevs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { RenderModalProps } from "@vencord/discord-types";
-import { ChannelStore, Menu, Modal, openModal, RelationshipStore, RestAPI, showToast, SnowflakeUtils, TextArea, TextInput, useMemo, useRef, UserStore, useState } from "@webpack/common";
+import { ChannelStore, Menu, Modal, openModal, RelationshipStore, RestAPI, showToast, SnowflakeUtils, TextArea, TextInput, useEffect, useMemo, useRef, UserStore, useState } from "@webpack/common";
 
 const settings = definePluginSettings({
     inactiveDays: {
@@ -46,17 +46,35 @@ interface Friend {
     name: string;
     /** Time of the last message in your DM with them (either side), or null when there is none. */
     lastMessageAt: number | null;
+    /** Whether you have an open DM with them. Without one, "no message" can also mean a closed DM with older messages. */
+    hasDm: boolean;
 }
 
-function listFriends(): Friend[] {
+/** The client only keeps a few DMs in memory: this asks Discord for all your open DMs (friend id -> last message id). */
+async function fetchLastMessageIds(): Promise<Record<string, string>> {
+    const result: Record<string, string> = {};
+    try {
+        const res = await RestAPI.get({ url: "/users/@me/channels" });
+        for (const ch of res.body ?? []) {
+            if (ch.type === 1 && ch.last_message_id && ch.recipient_ids?.[0]) result[ch.recipient_ids[0]] = ch.last_message_id;
+            else if (ch.type === 1 && ch.last_message_id && ch.recipients?.[0]?.id) result[ch.recipients[0].id] = ch.last_message_id;
+        }
+    } catch (err) {
+        console.error("[FriendCleanup] could not read your DMs", err);
+    }
+    return result;
+}
+
+function listFriends(fetched: Record<string, string> = {}): Friend[] {
     return RelationshipStore.getFriendIDs().map(id => {
         const user: any = UserStore.getUser(id);
         const dmId = (ChannelStore as any).getDMFromUserId?.(id);
-        const lastId = dmId ? (ChannelStore.getChannel(dmId) as any)?.lastMessageId : null;
+        const lastId = (dmId ? (ChannelStore.getChannel(dmId) as any)?.lastMessageId : null) ?? fetched[id] ?? null;
         return {
             id,
             name: user?.globalName || user?.username || id,
-            lastMessageAt: lastId ? SnowflakeUtils.extractTimestamp(lastId) : null
+            lastMessageAt: lastId ? SnowflakeUtils.extractTimestamp(lastId) : null,
+            hasDm: !!dmId || id in fetched
         };
     });
 }
@@ -65,7 +83,7 @@ const toInputDate = (ms: number) => {
     const d = new Date(ms);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
-const showDate = (ms: number | null) => ms == null ? "never" : new Date(ms).toLocaleDateString();
+const showDate = (f: Friend) => f.lastMessageAt != null ? new Date(f.lastMessageAt).toLocaleDateString() : f.hasDm ? "no messages" : "no open DM";
 
 /** A job shown inside a modal: progress, Stop, and it ends early after 5 refusals in a row. */
 function useJob() {
@@ -118,14 +136,17 @@ function CleanupModal(props: RenderModalProps) {
     const [unselected, setUnselected] = useState<Set<string>>(new Set());
     const [confirm, setConfirm] = useState<"selected" | "all" | null>(null);
     const [removed, setRemoved] = useState<Set<string>>(new Set());
+    const [fetched, setFetched] = useState<Record<string, string> | null>(null);
     const job = useJob();
+
+    useEffect(() => { fetchLastMessageIds().then(setFetched); }, []);
 
     const cutoff = date ? new Date(date + "T23:59:59").getTime() : 0;
     const inactive = useMemo(
-        () => listFriends()
+        () => fetched == null ? [] : listFriends(fetched)
             .filter(f => (f.lastMessageAt == null || f.lastMessageAt < cutoff) && !removed.has(f.id))
             .sort((a, b) => (a.lastMessageAt ?? 0) - (b.lastMessageAt ?? 0)),
-        [cutoff, removed]
+        [cutoff, removed, fetched]
     );
     const selected = inactive.filter(f => !unselected.has(f.id));
     const busy = job.state.running;
@@ -167,8 +188,8 @@ function CleanupModal(props: RenderModalProps) {
                 />
             </div>
             <Paragraph color="text-muted" style={{ marginTop: 8 }}>
-                Friends whose last message with you (sent by either of you) is before this date, or who never messaged you.
-                Removing a friend cannot be undone: they have to accept a new request to be friends again.
+                Friends whose last message with you (sent by either of you) is before this date. "No open DM" means you have no
+                conversation open with them: it may be closed, with older messages Discord does not show here. Removing a friend cannot be undone: they have to accept a new request to be friends again.
             </Paragraph>
             {confirm && (
                 <Paragraph style={{ marginTop: 10, color: "var(--status-danger)" }}>
@@ -180,7 +201,8 @@ function CleanupModal(props: RenderModalProps) {
                 <Button size="small" variant="secondary" disabled={busy} onClick={() => { setUnselected(new Set(inactive.map(f => f.id))); setConfirm(null); }}>Select none</Button>
             </div>
             <div style={{ maxHeight: 320, overflowY: "auto", border: "1px solid var(--border-subtle)", borderRadius: 6, padding: "4px 10px" }}>
-                {inactive.length === 0 && <Paragraph color="text-muted" style={{ padding: "10px 0" }}>No inactive friend for this date.</Paragraph>}
+                {fetched == null && <Paragraph color="text-muted" style={{ padding: "10px 0" }}>Reading your DMs...</Paragraph>}
+                {fetched != null && inactive.length === 0 && <Paragraph color="text-muted" style={{ padding: "10px 0" }}>No inactive friend for this date.</Paragraph>}
                 {inactive.map(f => (
                     <label key={f.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "6px 0", cursor: busy ? "default" : "pointer" }}>
                         <input
@@ -195,7 +217,7 @@ function CleanupModal(props: RenderModalProps) {
                             }}
                         />
                         <Span weight="semibold" style={{ flex: 1 }}>{f.name}</Span>
-                        <Span color="text-muted">last message: {showDate(f.lastMessageAt)}</Span>
+                        <Span color="text-muted">last message: {showDate(f)}</Span>
                     </label>
                 ))}
             </div>
