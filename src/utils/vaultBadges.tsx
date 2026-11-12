@@ -216,6 +216,7 @@ const FALLBACK_TYPES: BadgeType[] = [
     { key: "staff", label: "Vault Staff", icon_url: null, sort: 1 },
     { key: "helper", label: "Vault Helper", icon_url: null, sort: 2 },
     { key: "bug_hunter", label: "Vault Bug Hunter", icon_url: null, sort: 3 },
+    { key: "vip", label: "Vault VIP", icon_url: null, sort: 3.5 },
     { key: "donor", label: "Vault Donateur", icon_url: null, sort: 4 }
 ];
 
