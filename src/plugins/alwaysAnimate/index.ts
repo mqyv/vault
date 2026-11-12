@@ -98,9 +98,10 @@ export default definePlugin({
         },
         {
             // Gradient roles in member list
-            find: '="left",className:',
+            // Discord moved the member list username into its own module: animateRoleGradient is its prop
+            find: /animateRoleGradient:\i,variant:/,
             replacement: {
-                match: /,animateGradient:/,
+                match: /,animateGradient:(?=\i\|\|)/,
                 replace: ",animateGradient:!0,_oldAnimateGradient:"
             }
         },
