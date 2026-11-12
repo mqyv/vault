@@ -108,7 +108,7 @@ const patchUserContext: NavContextMenuPatchCallback = (children, { user }: UserC
 
 export default definePlugin({
     name: "CopyProfile",
-    description: "Adds a 'Clone Profile to Me' option to the user menu that copies someone's avatar, banner, bio and pronouns onto your own account. Similar idea to Equicord's CopyProfileColors by Crxa, Cortex and Gir0fa.",
+    description: "Ajoute « Clone Profile to Me » au menu d'un utilisateur : copie son avatar, sa bannière, sa bio et ses pronoms sur ton propre compte. Même idée que CopyProfileColors d'Equicord (Crxa, Cortex et Gir0fa).",
     authors: [EquicordDevs.eqen],
     enabledByDefault: true,
     tags: ["Utility", "Friends"],

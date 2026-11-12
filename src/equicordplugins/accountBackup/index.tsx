@@ -65,7 +65,7 @@ export async function saveBackup(reason = "backup"): Promise<string> {
 
 export default definePlugin({
     name: "AccountBackup",
-    description: "Saves your friends, blocked accounts and servers to a JSON file (/backup account). Friend Cleanup also uses it before removing friends.",
+    description: "Enregistre tes amis, tes comptes bloqués et tes serveurs dans un fichier JSON (/backup account). Le nettoyage d'amis s'en sert aussi avant de retirer quelqu'un.",
     authors: [EquicordDevs.eqen],
     enabledByDefault: true,
     tags: ["Utility", "Friends"],
@@ -74,7 +74,7 @@ export default definePlugin({
     commands: [
         {
             name: "backup account",
-            description: "Save your friends, blocked accounts and servers to a file.",
+            description: "Enregistre tes amis, tes comptes bloqués et tes serveurs dans un fichier.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: async () => {
                 try {

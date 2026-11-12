@@ -35,7 +35,7 @@ const settings = definePluginSettings({
     imageScrollMargin: {
         type: OptionType.STRING,
         displayName: "Image Preload Distance",
-        description: "How far ahead to load images, in pixels (300-3000).",
+        description: "À quelle distance à l'avance charger les images, en pixels (300-3000).",
         default: "1500",
         isValid: value => validateInteger(value, 300, 3000),
         restartNeeded: true
@@ -43,7 +43,7 @@ const settings = definePluginSettings({
     messageLoadBuffer: {
         type: OptionType.STRING,
         displayName: "Message Load Buffer",
-        description: "How far ahead to fetch more messages, in pixels (500-3000).",
+        description: "À quelle distance à l'avance charger plus de messages, en pixels (500-3000).",
         default: "1500",
         isValid: value => validateInteger(value, 500, 3000),
         restartNeeded: true
@@ -51,24 +51,24 @@ const settings = definePluginSettings({
     useDiscordMessageCount: {
         type: OptionType.BOOLEAN,
         displayName: "Use Discord's Dynamic Message Count",
-        description: "Let Discord choose how many messages to fetch based on your window and chat settings.",
+        description: "Laisser Discord choisir combien de messages charger selon ta fenêtre et tes réglages de discussion.",
         default: true
     },
     messageCount: {
         type: OptionType.STRING,
         displayName: "Custom Message Count",
-        description: "How many messages to fetch per history request when the dynamic count is disabled (30-100).",
+        description: "Combien de messages charger par requête d'historique quand le nombre dynamique est désactivé (30-100).",
         default: "50",
         isValid: value => validateInteger(value, 30, 100)
     },
     channelOpenScrollMode: {
         type: OptionType.SELECT,
         displayName: "Channel Opening Position",
-        description: "Open unread channels at the saved position (or bottom), always the bottom, or defer to default unread behavior.",
+        description: "Ouvrir les salons non lus à la position enregistrée (ou en bas), toujours en bas, ou laisser Discord faire par défaut.",
         options: [
-            { label: "Discord Default", value: "default" },
-            { label: "Always Bottom", value: "bottom" },
-            { label: "Saved Position", value: "saved", default: true }
+            { label: "Réglage Discord", value: "default" },
+            { label: "Toujours en bas", value: "bottom" },
+            { label: "Position enregistrée", value: "saved", default: true }
         ]
     }
 }, {
@@ -95,7 +95,7 @@ function getCustomMessageCount() {
 
 export default definePlugin({
     name: "BetterBackreading",
-    description: "Improve backreading with earlier message loading and less rubberbanding.",
+    description: "Améliore la relecture de l'historique : chargement des messages plus tôt et moins de sauts d'affichage.",
     authors: [EquicordDevs.Etorix],
     tags: ["Chat", "Utility"],
     settings,

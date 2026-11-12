@@ -16,13 +16,13 @@ import { MediaEngineStore, VoiceActions } from "@webpack/common";
 const settings = definePluginSettings({
     appearMuted: {
         type: OptionType.BOOLEAN,
-        description: "Appear muted to others (you can still talk). Left-click the ghost button.",
+        description: "Apparaître en sourdine micro pour les autres (tu peux quand même parler). Clic gauche sur le bouton fantôme.",
         default: false,
         onChange: () => resend()
     },
     appearDeafened: {
         type: OptionType.BOOLEAN,
-        description: "Appear deafened to others (you can still hear). Right-click the ghost button.",
+        description: "Apparaître en sourdine casque pour les autres (tu entends quand même). Clic droit sur le bouton fantôme.",
         default: false,
         onChange: () => resend()
     }
@@ -74,7 +74,7 @@ function FakeVoiceButton({ iconForeground, hideTooltips, nameplate }: UserAreaRe
 
 export default definePlugin({
     name: "FakeVoice",
-    description: "Appear muted and/or deafened to others while you keep talking and hearing. Ghost button next to mute/deafen: left-click = mute, right-click = deafen (independent). Experimental.",
+    description: "Apparaître en sourdine micro et/ou casque pour les autres tout en continuant à parler et à entendre. Bouton fantôme à côté de micro/casque : clic gauche = micro coupé, clic droit = casque coupé (indépendants). Expérimental.",
     authors: [EquicordDevs.eqen],
     enabledByDefault: true,
     tags: ["Voice"],

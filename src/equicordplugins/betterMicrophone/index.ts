@@ -26,7 +26,7 @@ const MAX_GAIN_DB = 12;
 const settings = definePluginSettings({
     bitrate: {
         type: OptionType.SLIDER,
-        description: "Voice bitrate in kbps. Discord uses 64 by default; 510 is the best Opus can do.",
+        description: "Débit de la voix en kbps. Discord utilise 64 par défaut ; 510 est le maximum d'Opus.",
         markers: [64, 128, 192, 256, 320, 384, 448, MAX_BITRATE_KBPS],
         default: MAX_BITRATE_KBPS,
         stickToMarkers: false,
@@ -34,25 +34,25 @@ const settings = definePluginSettings({
     },
     stereo: {
         type: OptionType.BOOLEAN,
-        description: "Send in stereo (Discord sends mono). Keeps the full image of a stereo microphone or audio interface.",
+        description: "Envoyer en stéréo (Discord envoie en mono). Garde toute l'image d'un micro stéréo ou d'une interface audio.",
         default: true,
         onChange: () => applyToAllConnections()
     },
     studioMode: {
         type: OptionType.BOOLEAN,
-        description: "Native microphone: during calls, send your microphone as it is. Turns off Krisp (noise suppression and its voice detection), standard noise suppression and automatic gain, bypasses Windows' own processing and lifts Discord's sample rate and channel caps. Your Discord voice settings stay as they are.",
+        description: "Micro natif : pendant les appels, envoie ton micro tel quel. Coupe Krisp (réduction de bruit et détection de la voix), la réduction de bruit standard et le gain automatique, contourne le traitement de Windows et lève les limites de fréquence d'échantillonnage et de canaux de Discord. Tes réglages vocaux Discord ne changent pas.",
         default: true,
         onChange: () => { applyProcessing(); applyToAllConnections(); }
     },
     disableEchoCancellation: {
         type: OptionType.BOOLEAN,
-        description: "Also turn off echo cancellation, for a fully untouched signal. Use headphones: with speakers, the others hear themselves.",
+        description: "Coupe aussi l'annulation d'écho, pour un signal totalement intact. Utilise un casque : avec des haut-parleurs, les autres s'entendent eux-mêmes.",
         default: true,
         onChange: () => applyProcessing()
     },
     gainDb: {
         type: OptionType.SLIDER,
-        description: `Extra microphone gain in dB, on top of Discord's input volume (0 = unchanged). Up to +${MAX_GAIN_DB} dB stays clean; turn off "Automatic gain control" in Voice settings or it will undo the boost.`,
+        description: `Gain supplémentaire du micro en dB, en plus du volume d'entrée de Discord (0 = inchangé). Jusqu'à +${MAX_GAIN_DB} dB reste propre ; désactive « Contrôle automatique du gain » dans les réglages vocaux, sinon il annule l'augmentation.`,
         markers: [0, 3, 6, 9, MAX_GAIN_DB],
         default: 0,
         stickToMarkers: false,
@@ -277,7 +277,7 @@ const onConnection = (c: VoiceConnection) => hook(c);
 
 export default definePlugin({
     name: "BetterMicrophone",
-    description: "Best possible microphone quality in calls: Opus up to 510 kbps (Discord uses 64), stereo, and studio mode, which turns off Krisp and the other voice filters during calls. Applied right away. Optional extra gain in dB. Inspired by PhilsBetterMicrophone by philhk (Equicord).",
+    description: "Meilleure qualité de micro possible en appel : Opus jusqu'à 510 kbps (Discord utilise 64), stéréo, et mode studio qui coupe Krisp et les autres filtres vocaux pendant les appels. Appliqué tout de suite. Gain supplémentaire en dB en option. Inspiré de PhilsBetterMicrophone par philhk (Equicord).",
     authors: [EquicordDevs.eqen],
     tags: ["Voice"],
     enabledByDefault: true,

@@ -16,7 +16,7 @@ import { Alerts, ChannelStore, Menu, RestAPI, showToast, UserStore } from "@webp
 const settings = definePluginSettings({
     delayMs: {
         type: OptionType.NUMBER,
-        description: "Delay between each deleted message, in milliseconds (0 = as fast as Discord allows).",
+        description: "Pause entre chaque message supprimé, en millisecondes (0 = aussi vite que Discord le permet).",
         default: 350
     }
 });
@@ -292,7 +292,7 @@ const patchMessageContext: NavContextMenuPatchCallback = (children, { message }:
 
 export default definePlugin({
     name: "ClearMessages",
-    description: "Deletes your own messages one by one (newest to oldest). 'Clear Messages' on a user clears a whole DM; 'Clear from this Message' on a message clears that message and everything after it; 'Clear My Messages in this Server' on a server clears it everywhere. Re-open the same menu to stop.",
+    description: "Supprime tes propres messages un par un, du plus récent au plus ancien. « Clear Messages » sur un utilisateur vide tout le MP ; « Clear from this Message » sur un message supprime celui-ci et tout ce qui suit ; « Clear My Messages in this Server » sur un serveur le vide partout. Rouvre le même menu pour arrêter.",
     authors: [EquicordDevs.eqen],
     enabledByDefault: true,
     tags: ["Utility", "Chat"],

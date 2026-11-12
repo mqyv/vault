@@ -20,27 +20,27 @@ import { saveBackup } from "../accountBackup";
 const settings = definePluginSettings({
     inactiveDays: {
         type: OptionType.NUMBER,
-        description: "A friend counts as inactive when your last message with them is older than this many days (you can also pick the exact date in the window).",
+        description: "Un ami est inactif quand votre dernier message date de plus de ce nombre de jours (tu peux aussi choisir la date exacte dans la fenêtre).",
         default: 180
     },
     backupBeforeRemove: {
         type: OptionType.BOOLEAN,
-        description: "Save your friends, blocked accounts and servers to a JSON file in your downloads before removing friends.",
+        description: "Enregistre tes amis, tes comptes bloqués et tes serveurs dans un fichier JSON (dossier Téléchargements) avant de retirer des amis.",
         default: true
     },
     removeDelayMs: {
         type: OptionType.NUMBER,
-        description: "Delay between each friend removed, in milliseconds.",
+        description: "Pause entre chaque ami retiré, en millisecondes.",
         default: 1000
     },
     dmMessage: {
         type: OptionType.STRING,
-        description: "Message sent to every friend by DM All Friends. You can still edit it in the window before sending.",
+        description: "Message envoyé à chaque ami par « DM à tous les amis ». Tu peux encore le modifier dans la fenêtre avant l'envoi.",
         default: ""
     },
     dmDelayMs: {
         type: OptionType.NUMBER,
-        description: "Delay between each DM sent by DM All Friends, in milliseconds. Keep it high: many DMs in a row can get an account flagged.",
+        description: "Pause entre chaque MP envoyé par « DM à tous les amis », en millisecondes. Garde-la longue : beaucoup de MP d'affilée peuvent faire signaler un compte.",
         default: 5000
     }
 });
@@ -372,7 +372,7 @@ function DmAllModal(props: RenderModalProps) {
 
 export default definePlugin({
     name: "FriendCleanup",
-    description: "Vencord Toolbox actions: remove friends you have not messaged since a date you choose (pick some or all), and send one preset message by DM to all your friends.",
+    description: "Retire les amis avec qui tu n'as pas échangé depuis une date que tu choisis (une sélection ou tous), et envoie un même message en MP à tous tes amis. Commandes /friend cleanup et /dm all friends, aussi dans la Toolbox.",
     authors: [EquicordDevs.eqen],
     enabledByDefault: true,
     tags: ["Utility", "Friends"],
@@ -383,13 +383,13 @@ export default definePlugin({
     commands: [
         {
             name: "friend cleanup",
-            description: "Remove friends you have not messaged since a date you choose.",
+            description: "Retire les amis avec qui tu n'as pas échangé depuis une date que tu choisis.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: () => void openModal(p => <CleanupModal {...p} />)
         },
         {
             name: "dm all friends",
-            description: "Send one preset message by DM to all your friends.",
+            description: "Envoie un même message en MP à tous tes amis.",
             inputType: ApplicationCommandInputType.BUILT_IN,
             execute: () => void openModal(p => <DmAllModal {...p} />)
         }

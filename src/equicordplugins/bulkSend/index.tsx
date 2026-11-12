@@ -19,7 +19,7 @@ import { Modal, openModal, showToast, TextArea, TextInput, useEffect, UserStore,
 const settings = definePluginSettings({
     delayMs: {
         type: OptionType.NUMBER,
-        description: "Delay between each message, in milliseconds (0 = as fast as Discord allows).",
+        description: "Pause entre chaque message, en millisecondes (0 = aussi vite que Discord le permet).",
         default: 0
     }
 });
@@ -192,7 +192,7 @@ const BulkSendButton: ChatBarButtonFactory = ({ channel }) => {
 
 export default definePlugin({
     name: "BulkSend",
-    description: "Adds a chat bar button to send several messages in order (one per line, or the whole text as one), repeat them or keep sending until you press Stop. Includes an invisible block of blank characters.",
+    description: "Ajoute un bouton dans la barre de message pour envoyer plusieurs messages à la suite (un par ligne, ou tout le texte en un seul), les répéter ou continuer jusqu'à ce que tu appuies sur Stop. Inclut un bloc invisible de caractères vides.",
     authors: [EquicordDevs.eqen],
     enabledByDefault: true,
     settings,
