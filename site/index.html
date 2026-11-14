@@ -1,590 +1,167 @@
 <!doctype html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Vault : le mod Discord avec 370+ plugins, pour Windows et macOS</title>
-<meta name="description" content="Vault ajoute plus de 370 plugins, des thèmes et des mises à jour automatiques au client Discord de bureau. Accès sur demande, pour Windows et macOS.">
-<meta name="robots" content="index, follow, max-image-preview:large">
-<meta name="theme-color" content="#07070a">
-<meta name="color-scheme" content="dark">
-<link rel="canonical" href="https://vaultcord.fr/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Vault">
-<meta property="og:locale" content="fr_FR">
-<meta property="og:title" content="Vault : le mod Discord avec 370+ plugins">
-<meta property="og:description" content="Plus de 370 plugins, des thèmes et des mises à jour automatiques pour le client Discord de bureau. Accès sur demande.">
-<meta property="og:url" content="https://vaultcord.fr/">
-<meta property="og:image" content="https://vaultcord.fr/icon.png">
-<meta property="og:image:alt" content="Logo Vault : deux chevrons dorés sur fond noir">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Vault : le mod Discord avec 370+ plugins">
-<meta name="twitter:description" content="Plus de 370 plugins, des thèmes et des mises à jour automatiques pour Discord. Accès sur demande.">
-<meta name="twitter:image" content="https://vaultcord.fr/icon.png">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@graph":[
-{"@type":"SoftwareApplication","name":"Vault","url":"https://vaultcord.fr/","description":"Mod du client Discord de bureau : plus de 370 plugins, thèmes et mises à jour automatiques.","applicationCategory":"UtilitiesApplication","operatingSystem":"Windows 10, Windows 11, macOS","inLanguage":"fr","isAccessibleForFree":false},
-{"@type":"FAQPage","mainEntity":[
-{"@type":"Question","name":"Comment avoir accès à Vault ?","acceptedAnswer":{"@type":"Answer","text":"Vault est privé. Rejoins le Discord, fais ta demande dans le salon prévu : si elle est acceptée, tu reçois une clé personnelle en message privé."}},
-{"@type":"Question","name":"J'ai ma clé, comment j'installe Vault ?","acceptedAnswer":{"@type":"Answer","text":"Sur Windows, télécharge l'installeur, lance-le et colle ta clé. Sur Mac, colle la commande du Terminal : elle te demande ta clé. Active d'abord ta clé avec /claim sur le Discord."}},
-{"@type":"Question","name":"Comment fonctionnent les mises à jour ?","acceptedAnswer":{"@type":"Answer","text":"Vault vérifie les correctifs chaque minute, sans relancer Discord, et affiche une notification « Restart ». Un clic et tu es à jour."}},
-{"@type":"Question","name":"Comment désinstaller Vault ?","acceptedAnswer":{"@type":"Answer","text":"Dans les Réglages de Discord, onglet Vault, action « Désinstaller Vault », ou via « Ajout/Suppression de programmes »."}},
-{"@type":"Question","name":"Y a-t-il un risque pour mon compte Discord ?","acceptedAnswer":{"@type":"Answer","text":"Modifier le client Discord enfreint ses conditions d'utilisation. Aucun bannissement n'est connu pour l'usage d'un client mod, mais si ton compte est essentiel, évite tout client mod."}},
-{"@type":"Question","name":"Sur quels systèmes Vault fonctionne-t-il ?","acceptedAnswer":{"@type":"Answer","text":"Windows 10 et 11 avec l'installeur, et macOS avec une commande dans le Terminal."}}]}]}
-</script>
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="icon" href="icon.png" sizes="512x512" type="image/png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#07070a; --bg2:#0c0c11; --panel:#101016; --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.12);
-  --text:#ecebe6; --muted:#8e8d96; --gold:#d8b46a; --gold2:#f3dca6; --goldd:#8f7236;
-  --radius:18px; --ink:#15110a; --gold-rgb:216,180,106; --ease:cubic-bezier(.2,.7,.2,1);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font:400 16px/1.6 Albert Sans,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}
-::selection{background:var(--gold);color:#000}
-.wrap{width:min(1160px,100% - 40px);margin-inline:auto}
-.serif{font-family:'Bodoni Moda',Georgia,serif;font-weight:400;letter-spacing:-.01em}
-.mono{font-family:'JetBrains Mono',monospace}
-.gold{color:var(--gold)}
-
-/* ambient */
-.ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;background:
-  radial-gradient(900px 500px at 78% -10%,rgba(var(--gold-rgb),.13),transparent 60%),
-  radial-gradient(700px 500px at 5% 20%,rgba(120,100,200,.07),transparent 60%),var(--bg)}
-
-/* nav */
-nav{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:50;width:min(920px,100% - 24px);
-  display:flex;align-items:center;justify-content:space-between;padding:10px 12px 10px 18px;
-  background:rgba(14,14,19,.62);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);
-  border:1px solid var(--line2);border-radius:999px}
-.brand{display:flex;align-items:center;gap:10px;font:500 15px Albert Sans;letter-spacing:.14em;text-transform:uppercase}
-.brand img{width:28px;height:28px}
-.links{display:flex;gap:26px;font-size:14px;color:var(--muted)}
-.links a{transition:color .2s}.links a:hover{color:var(--text)}
-.btn{display:inline-flex;align-items:center;gap:10px;padding:12px 22px;border-radius:999px;font:500 14px Albert Sans;border:1px solid var(--line2);transition-property:transform,background-color,border-color,box-shadow,color,opacity;transition-duration:.3s;transition-timing-function:cubic-bezier(.2,.7,.2,1);cursor:pointer;background:transparent;color:var(--text)}
-.btn:hover{border-color:var(--gold);transform:translateY(-1px)}
-.btn.primary{background-color:var(--gold);background-image:linear-gradient(180deg,var(--gold2),var(--gold));color:var(--ink);border:0;box-shadow:0 1px 2px rgba(0,0,0,.5),0 8px 16px -8px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.45)}
-.btn.primary:hover{background-image:linear-gradient(180deg,#fff0c4,var(--gold2));box-shadow:0 1px 2px rgba(0,0,0,.5),0 12px 20px -8px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.55)}
-.btn.sm{padding:9px 18px}
-.nav-end{display:flex;align-items:center;gap:8px}
-.discord{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:999px;border:1px solid var(--line2);color:var(--muted);transition-property:color,border-color,background-color,transform;transition-duration:.3s;transition-timing-function:cubic-bezier(.2,.7,.2,1)}
-.discord svg{width:20px;height:20px;fill:currentColor}
-.discord:hover{color:var(--gold2);border-color:var(--gold);background-color:rgba(var(--gold-rgb),.08);transform:translateY(-1px)}
-.discord:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-
-/* hero */
-header.hero{padding:170px 0 90px;text-align:center;position:relative}
-.pill{display:inline-flex;align-items:center;gap:10px;padding:7px 14px 7px 10px;border:1px solid var(--line2);border-radius:999px;font-size:13px;color:var(--muted);background:rgba(255,255,255,.02)}
-.pill i{width:7px;height:7px;border-radius:50%;background:#5be39b}
-h1{font-size:clamp(46px,8.4vw,104px);line-height:1;margin:28px auto 26px;max-width:12ch}
-h1 em{font-style:italic}
-.lead{max-width:560px;margin:0 auto 40px;color:var(--muted);font-size:clamp(16px,2vw,19px)}
-.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.meta{margin-top:22px;font-size:13px;color:var(--muted)}
-
-/* mock window */
-.stage{margin:80px auto 0;width:min(980px,100%);perspective:1600px}
-.window{border:1px solid var(--line2);border-radius:20px;background:linear-gradient(180deg,#14141b,#0d0d12);overflow:hidden;
-  box-shadow:0 60px 120px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.02);
-  transform:rotateX(7deg);transition:transform .8s var(--ease);text-align:left}
-.stage:hover .window{transform:rotateX(0)}
-.bar{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line)}
-.bar b{width:11px;height:11px;border-radius:50%;background:#2a2a33}
-.bar span{margin-left:auto;font:12px 'JetBrains Mono';color:var(--muted)}
-.win-body{display:grid;grid-template-columns:200px 1fr;min-height:340px}
-.side{border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
-
-.main{padding:22px}
-.search{display:flex;gap:10px;align-items:center;padding:11px 14px;border:1px solid var(--line2);border-radius:11px;color:var(--muted);font-size:14px;margin-bottom:16px}
-.rows{display:grid;gap:10px}
-.row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.015)}
-.row p{font-size:14px}.row small{display:block;color:var(--muted);font-size:12.5px}
-.tg{width:38px;height:22px;border-radius:99px;background:#26262e;position:relative;flex:none}
-.tg::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#777;transition-property:transform,background-color,width;transition-property:transform,background-color,border-color,box-shadow,color,opacity;transition-duration:.3s;transition-timing-function:cubic-bezier(.2,.7,.2,1);}
-.tg.on{background:var(--gold)}.tg.on::after{transform:translateX(16px);background:var(--ink)}.tg.on:active::after{transform:translateX(14px)}
-
-/* interactive window */
-.side button{all:unset;box-sizing:border-box;cursor:pointer;padding:9px 12px;border-radius:9px;transition-property:transform,background-color,border-color,box-shadow,color,opacity;transition-duration:.2s;transition-timing-function:cubic-bezier(.2,.7,.2,1);font-size:14px;color:var(--muted)}
-.side button:hover{color:var(--text);background:rgba(255,255,255,.03)}
-.side button.on{background:rgba(var(--gold-rgb),.1);color:var(--gold2)}
-.side button:focus-visible,.tg:focus-visible,.seg button:focus-visible,.theme:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.main{min-width:0}
-section.tp{display:none;padding:0;animation:fin .35s var(--ease)}section.tp.on{display:block}
-@keyframes fin{from{opacity:0;transform:translateY(6px)}}
-.search input{all:unset;flex:1;min-width:0;color:var(--text)}.search input::placeholder{color:var(--muted)}
-.search em{font:normal 12px 'JetBrains Mono';color:var(--gold);white-space:nowrap}
-.search:focus-within{border-color:var(--gold)}
-.row{transition:border-color .2s,background .2s}.row:hover{border-color:var(--line2);background:rgba(255,255,255,.03)}
-.tg{border:0;padding:0;cursor:pointer}
-.empty,.sub{color:var(--muted);font-size:14px}.ttl{font-weight:500;margin-bottom:4px}.sub{margin-bottom:16px}
-.themes{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.theme{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.015);transition-property:transform,background-color,border-color,box-shadow,color,opacity;transition-duration:.25s;transition-timing-function:cubic-bezier(.2,.7,.2,1);}
-.theme:hover{border-color:var(--line2);transform:translateY(-2px)}.theme[aria-pressed=true]{border-color:var(--gold);background:rgba(var(--gold-rgb),.07)}
-.theme i{width:34px;height:34px;border-radius:50%;flex:none;border:1px solid rgba(255,255,255,.18)}.theme p{font-size:14px}.theme small{display:block;color:var(--muted);font-size:12.5px}
-.upd{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px;border:1px solid rgba(var(--gold-rgb),.3);border-radius:12px;background:rgba(var(--gold-rgb),.05);margin-bottom:12px}
-.upd small{color:var(--muted);font-size:12.5px}.upd p{font-size:15px}
-.seg{display:flex;gap:6px;padding:5px;border:1px solid var(--line2);border-radius:12px;margin:10px 0 22px}
-.seg button{all:unset;box-sizing:border-box;flex:1;text-align:center;padding:10px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--muted);transition-property:transform,background-color,border-color,box-shadow,color,opacity;transition-duration:.25s;transition-timing-function:cubic-bezier(.2,.7,.2,1);}
-.seg button.on{background:var(--gold);color:var(--ink);font-weight:500}
-.bars{display:grid;gap:16px}.bars>div{display:grid;grid-template-columns:90px 1fr 70px;align-items:center;gap:14px;font-size:14px;color:var(--muted)}
-.bars i{height:8px;border-radius:9px;background:#1b1b22;overflow:hidden}.bars b{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--goldd),var(--gold2));transition:width .7s var(--ease)}
-.bars em{font:normal 12.5px 'JetBrains Mono';color:var(--text);text-align:right}
-.spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:rot .7s linear infinite;vertical-align:-2px;margin-right:6px}
-@keyframes rot{to{transform:rotate(1turn)}}
-@media(max-width:620px){.themes{grid-template-columns:1fr}.bars>div{grid-template-columns:70px 1fr 56px}
-  .side{display:flex!important;flex-direction:row;overflow-x:auto;scrollbar-width:none;border-right:0;border-bottom:1px solid var(--line);padding:10px}.side button{white-space:nowrap}.win-body{grid-template-columns:1fr}}
-
-/* sections */
-section{padding:110px 0}
-.head{max-width:640px;margin-bottom:56px}
-.head h2{font-size:clamp(34px,5vw,58px);line-height:1.05;margin:16px 0}
-.head p{color:var(--muted)}
-
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.card{position:relative;padding:30px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);overflow:hidden;transition:border-color .3s,transform .4s var(--ease)}
-.card::before{content:"";position:absolute;inset:0;background:radial-gradient(380px circle at var(--mx,50%) var(--my,0%),rgba(var(--gold-rgb),.13),transparent 60%);opacity:0;transition:opacity .3s}
-.card:hover{border-color:rgba(var(--gold-rgb),.35);transform:translateY(-4px)}.card:hover::before{opacity:1}
-.card>*{position:relative}
-.ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;border:1px solid var(--line2);color:var(--gold);margin-bottom:22px;background:rgba(var(--gold-rgb),.05)}
-.ic svg{width:21px;height:21px}
-.card h3{font:500 18px Albert Sans;margin-bottom:8px}
-.card p{color:var(--muted);font-size:14.5px}
-.tag{display:inline-block;margin-top:18px;font:12px 'JetBrains Mono';letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(var(--gold-rgb),.3);border-radius:99px;padding:4px 10px}
-
-/* marquee */
-
-/* install */
-.install{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:start}
-.steps{display:grid;gap:26px;counter-reset:s;margin-top:34px}
-.step{display:flex;gap:18px;counter-increment:s}
-.step::before{content:counter(s);flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--gold);color:var(--gold);font:500 14px 'JetBrains Mono'}
-.step b{display:block;font-weight:500}.step span{color:var(--muted);font-size:14.5px}
-.term{border:1px solid var(--line2);border-radius:var(--radius);background:#0a0a0e;overflow:hidden}
-.tabs{display:flex;border-bottom:1px solid var(--line)}
-.tabs button{flex:1;padding:15px;background:none;border:0;color:var(--muted);font:500 13.5px Albert Sans;cursor:pointer;border-bottom:2px solid transparent;transition-property:transform,background-color,border-color,box-shadow,color,opacity;transition-duration:.2s;transition-timing-function:cubic-bezier(.2,.7,.2,1);}
-.tabs button[aria-selected=true]{color:var(--gold2);border-color:var(--gold)}
-.pane{padding:26px;display:none}.pane.on{display:block}
-.pane p{color:var(--muted);font-size:14.5px;margin-bottom:20px}
-pre{position:relative;background:#06060a;border:1px solid var(--line);border-radius:12px;padding:18px 90px 18px 18px;font:13px/1.7 'JetBrains Mono',monospace;color:#d6d4cb;overflow-x:auto;white-space:pre}
-pre .c{color:#5f5e68}
-.code{position:relative} /* holds the copy button outside the scrolling block, so it stays put */
-.copy{position:absolute;z-index:1;top:10px;right:10px;padding:6px 12px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);font:12px Albert Sans;cursor:pointer}
-.copy:hover{color:var(--gold2);border-color:var(--gold)}
-
-/* faq */
-.faq{max-width:780px;margin-inline:auto}
-details{border-bottom:1px solid var(--line);padding:22px 0}
-summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:20px;font:300 22px 'Bodoni Moda',serif}
-summary::-webkit-details-marker{display:none}
-summary::after{content:"+";color:var(--gold);font:300 26px/1 Albert Sans;transition:transform .3s}
-details[open] summary::after{transform:rotate(45deg)}
-details p{margin-top:14px;color:var(--muted);max-width:62ch}
-
-.final{text-align:center;border:1px solid var(--line2);border-radius:28px;padding:90px 24px;background:radial-gradient(600px 300px at 50% 0%,rgba(var(--gold-rgb),.16),transparent 70%),var(--bg2)}
-.final h2{font-size:clamp(36px,6vw,70px);line-height:1.02;margin:14px auto 30px;max-width:14ch}
-footer{padding:50px 0 60px;color:var(--muted);font-size:13px}
-footer .row2{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}
-footer p{max-width:560px;margin-top:10px;font-size:12.5px}
-footer a:hover{color:var(--text)}
-
-/* reveal */
-.rv{opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
-.rv.in{opacity:1;transform:none}
-
-@media(max-width:900px){
-  .links{display:none}.grid{grid-template-columns:1fr 1fr}.install{grid-template-columns:1fr;gap:40px}
-}
-@media(max-width:620px){
-  .grid{grid-template-columns:1fr}.win-body{grid-template-columns:1fr}.side{display:none}
-  header.hero{padding-top:130px;padding-bottom:56px}section{padding:56px 0}.window{transform:none}
-}
-#rows{max-height:340px;overflow-y:auto;padding:2px 6px 2px 0;margin-right:-6px;scrollbar-width:thin;scrollbar-color:rgba(var(--gold-rgb),.35) transparent;-webkit-mask-image:linear-gradient(#000 calc(100% - 28px),transparent);mask-image:linear-gradient(#000 calc(100% - 28px),transparent);padding-bottom:26px}
-#rows::-webkit-scrollbar{width:6px}#rows::-webkit-scrollbar-thumb{background:rgba(var(--gold-rgb),.35);border-radius:9px}
-/* touch targets + small phones */
-.tg{position:relative}
-.tg::before{content:"";position:absolute;inset:-11px -8px}
-.search{min-height:46px}
-.seg button,.side button,.theme,.tabs button,summary,.copy{min-height:44px}
-.tabs{overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
-.tabs button{white-space:nowrap}
-@media(max-width:620px){
-  nav{padding:6px 8px 6px 14px}.btn.sm{min-height:44px;padding:0 18px}.discord{width:44px;height:44px}
-  .btn{min-height:46px}
-  .tabs button{padding:14px 12px;font-size:13px}
-  .pane{padding:20px 16px}.term{border-radius:14px}
-  pre{padding:16px 14px;font-size:12px;padding-right:14px;padding-top:46px}
-  .copy{top:8px;right:8px;min-height:32px}
-  .win-body{min-height:0;grid-auto-rows:min-content}.main{padding:16px}
-  .bar span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.seg{gap:4px;padding:4px}.seg button{padding:10px 2px;font-size:13px}
-  .pill{border-radius:16px;text-align:center;font-size:12.5px}
-  .final{padding:60px 18px;border-radius:22px}
-  .row{gap:14px}.upd{flex-direction:column;align-items:flex-start}
-  .step{gap:14px}summary{font-size:19px}
-  .tag{font-size:11px}
-}
-@media(max-width:360px){
-  h1{font-size:44px}
-}
-/* browser surfaces, focus, skip link */
-html{scrollbar-color:#2c2c36 var(--bg);scrollbar-width:thin}
-input{caret-color:var(--gold)}
-:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:6px}
-.skip{position:absolute;left:12px;top:-64px;z-index:100;padding:12px 18px;border-radius:10px;background:var(--gold);color:var(--ink);font-weight:500;transition-property:top;transition-duration:.2s}
-.skip:focus{top:12px}
-h1,h2,h3{text-wrap:balance}
-p,li,summary,small{text-wrap:pretty}
-#cnt,.bars em{font-variant-numeric:tabular-nums}
-.btn:active,.chip-btn:active,.theme:active,.seg button:active{transform:scale(.97)}
-.tg:active::after{width:20px}
-/* feature rows (no cards, no icons) */
-.feat{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:64px;align-items:start}
-.feat-intro{position:sticky;top:110px}
-.feat-intro h2{font-size:clamp(32px,4.4vw,52px);line-height:1.08;margin-bottom:18px;max-width:14ch}
-.feat-intro p{color:var(--muted);max-width:44ch}
-.frows{list-style:none;border-top:1px solid var(--line)}
-.frows li{padding:26px 0;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,200px) 1fr;gap:24px}
-.frows h3{font:500 17px Albert Sans;color:var(--gold2)}
-.frows p{color:var(--muted);font-size:15px;max-width:52ch}
-.note{color:var(--muted);font-size:12.5px;margin-top:14px}
-@media(max-width:900px){.feat{grid-template-columns:1fr;gap:36px}.feat-intro{position:static}}
-@media(max-width:620px){.frows li{grid-template-columns:1fr;gap:6px;padding:22px 0}}
-/* ---- motion ---- */
-/* scroll progress */
-.progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:60;transform-origin:0 50%;transform:scaleX(var(--p,0));background:linear-gradient(90deg,var(--goldd),var(--gold2));pointer-events:none}
-/* nav tightens once you scroll */
-nav{transition:background-color .4s var(--ease),box-shadow .4s var(--ease),top .4s var(--ease)}
-nav.scrolled{top:10px;background:rgba(10,10,14,.82);box-shadow:0 12px 30px -12px rgba(0,0,0,.8)}
-/* drifting ambient glows */
-.ambient{overflow:hidden}
-.ambient::before,.ambient::after{content:"";position:absolute;border-radius:50%;filter:blur(70px);opacity:.55}
-.ambient::before{width:520px;height:520px;left:60%;top:-180px;background:rgba(var(--gold-rgb),.16);animation:drift1 22s ease-in-out infinite alternate}
-.ambient::after{width:440px;height:440px;left:-120px;top:35%;background:rgba(120,100,200,.10);animation:drift2 28s ease-in-out infinite alternate}
-@keyframes drift1{to{transform:translate(-160px,140px) scale(1.15)}}
-@keyframes drift2{to{transform:translate(180px,-120px) scale(.9)}}
-/* hero entrance, one orchestrated sequence */
-.hero .wrap>*{animation:rise 1s var(--ease) backwards}
-.hero .wrap>:nth-child(1){animation-delay:.05s}.hero .wrap>:nth-child(2){animation-delay:.15s}
-.hero .wrap>:nth-child(3){animation-delay:.3s}.hero .wrap>:nth-child(4){animation-delay:.42s}
-.hero .wrap>:nth-child(5){animation-delay:.52s}.hero .wrap>:nth-child(n+6){animation-delay:.62s}
-@keyframes rise{from{opacity:0;transform:translateY(22px);filter:blur(6px)}}
-/* live dot */
-.pill i{position:relative}
-.pill i::after{content:"";position:absolute;inset:0;border-radius:50%;background:inherit;animation:ping 2.2s cubic-bezier(0,0,.2,1) infinite}
-@keyframes ping{75%,100%{transform:scale(2.6);opacity:0}}
-/* quiet details: barely there, only noticed when you look */
-/* the headline accent and the logo breathe between the two golds */
-h1 em.gold{animation:breathe 7s ease-in-out 1.5s infinite}
-@keyframes breathe{50%{color:var(--gold2)}}
-.brand img{animation:glint 9s ease-in-out 2s infinite}
-@keyframes glint{0%,86%,100%{filter:none}93%{filter:brightness(1.35)}}
-/* a faint warm light follows the pointer on desktop */
-.cursor-light{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .6s;
-  background:radial-gradient(420px circle at var(--cx,50%) var(--cy,50%),rgba(var(--gold-rgb),.045),transparent 70%)}
-.cursor-light.on{opacity:1}
-/* nav links: a thin rule grows under the hovered one */
-.links a{position:relative}
-.links a::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:1px;background:var(--gold);transform:scaleX(0);transition:transform .35s var(--ease)}
-.links a:hover::after{transform:scaleX(1)}
-/* section titles settle their spacing as they appear */
-.rv h2{letter-spacing:.02em;transition:letter-spacing 1.2s var(--ease)}
-.rv.in h2{letter-spacing:-.01em}
-/* demo window: plugin rows arrive one after another, the active count ticks */
-#rows .row{animation:fin .4s var(--ease) backwards}
-#rows .row:nth-child(2){animation-delay:.03s}#rows .row:nth-child(3){animation-delay:.06s}#rows .row:nth-child(4){animation-delay:.09s}
-#rows .row:nth-child(5){animation-delay:.12s}#rows .row:nth-child(n+6){animation-delay:.15s}
-#cnt{display:inline-block}#cnt.tick{animation:tick .35s var(--ease)}
-@keyframes tick{40%{transform:scale(1.18)}}
-/* faq questions lean in slightly on hover */
-summary{transition:color .25s}summary:hover{color:var(--gold2)}
-/* demo window: slow float, tilt follows the pointer on desktop */
-.stage.in .window{animation:float 7s ease-in-out 1s infinite}
-@keyframes float{50%{translate:0 -8px}}
-@media(hover:hover) and (pointer:fine){
-  .window{transform:rotateX(calc(7deg + var(--ty,0deg))) rotateY(var(--tx,0deg));transition:transform .6s var(--ease)}
-  .stage:hover .window{transform:rotateX(var(--ty,0deg)) rotateY(var(--tx,0deg))}
-}
-/* buttons: light sweep */
-.btn.primary{position:relative;overflow:hidden}
-.btn.primary::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);transform:translateX(-120%);transition:transform .8s var(--ease);pointer-events:none}
-.btn.primary:hover::after{transform:translateX(120%)}
-/* feature rows: staggered reveal, gold rule draws in on hover */
-.frows li{position:relative;transition-delay:calc(var(--i,0) * 70ms)}
-.frows li::after{content:"";position:absolute;left:0;bottom:-1px;height:1px;width:100%;background:linear-gradient(90deg,var(--gold),transparent);transform:scaleX(0);transform-origin:0 50%;transition:transform .7s var(--ease)}
-.frows li:hover::after{transform:scaleX(1)}
-.frows h3{transition:transform .4s var(--ease)}
-.frows li:hover h3{transform:translateX(6px)}
-/* install steps light up one after another */
-.steps{position:relative}
-.steps::before{content:"";position:absolute;left:16.5px;top:34px;bottom:34px;width:1px;background:linear-gradient(var(--gold),rgba(var(--gold-rgb),.15));transform:scaleY(0);transform-origin:top;transition:transform 1.2s var(--ease) .3s}
-.rv.in .steps::before{transform:scaleY(1)}
-.step::before{background:var(--bg);position:relative;z-index:1;transition:background-color .5s,color .5s,box-shadow .5s}
-.rv.in .step::before{background:var(--gold);color:var(--ink);box-shadow:0 0 0 6px rgba(var(--gold-rgb),.12)}
-.rv.in .step:nth-child(1)::before{transition-delay:.3s}.rv.in .step:nth-child(2)::before{transition-delay:.8s}.rv.in .step:nth-child(3)::before{transition-delay:1.3s}
-/* tab panes slide in */
-.pane.on{animation:fin .4s var(--ease)}
-/* faq answers open smoothly where the browser supports it */
-@supports (interpolate-size:allow-keywords){
-  :root{interpolate-size:allow-keywords}
-  details::details-content{height:0;overflow:clip;transition:height .45s var(--ease),content-visibility .45s allow-discrete}
-  details[open]::details-content{height:auto}
-}
-/* final call to action: a slow gold ring around the box */
-.final{position:relative;isolation:isolate}
-.final::before{content:"";position:absolute;inset:-1px;border-radius:inherit;padding:1px;z-index:-1;
-  background:conic-gradient(from var(--a,0deg),transparent 0 70%,rgba(var(--gold-rgb),.9) 85%,transparent 100%);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:ring 6s linear infinite}
-@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
-@keyframes ring{to{--a:360deg}}
-
-@media(prefers-reduced-motion:reduce){
-  .ambient::before,.ambient::after,.hero .wrap>*,.stage.in .window,.final::before,.pill i::after{animation:none}
-  .cursor-light{display:none}
-  .rv h2{letter-spacing:-.01em;transition:none}
-  .btn.primary::after{display:none}
-  .frows li{transition-delay:0s}
-  html{scroll-behavior:auto}
-  *{animation:none!important}
-  .rv{transform:none;transition-property:opacity;transition-duration:.3s}
-  .window,.stage:hover .window,.btn:active,.chip-btn:active,.theme:active,.seg button:active,.theme:hover{transform:none}
-  .tg::after{transition-property:background-color}
-  .bars b{transition-duration:.01s}
-  .spin{border-style:dotted}
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vault — Ton Discord, sans limites.</title>
+  <meta name="description" content="Vault est un client Discord modifié : 370+ plugins, thèmes, mises à jour automatiques et accès par clé.">
+  <meta name="theme-color" content="#040506">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23040506'/%3E%3Cpath d='M14 22 L50 82 L86 22' fill='none' stroke='%23ff6363' stroke-width='10.5'/%3E%3Cpath d='M30 22 L50 56 L70 22' fill='none' stroke='%23ff6363' stroke-width='10.5'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Inter:wght@400;500&display=swap">
+  <link rel="stylesheet" href="assets/style.css">
+  <script>
+    // si le script d'animation ne se charge pas, l'écran d'entrée ne doit jamais bloquer la page
+    document.documentElement.classList.add("js");
+    setTimeout(function () { var i = document.querySelector(".intro"); if (i) i.remove(); }, 7000);
+  </script>
 </head>
 <body>
-<a class="skip" href="#main">Aller au contenu</a>
-<div class="ambient"></div>
-<div class="progress" aria-hidden="true"></div>
-<div class="cursor-light" aria-hidden="true"></div>
 
-<nav aria-label="Navigation principale">
-  <a class="brand" href="#top"><img src="logo.svg" alt="" width="28" height="28">Vault</a>
-  <div class="links"><a href="#features">Fonctions</a><a href="#install">Accès</a><a href="#faq">FAQ</a></div>
-  <div class="nav-end">
-    <a class="discord" href="https://discord.gg/q97W6EfMV6" target="_blank" rel="noopener" aria-label="Rejoindre le Discord de Vault" title="Discord"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"/></svg></a>
-    <a class="btn primary sm" href="https://discord.gg/q97W6EfMV6" target="_blank" rel="noopener">Demander l'accès</a>
+  <div class="intro" aria-hidden="true">
+    <svg viewBox="0 0 100 100"><path class="p1" d="M14 22 L50 82 L86 22"/><path class="p2" d="M30 22 L50 56 L70 22"/></svg>
   </div>
-</nav>
 
-<main id="main">
-<header class="hero" id="top">
-  <div class="wrap">
-    <span class="pill"><i></i>Version 1.15 · mises à jour automatiques</span>
-    <h1 class="serif">Discord, avec <em class="gold"><span id="n370">370</span>+ plugins</em> en plus.</h1>
-    <p class="lead">Vault est un mod pour le client Discord de bureau. Il ajoute des plugins, des thèmes et une sauvegarde cloud, et se met à jour tout seul.</p>
-    <div class="cta">
-      <a class="btn primary" href="https://discord.gg/q97W6EfMV6" target="_blank" rel="noopener">Demander l'accès</a>
-      <a class="btn" href="#install">Comment ça marche</a>
+  <header class="nav" id="nav">
+    <a class="brand" href="#haut" aria-label="Vault, accueil">
+      <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M14 22 L50 82 L86 22" fill="none" stroke="#ff6363" stroke-width="10.5" stroke-miterlimit="10"/><path d="M30 22 L50 56 L70 22" fill="none" stroke="#ff6363" stroke-width="10.5" stroke-miterlimit="10"/></svg>
+      Vault
+    </a>
+    <nav class="nav-links" aria-label="Navigation principale">
+      <a href="#plugins">Plugins</a>
+      <a href="#fonctionnalites">Fonctionnalités</a>
+      <a href="#cle">Espace membres</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-secondary" href="login.html">Se connecter</a>
+      <a class="btn btn-primary" href="#">Télécharger</a>
     </div>
-    <p class="meta">Accès sur demande · Windows 10 &amp; 11 · macOS</p>
+  </header>
 
-    <p class="meta" style="margin-top:56px">La fenêtre ci-dessous est une démo&nbsp;: tu peux cliquer partout.</p>
-    <div class="stage rv" style="margin-top:20px">
-      <div class="window">
-        <div class="bar"><b></b><b></b><b></b><span id="crumb">Réglages › Vault › Plugins</span></div>
-        <div class="win-body">
-          <div class="side" role="tablist" aria-label="Réglages Vault">
-            <button class="on" role="tab" id="tab-plugins" aria-controls="tp-plugins" aria-selected="true" tabindex="0" data-tab="plugins">Plugins</button>
-            <button role="tab" id="tab-themes" aria-controls="tp-themes" aria-selected="false" tabindex="-1" data-tab="themes">Thèmes</button>
-            <button role="tab" id="tab-updates" aria-controls="tp-updates" aria-selected="false" tabindex="-1" data-tab="updates">Mises à jour</button>
-            <button role="tab" id="tab-cloud" aria-controls="tp-cloud" aria-selected="false" tabindex="-1" data-tab="cloud">Cloud</button>
-            <button role="tab" id="tab-perf" aria-controls="tp-perf" aria-selected="false" tabindex="-1" data-tab="perf">Performance</button>
-          </div>
-          <div class="main">
-            <section class="tp on" id="tp-plugins" role="tabpanel" aria-labelledby="tab-plugins">
-              <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Rechercher un plugin…" autocomplete="off" aria-label="Rechercher un plugin"><em id="cnt"></em></label>
-              <div class="rows" id="rows"></div>
-              <p class="empty" id="empty" hidden>Aucun plugin ne correspond. Il y en a 370+ dans la vraie version.</p>
-            </section>
-            <section class="tp" id="tp-themes" role="tabpanel" aria-labelledby="tab-themes">
-              <p class="ttl">Thème</p><p class="sub">Choisis une couleur&nbsp;: tout le site s'adapte.</p>
-              <div class="themes" id="themes"></div>
-            </section>
-            <section class="tp" id="tp-updates" role="tabpanel" aria-labelledby="tab-updates">
-              <div class="upd"><div><p>Vault <b id="ver">1.15.13.0</b></p><small id="updmsg">Dernière vérification&nbsp;: à l'instant</small></div><button class="btn sm" id="chk">Rechercher</button></div>
-              <div class="rows">
-                <div class="row"><div><p>Mises à jour automatiques</p><small>Télécharge les correctifs en arrière-plan</small></div><button class="tg on" role="switch" aria-checked="true" aria-label="Mises à jour automatiques"></button></div>
-                <div class="row"><div><p>Me prévenir une fois terminée</p><small>Notification «&nbsp;Restart&nbsp;» comme Discord</small></div><button class="tg on" role="switch" aria-checked="true" aria-label="Notification de mise à jour"></button></div>
-              </div>
-            </section>
-            <section class="tp" id="tp-cloud" role="tabpanel" aria-labelledby="tab-cloud">
-              <div class="rows">
-                <div class="row"><div><p>Synchronisation cloud</p><small id="cloudmsg">Tes réglages sont sauvegardés et partagés entre tes appareils</small></div><button class="tg on" id="cloudtg" role="switch" aria-checked="true" aria-label="Synchronisation cloud"></button></div>
-                <div class="row"><div><p>Exporter mes réglages</p><small>Fichier JSON, à restaurer quand tu veux</small></div><button class="btn sm" id="exp">Exporter</button></div>
-              </div>
-            </section>
-            <section class="tp" id="tp-perf" role="tabpanel" aria-labelledby="tab-perf">
-              <p class="ttl">Préréglage</p>
-              <div class="seg" id="seg" role="radiogroup" aria-label="Préréglage de performance"><button role="radio" data-p="0" aria-checked="false">Équilibré</button><button role="radio" data-p="1" aria-checked="true" class="on">Performance</button><button role="radio" data-p="2" aria-checked="false">Maximum</button></div>
-              <div class="bars">
-                <div><span>Mémoire</span><i><b id="b1"></b></i><em id="v1"></em></div>
-                <div><span>Processeur</span><i><b id="b2"></b></i><em id="v2"></em></div>
-                <div><span>Démarrage</span><i><b id="b3"></b></i><em id="v3"></em></div>
-              </div>
-              <p class="note">Valeurs d'illustration, pas des mesures.</p>
-            </section>
-          </div>
+  <main id="haut">
+
+    <!-- ===== haut de page ===== -->
+    <section class="hero" id="accueil">
+      <div class="blobs" aria-hidden="true">
+        <div class="blob-wrap b1"><div class="blob"></div></div>
+        <div class="blob-wrap b2"><div class="blob"></div></div>
+        <div class="blob-wrap b3"><div class="blob"></div></div>
+        <div class="grain"></div>
+      </div>
+      <div class="hero-inner container">
+        <h1 class="hero-title">Ton Discord, sans limites.</h1>
+        <p class="lead hero-lead">Vault ajoute à Discord 370+ plugins, des thèmes et des mises à jour automatiques. L'accès se fait par clé.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="#">Télécharger Vault</a>
+          <a class="btn btn-secondary btn-lg" href="https://discord.gg/q97W6EfMV6" target="_blank" rel="noopener">Rejoindre le serveur Discord</a>
         </div>
       </div>
-    </div>
-  </div>
-</header>
-
-<section id="features">
-  <div class="wrap feat">
-    <div class="feat-intro rv">
-      <h2 class="serif">Des plugins que tu ne trouveras pas ailleurs</h2>
-      <p>Vault ajoute aussi des thèmes, la sauvegarde cloud et les mises à jour automatiques. Ces plugins sont écrits pour Vault et n'existent nulle part ailleurs. La liste s'allonge au fil des mises à jour.</p>
-    </div>
-    <ol class="frows">
-      <li class="rv"><h3>BulkSend</h3><p>Un bouton dans la barre de chat : une ligne par message, envoyés dans l'ordre avec un délai réglable en millisecondes.</p></li>
-      <li class="rv"><h3>ClearMessages</h3><p>Supprime tes propres messages, du plus récent au plus ancien, dans un MP entier ou à partir d'un message précis.</p></li>
-      <li class="rv"><h3>CopyProfile</h3><p>Copie l'avatar, la bannière, la bio et les pronoms d'un utilisateur sur ton propre compte, après confirmation.</p></li>
-      <li class="rv"><h3>FakeVoice</h3><p>Apparais muet ou sourd pour les autres tout en continuant à parler et à entendre. Clic gauche pour le micro, clic droit pour le casque. Expérimental.</p></li>
-      <li class="rv"><h3>BetterMicrophone</h3><p>Débloque un débit d'encodage plus élevé pour le micro. Expérimental : une mise à jour de Discord peut le casser.</p></li>
-      <li class="rv"><h3>VaultPerformance</h3><p>Trois préréglages pour alléger Discord : Équilibré (sans flou), Performance (sans animations non plus) et Maximum (sans ombres ni filtres). Activé par défaut en Performance.</p></li>
-    </ol>
-  </div>
-</section>
-
-<section id="install">
-  <div class="wrap install">
-    <div class="rv"><h2 class="serif" style="font-size:clamp(32px,4.6vw,52px);line-height:1.08;margin:0 0 16px;max-width:16ch">Vault est privé</h2>
-      <p style="color:var(--muted);max-width:46ch">L'accès se demande sur le Discord. Si ta demande est acceptée, tu reçois une clé personnelle, liée à ton compte et à ton appareil.</p>
-      <div class="steps">
-        <div class="step"><div><b>Rejoins le Discord</b><span>Candidature d'entrée, puis un seul salon visible&nbsp;: «&nbsp;demander-accès&nbsp;».</span></div></div>
-        <div class="step"><div><b>Demande l'accès</b><span>Un bouton envoie ta demande. Tu reçois ta clé en message privé si elle est acceptée.</span></div></div>
-        <div class="step"><div><b>Active ta clé</b><span>La commande /claim ouvre le serveur pour toi.</span></div></div>
-        <div class="step"><div><b>Installe Vault</b><span>Lance l'installeur et colle la même clé : il vérifie ton accès, télécharge Vault et l'ajoute à Discord.</span></div></div>
+      <div class="scroll-hint" aria-hidden="true">
+        <span class="label">Défiler</span>
+        <span class="bar"></span>
       </div>
-      <p style="margin-top:28px"><a class="btn primary" href="https://discord.gg/q97W6EfMV6" target="_blank" rel="noopener">Rejoindre le Discord</a></p>
-    </div>
-    <div class="term rv">
-      <div class="pane on">
-        <p><b style="color:var(--text)">Windows 10 et 11</b><br>Lance l'installeur et colle ta clé. Windows peut afficher «&nbsp;Windows a protégé votre PC&nbsp;» car l'installeur n'est pas signé&nbsp;: Informations complémentaires → Exécuter quand même.</p>
-        <a class="btn primary" href="https://zjppxtnfohjvsjfqioqh.supabase.co/storage/v1/object/public/vault-public/VaultSetup.exe">Télécharger l'installeur</a>
+    </section>
+
+    <!-- ===== fenêtre d'appli ===== -->
+    <section class="showcase" id="plugins">
+      <div class="container showcase-grid">
+        <div class="showcase-copy">
+          <span class="label">Plugins</span>
+          <h2 class="split">Active ce que tu veux. Garde le reste.</h2>
+          <p class="reveal-up">Chaque plugin s'allume ou s'éteint d'un clic. Tu gardes un Discord à ta main, sans rien subir de ce dont tu n'as pas besoin.</p>
+        </div>
+        <div class="window keycap" aria-label="Aperçu de la liste des plugins">
+          <div class="win-bar" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="label">Vault · Plugins</span></div>
+          <div class="search" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            Rechercher parmi 370+ plugins
+          </div>
+          <ul class="list" aria-hidden="true">
+            <div class="selector"></div>
+            <li class="row"><div><div class="name">BulkSend</div><div class="desc">Envoie plusieurs messages à la suite</div></div><span class="switch"><span class="knob"></span></span></li>
+            <li class="row"><div><div class="name">ClearMessages</div><div class="desc">Supprime tes propres messages en un clic</div></div><span class="switch"><span class="knob"></span></span></li>
+            <li class="row"><div><div class="name">FriendCleanup</div><div class="desc">Retire les amis inactifs</div></div><span class="switch"><span class="knob"></span></span></li>
+            <li class="row"><div><div class="name">AccountBackup</div><div class="desc">Sauvegarde tes amis et tes serveurs</div></div><span class="switch"><span class="knob"></span></span></li>
+            <li class="row"><div><div class="name">FakeVoice</div><div class="desc">Apparais en sourdine tout en parlant</div></div><span class="switch"><span class="knob"></span></span></li>
+            <li class="row"><div><div class="name">BetterMicrophone</div><div class="desc">Micro en qualité studio</div></div><span class="switch"><span class="knob"></span></span></li>
+            <li class="row"><div><div class="name">VaultPerformance</div><div class="desc">Allège Discord pour le rendre plus rapide</div></div><span class="switch"><span class="knob"></span></span></li>
+            <li class="row"><div><div class="name">UnlimitedAccounts</div><div class="desc">Autant de comptes que tu veux</div></div><span class="switch"><span class="knob"></span></span></li>
+          </ul>
+        </div>
       </div>
-      <div class="pane on" style="border-top:1px solid var(--line2)">
-        <p><b style="color:var(--text)">macOS</b><br>Colle cette commande dans le Terminal (Applications → Utilitaires) : elle te demande ta clé. Si macOS refuse de modifier Discord, active Terminal dans Réglages Système → Confidentialité et sécurité → Gestion des apps.</p>
-        <div class="code"><button class="copy">Copier</button><pre>curl -fsSL https://zjppxtnfohjvsjfqioqh.supabase.co/storage/v1/object/public/vault-public/install-vault.sh | bash</pre></div>
+    </section>
+
+    <!-- ===== 4 cartes ===== -->
+    <section class="section" id="fonctionnalites">
+      <div class="container">
+        <div class="section-head">
+          <span class="label">Fonctionnalités</span>
+          <h2 class="split">Tout ce que Discord ne te laisse pas faire.</h2>
+          <p class="reveal-up">Quatre raisons de passer à Vault.</p>
+        </div>
+        <div class="cards">
+          <article class="card keycap">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></div>
+            <span class="label">01</span>
+            <h3>370+ plugins</h3>
+            <p>Messages, vocal, confort, confidentialité : tu actives ce dont tu as besoin, et rien de plus.</p>
+          </article>
+          <article class="card keycap">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z"/></svg></div>
+            <span class="label">02</span>
+            <h3>Thèmes</h3>
+            <p>Change les couleurs et l'allure de Discord avec des thèmes, jusqu'à ce qu'il te ressemble.</p>
+          </article>
+          <article class="card keycap">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg></div>
+            <span class="label">03</span>
+            <h3>Mises à jour automatiques</h3>
+            <p>Vault se tient à jour : une pastille t'avertit, un clic, et Discord redémarre à jour.</p>
+          </article>
+          <article class="card tinted keycap" id="cle">
+            <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9"/><path d="M16 7l3 3"/></svg></div>
+            <span class="badge" style="align-self:flex-start"><i></i>Sur clé</span>
+            <h3>Espace membres par clé</h3>
+            <p>L'accès se fait avec une clé personnelle. Pas de clé ? Demande-la sur le serveur Discord.</p>
+          </article>
+        </div>
       </div>
-      <div class="pane on" style="border-top:1px solid var(--line2)">
-        <p style="margin:0">Il te faut ta clé personnelle : l'installeur ne marche pas sans.</p>
+    </section>
+
+    <!-- ===== appel à l'action ===== -->
+    <section class="cta">
+      <div class="blobs" aria-hidden="true"><div class="blob-wrap"><div class="blob"></div></div></div>
+      <div class="container cta-inner">
+        <span class="label">Prêt ?</span>
+        <h2 class="split">Passe à un Discord à ta mesure.</h2>
+        <p class="reveal-up">Télécharge Vault, entre ta clé, et active ce qui te plaît.</p>
+        <div class="hero-actions reveal-up">
+          <a class="btn btn-primary btn-lg" href="#">Télécharger Vault</a>
+          <a class="btn btn-secondary btn-lg" href="login.html">J'ai une clé</a>
+        </div>
       </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <a class="brand" href="#haut" aria-label="Vault, haut de page">
+        <svg viewBox="0 0 100 100" aria-hidden="true"><path d="M14 22 L50 82 L86 22" fill="none" stroke="#ff6363" stroke-width="10.5" stroke-miterlimit="10"/><path d="M30 22 L50 56 L70 22" fill="none" stroke="#ff6363" stroke-width="10.5" stroke-miterlimit="10"/></svg>
+        Vault
+      </a>
+      <p class="footer-line">
+        <span>© 2026 Vault</span><span class="sep" aria-hidden="true">|</span>
+        <a href="https://vaultcord.fr">vaultcord.fr</a><span class="sep" aria-hidden="true">|</span>
+        <a href="https://discord.gg/q97W6EfMV6" target="_blank" rel="noopener">Discord</a><span class="sep" aria-hidden="true">|</span>
+        <a href="login.html">Connexion</a>
+      </p>
     </div>
-  </div>
-</section>
+  </footer>
 
-<section id="faq">
-  <div class="wrap">
-    <div class="head rv" style="margin-inline:auto;text-align:center"><h2 class="serif">Questions fréquentes</h2></div>
-    <div class="faq rv">
-      <details><summary>Comment avoir accès à Vault&nbsp;?</summary><p>Vault est privé. Rejoins le Discord et fais ta demande dans le salon prévu. Si elle est acceptée, tu reçois une clé personnelle en message privé. Elle ne marche que pour ton compte et sur un seul appareil.</p></details>
-      <details><summary>J'ai ma clé, comment j'installe Vault&nbsp;?</summary><p>Sur Windows, télécharge l'installeur (section «&nbsp;Accès&nbsp;» plus haut), lance-le et colle ta clé. Sur Mac, colle la commande du Terminal : elle te demande ta clé. Dans les deux cas, active d'abord ta clé avec /claim sur le Discord. La clé se lie à ton ordinateur au premier usage.</p></details>
-      <details><summary>Comment fonctionnent les mises à jour&nbsp;?</summary><p>Vault vérifie les correctifs chaque minute, sans relancer Discord, et affiche une notification «&nbsp;Restart&nbsp;». Un clic et tu es à jour.</p></details>
-      <details><summary>Comment désinstaller Vault&nbsp;?</summary><p>Dans les Réglages de Discord, onglet Vault, action «&nbsp;Désinstaller Vault&nbsp;». Si ton accès est retiré, Vault se désinstalle tout seul et Discord redémarre sans lui.</p></details>
-      <details><summary>Y a-t-il un risque pour mon compte Discord&nbsp;?</summary><p>Modifier le client Discord enfreint ses conditions d'utilisation. Aucun bannissement n'est connu pour l'usage d'un client mod, mais si ton compte est essentiel, évite tout client mod.</p></details>
-      <details><summary>Sur quels systèmes Vault fonctionne-t-il&nbsp;?</summary><p>Windows 10 et 11 (avec l'installeur) et macOS (avec une commande dans le Terminal).</p></details>
-    </div>
-  </div>
-</section>
-
-<section style="padding-top:0">
-  <div class="wrap"><div class="final rv">
-    <h2 class="serif">Prêt à essayer Vault ?</h2>
-    <a class="btn primary" href="https://discord.gg/q97W6EfMV6" target="_blank" rel="noopener">Demander l'accès</a>
-  </div></div>
-</section>
-</main>
-
-<footer>
-  <div class="wrap">
-    <div class="row2">
-      <div><a class="brand" href="#top"><img src="logo.svg" alt="" width="28" height="28">Vault</a>
-        <p>Discord est une marque de Discord Inc., citée à titre descriptif uniquement. Vault n'est ni affilié ni approuvé par Discord Inc. Basé sur Equicord et Vencord, sous licence GPL-3.0.</p></div>
-      <div style="display:flex;gap:26px"><a href="https://github.com/mqyv/vault">GitHub</a><a href="https://github.com/mqyv/vault/blob/main/PRIVACY_POLICY.md">Confidentialité</a><a href="https://github.com/mqyv/vault/blob/main/LICENSE">Licence</a></div>
-    </div>
-  </div>
-</footer>
-
-<script>
-// reveal on scroll
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
-document.querySelectorAll('.rv').forEach(el=>io.observe(el));
-const calm=matchMedia('(prefers-reduced-motion: reduce)').matches;
-// stagger the feature rows
-document.querySelectorAll('.frows li').forEach((li,i)=>li.style.setProperty('--i',i));
-// scroll progress + nav state
-const nav=document.querySelector('nav'),bar=document.querySelector('.progress');
-const onScroll=()=>{const h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.setProperty('--p',max>0?h.scrollTop/max:0);nav.classList.toggle('scrolled',h.scrollTop>40)};
-addEventListener('scroll',onScroll,{passive:true});onScroll();
-// headline count-up
-if(!calm){const n=document.getElementById('n370'),t0=performance.now()+250;
-  const tick=t=>{const k=Math.min(1,Math.max(0,(t-t0)/1400)),e=1-Math.pow(1-k,3);n.textContent=Math.round(370*e);if(k<1)requestAnimationFrame(tick)};
-  n.textContent='0';requestAnimationFrame(tick)}
-// faint light under the pointer (desktop only)
-if(!calm&&matchMedia('(hover:hover) and (pointer:fine)').matches){const cl=document.querySelector('.cursor-light');
-  addEventListener('pointermove',e=>{cl.style.setProperty('--cx',e.clientX+'px');cl.style.setProperty('--cy',e.clientY+'px');cl.classList.add('on')},{passive:true});
-  document.addEventListener('pointerleave',()=>cl.classList.remove('on'))}
-// demo window tilts toward the pointer
-const stage=document.querySelector('.stage'),win=document.querySelector('.window');
-if(!calm&&matchMedia('(hover:hover) and (pointer:fine)').matches){
-  stage.addEventListener('pointermove',e=>{const r=stage.getBoundingClientRect();win.style.setProperty('--tx',((e.clientX-r.left)/r.width-.5)*6+'deg');win.style.setProperty('--ty',-((e.clientY-r.top)/r.height-.5)*5+'deg')});
-  stage.addEventListener('pointerleave',()=>{win.style.removeProperty('--tx');win.style.removeProperty('--ty')})}
-// spotlight cards
-document.querySelectorAll('.card').forEach(c=>c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();c.style.setProperty('--mx',e.clientX-r.left+'px');c.style.setProperty('--my',e.clientY-r.top+'px')}));
-// ---- interactive settings window ----
-const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const PL=[["BulkSend","Envoie plusieurs messages d'un coup, délai réglable",1],["VaultPerformance","Préréglage pour un Discord plus fluide",1],["CopyProfile","Clone un profil complet : bannière, couleurs, thème",1],["ClearMessages","Supprime tes messages depuis n'importe quel point",0],["FakeVoice","Faux mute / sourd indépendants",0],["BetterMicrophone","Débloque le bitrate du micro (expérimental)",0],["MessageLogger","Garde une trace des messages supprimés ou modifiés",1],["ShowHiddenChannels","Affiche les salons que tu ne peux pas voir",0],["ViewIcons","Ouvre avatars, bannières et icônes en grand",1],["Translate","Traduis n'importe quel message en un clic",0]];
-const ON=new Set(PL.filter(p=>p[2]).map(p=>p[0]));
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const setTg=(b,on)=>{b.classList.toggle('on',on);b.setAttribute('aria-checked',on)};
-const count=()=>{const c=$('#cnt'),t=ON.size+' actifs';if(c.textContent&&c.textContent!==t){c.classList.remove('tick');void c.offsetWidth;c.classList.add('tick')}c.textContent=t};
-function renderPlugins(){
-  const q=$('#q').value.trim().toLowerCase();
-  const src=PL.map(p=>({n:p[0],d:p[1]}));
-  const list=src.filter(p=>!q||(p.n+' '+p.d).toLowerCase().includes(q)).slice(0,40);
-  $('#rows').innerHTML=list.map(p=>`<div class="row"><div><p>${esc(p.n)}</p><small>${esc(p.d)}</small></div><button class="tg${ON.has(p.n)?' on':''}" role="switch" aria-checked="${ON.has(p.n)}" aria-label="${esc(p.n)}" data-n="${esc(p.n)}"></button></div>`).join('');
-  $('#empty').hidden=list.length>0;count()}
-$('#rows').addEventListener('click',e=>{const b=e.target.closest('.tg');if(!b)return;const n=b.dataset.n;if(ON.has(n))ON.delete(n);else ON.add(n);setTg(b,ON.has(n));count()});
-$('#q').addEventListener('input',renderPlugins);renderPlugins();
-// tabs
-const sideBtns=$$('.side button');
-function openTab(t){const L={plugins:"Plugins",themes:"Thèmes",updates:"Mises à jour",cloud:"Cloud",perf:"Performance"};$("#crumb").textContent="Réglages › Vault › "+L[t];sideBtns.forEach(b=>{const on=b.dataset.tab===t;b.classList.toggle('on',on);b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1});$$('.tp').forEach(p=>p.classList.toggle('on',p.id==='tp-'+t));if(t==='perf')perf(+$('#seg .on').dataset.p)}
-sideBtns.forEach((b,i)=>{b.onclick=()=>openTab(b.dataset.tab);b.onkeydown=e=>{const d={ArrowDown:1,ArrowRight:1,ArrowUp:-1,ArrowLeft:-1}[e.key];if(!d)return;e.preventDefault();const n=sideBtns[(i+d+sideBtns.length)%sideBtns.length];n.focus();openTab(n.dataset.tab)}});
-// themes
-const TH=[["Or","Le classique",["#f3dca6","#d8b46a","#8f7236"]],["Saphir","Bleu profond",["#b9d4ff","#6aa2f2","#2f5da8"]],["Rubis","Rouge intense",["#ffc2c2","#ec6b6b","#9c3030"]],["Émeraude","Vert profond",["#bff3d3","#5fd49b","#2a7a55"]]];
-const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)).join(',');
-function applyTheme(i){const c=TH[i][2],r=document.documentElement.style;r.setProperty('--gold2',c[0]);r.setProperty('--gold',c[1]);r.setProperty('--goldd',c[2]);r.setProperty('--gold-rgb',hex2rgb(c[1]));$$('.theme').forEach((b,j)=>b.setAttribute('aria-pressed',j===i));try{localStorage.setItem('vault-theme',i)}catch{}}
-$('#themes').innerHTML=TH.map((t,i)=>`<button class="theme" aria-pressed="false" data-i="${i}"><i style="background:${t[2][1]};color:${t[2][1]}"></i><div><p>${t[0]}</p><small>${t[1]}</small></div></button>`).join('');
-$('#themes').addEventListener('click',e=>{const b=e.target.closest('.theme');if(b)applyTheme(+b.dataset.i)});
-let saved=0;try{saved=+localStorage.getItem('vault-theme')||0}catch{}
-applyTheme(TH[saved]?saved:0);
-// generic switches
-$$('#tp-updates .tg,#cloudtg').forEach(b=>b.addEventListener('click',()=>setTg(b,!b.classList.contains('on'))));
-$('#cloudtg').addEventListener('click',e=>{$('#cloudmsg').textContent=e.currentTarget.classList.contains('on')?'Tes réglages sont sauvegardés et partagés entre tes appareils':'Synchronisation désactivée : tes réglages restent sur cet appareil'});
-// update check
-$('#chk').onclick=function(){const b=this;b.disabled=true;b.innerHTML='<span class="spin"></span>Recherche…';$('#updmsg').textContent='Contact du serveur…';
-  setTimeout(()=>{b.disabled=false;b.textContent='Rechercher';$('#updmsg').textContent='Tu utilises la dernière version ✓'},1400)};
-// export
-$('#exp').onclick=function(){const b=this;b.textContent='Exporté ✓';setTimeout(()=>{b.textContent='Exporter'},1800);
-  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({vault:"1.15.13.0",plugins:Object.fromEntries(PL.map(p=>[p[0],!!p[2]]))},null,2)],{type:'application/json'}));a.download='vault-settings.json';a.click()}catch{}};
-// performance
-const PERF=[[[64,48,70],["480 Mo","18 %","2,4 s"]],[[42,30,52],["320 Mo","11 %","1,8 s"]],[[28,20,38],["240 Mo","7 %","1,3 s"]]];
-function perf(i){[1,2,3].forEach((n,k)=>{$('#b'+n).style.width=PERF[i][0][k]+'%';$('#v'+n).textContent=PERF[i][1][k]})}
-$$('#seg button').forEach(b=>b.onclick=()=>{$$('#seg button').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-checked',x===b)});perf(+b.dataset.p)});
-// tabs
-// copy
-document.querySelectorAll('.copy').forEach(b=>b.onclick=async()=>{const t=b.parentElement.querySelector('pre').innerText.trim();
-  try{await navigator.clipboard.writeText(t);b.textContent='Copié ✓';setTimeout(()=>b.textContent='Copier',1800)}catch{}});
-</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="assets/home.js"></script>
 </body>
 </html>
