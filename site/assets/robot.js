@@ -23,7 +23,7 @@
     gsap.set(el.bot, { svgOrigin: "200 376" });
     gsap.set(el.fall, { svgOrigin: "252 376" });
     gsap.set([el.shadow, el.shadowLoop], { svgOrigin: "200 414" });
-    gsap.set(el.shackle, { svgOrigin: "210 267" });
+    gsap.set(el.shackle, { svgOrigin: "210 278" });
 
     /* ---------- visage ---------- */
     function face(eyes = "normal", mouth = "neutral", blush = 0) {
@@ -39,7 +39,8 @@
     const qy = gsap.quickTo(el.face, "y", { duration: D(0.35), ease: "power3" });
     const qr = gsap.quickTo(el.head, "rotation", { duration: D(0.5), ease: "power3" });
     const qhx = gsap.quickTo(el.head, "x", { duration: D(0.5), ease: "power3" });
-    function aim(dx, dy) { qx(dx * 10); qy(dy * 6); qr(dx * 6); qhx(dx * 4); }
+    // le visage reste dans l'écran : 7 px au plus, et il est de toute façon coupé par le bord de l'écran
+    function aim(dx, dy) { qx(dx * 7); qy(dy * 4); qr(dx * 6); qhx(dx * 4); }
 
     let fixedTarget = null; // un élément à regarder (le formulaire), ou null pour suivre la souris
     function directionTo(x, y, spanX, spanY) {
@@ -129,7 +130,7 @@
       tl = gsap.timeline();
       tl.to(el.armL, { rotation: 150, duration: D(0.45), ease: "back.out(2)" })
         .to(el.armR, { rotation: -150, duration: D(0.45), ease: "back.out(2)" }, "<")
-        .to(el.shackle, { y: -9, rotation: -18, duration: D(0.35), ease: "back.out(2)" }, "<")
+        .to(el.shackle, { y: -6, rotation: -16, duration: D(0.35), ease: "back.out(1.6)" }, "<")
         .to(el.bot, { y: -26, duration: D(0.2), ease: "power2.out", yoyo: true, repeat: 1 }, "<")
         .to(el.shadow, { scaleX: 0.8, duration: D(0.2), yoyo: true, repeat: 1 }, "<");
       if (!reduce) tl.to([el.armL, el.armR], { rotation: (i) => (i ? -135 : 135), duration: 0.45, yoyo: true, repeat: -1, ease: "sine.inOut" });

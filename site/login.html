@@ -45,6 +45,7 @@
           <radialGradient id="floorGlow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffffff" stop-opacity="0.1"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/></radialGradient>
           <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
           <filter id="soft" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="6"/></filter>
+          <clipPath id="screenClip"><rect x="128" y="96" width="144" height="84" rx="22"/></clipPath>
         </defs>
 
         <!-- sol et ombre -->
@@ -77,12 +78,12 @@
           <!-- corps -->
           <rect x="128" y="212" width="144" height="126" rx="32" fill="url(#metal)" stroke="rgba(255,255,255,0.2)"/>
           <path d="M152 215 H248" stroke="rgba(255,255,255,0.1)" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="176" cy="236" r="3" fill="#2a2b2d"/><circle cx="200" cy="236" r="3" fill="#ff6363" filter="url(#glow)"/><circle cx="224" cy="236" r="3" fill="#2a2b2d"/>
-          <!-- serrure sur le torse -->
+          <circle cx="176" cy="229" r="3" fill="#2a2b2d"/><circle cx="200" cy="229" r="3" fill="#ff6363" filter="url(#glow)"/><circle cx="224" cy="229" r="3" fill="#2a2b2d"/>
+          <!-- serrure sur le torse : plus bas, pour que l'anse ouverte ne touche pas le voyant -->
           <g id="lock">
-            <g id="shackle"><path d="M190 267 V258 a10 10 0 0 1 20 0 V267" fill="none" stroke="#e6e6e6" stroke-width="5" stroke-linecap="round"/></g>
-            <rect x="184" y="266" width="32" height="26" rx="7" fill="#e6e6e6"/>
-            <circle cx="200" cy="277" r="3.8" fill="#454647"/><rect x="198.4" y="278" width="3.2" height="8" rx="1.6" fill="#454647"/>
+            <g id="shackle"><path d="M190 278 V269 a10 10 0 0 1 20 0 V278" fill="none" stroke="#e6e6e6" stroke-width="5" stroke-linecap="round"/></g>
+            <rect x="184" y="277" width="32" height="26" rx="7" fill="#e6e6e6"/>
+            <circle cx="200" cy="288" r="3.8" fill="#454647"/><rect x="198.4" y="289" width="3.2" height="8" rx="1.6" fill="#454647"/>
           </g>
 
           <!-- cou et tête -->
@@ -94,20 +95,21 @@
             <path d="M136 77 H264" stroke="rgba(255,255,255,0.12)" stroke-width="2" stroke-linecap="round"/>
             <rect x="124" y="92" width="152" height="92" rx="26" fill="#000" stroke="rgba(255,255,255,0.08)"/>
 
-            <g id="face">
+            <!-- le visage glisse sur l'écran mais ne peut jamais en sortir : tout ce qui dépasse est coupé -->
+            <g clip-path="url(#screenClip)"><g id="face">
               <!-- yeux -->
               <g id="eyes-normal" filter="url(#glow)"><rect x="156" y="118" width="24" height="34" rx="12" fill="#ff6363"/><rect x="220" y="118" width="24" height="34" rx="12" fill="#ff6363"/></g>
               <g id="eyes-angry" filter="url(#glow)" opacity="0" visibility="hidden"><path d="M152 124 L184 138 V148 Q184 153 179 153 H157 Q152 153 152 148 Z" fill="#ff6363"/><path d="M248 124 L216 138 V148 Q216 153 221 153 H243 Q248 153 248 148 Z" fill="#ff6363"/></g>
               <g id="eyes-happy" filter="url(#glow)" opacity="0" visibility="hidden" fill="none" stroke="#ff6363" stroke-width="7" stroke-linecap="round"><path d="M154 140 Q168 120 182 140"/><path d="M218 140 Q232 120 246 140"/></g>
               <g id="eyes-x" filter="url(#glow)" opacity="0" visibility="hidden" fill="none" stroke="#ff6363" stroke-width="6" stroke-linecap="round"><path d="M158 124 L180 146 M180 124 L158 146"/><path d="M220 124 L242 146 M242 124 L220 146"/></g>
               <!-- joues -->
-              <g id="blush" opacity="0"><ellipse cx="139" cy="161" rx="11" ry="6.5" fill="#ff8fb3"/><ellipse cx="261" cy="161" rx="11" ry="6.5" fill="#ff8fb3"/></g>
+              <g id="blush" opacity="0"><ellipse cx="146" cy="160" rx="10" ry="6" fill="#ff8fb3"/><ellipse cx="254" cy="160" rx="10" ry="6" fill="#ff8fb3"/></g>
               <!-- bouche -->
               <g id="mouth-neutral"><path d="M188 166 Q200 172 212 166" fill="none" stroke="#ff6363" stroke-width="4.5" stroke-linecap="round"/></g>
               <g id="mouth-smile" opacity="0" visibility="hidden"><path d="M182 160 Q200 180 218 160" fill="none" stroke="#ff6363" stroke-width="4.5" stroke-linecap="round"/></g>
               <g id="mouth-frown" opacity="0" visibility="hidden"><path d="M186 174 Q200 160 214 174" fill="none" stroke="#ff6363" stroke-width="4.5" stroke-linecap="round"/></g>
               <g id="mouth-o" opacity="0" visibility="hidden"><ellipse cx="200" cy="168" rx="6.5" ry="8.5" fill="none" stroke="#ff6363" stroke-width="4.5"/></g>
-            </g>
+            </g></g>
           </g>
 
         </g></g></g>
