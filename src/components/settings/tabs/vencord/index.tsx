@@ -22,8 +22,7 @@ import BadgeAPI from "@plugins/_api/badges";
 import NoTrack from "@plugins/_core/noTrack";
 import SettingsPlugin from "@plugins/_core/settings";
 import { gitRemote } from "@shared/vencordUserAgent";
-import { DONOR_ROLE_ID, GUILD_ID, IS_MAC, IS_WINDOWS, VC_DONOR_ROLE_ID, VC_GUILD_ID } from "@utils/constants";
-import { classNameFactory } from "@utils/css";
+import { DONOR_ROLE_ID, GUILD_ID, IS_WINDOWS, VC_DONOR_ROLE_ID, VC_GUILD_ID } from "@utils/constants";
 import { Margins } from "@utils/margins";
 import { isAnyPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
@@ -33,8 +32,7 @@ import { Alerts, GuildMemberStore, React, showToast, UserStore } from "@webpack/
 import { DonateButtonComponent } from "./DonateButton";
 import { MacOSVibrancySettings } from "./MacVibrancySettings";
 import { NotificationSection } from "./NotificationSettings";
-import { VaultBadgesSection } from "./VaultBadgesSection";
-import { VaultLicenceSection } from "./VaultLicenceSection";
+import { openPlayground } from "./playground";
 import { WindowsMaterialSettings } from "./WindowsMaterialSettings";
 
 const VENNIE_DONATOR_IMAGE = "https://cdn.discordapp.com/emojis/1238120638020063377.png";
@@ -42,22 +40,6 @@ const COZY_CONTRIB_IMAGE = "https://cdn.discordapp.com/emojis/102653307095587233
 
 const DONOR_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070116305436712.png?size=2048";
 const CONTRIB_BACKGROUND_IMAGE = "https://media.discordapp.net/stickers/1311070166481895484.png?size=2048";
-
-const cl = classNameFactory("vc-vencord-tab-");
-
-// Windows desktop only: the uninstaller closes Discord, takes Vault out of it, deletes Vault's folder and reopens Discord
-function confirmUninstall() {
-    Alerts.show({
-        title: "Uninstall Vault?",
-        body: "Discord will close, go back to normal and reopen without Vault. Vault's files are deleted. You can install Vault again at any time.",
-        confirmText: "Uninstall",
-        cancelText: "Cancel",
-        onConfirm: async () => {
-            const res = await VencordNative.updater.uninstall();
-            if (!res.ok) showToast({ text: `Could not start the uninstaller: ${res.error?.message ?? res.error}`, variant: "critical" });
-        }
-    });
-}
 
 type KeysOfType<Object, Type> = {
     [K in keyof Object]: Object[K] extends Type ? K : never;
@@ -277,6 +259,11 @@ function EquicordSettings() {
                         )
                     }
                 />
+                {IS_DEV && <QuickAction
+                    Icon={PaintbrushIcon}
+                    text="Open Component Playground"
+                    action={() => openPlayground()}
+                />}
             </QuickActionCard>
 
             <Divider className={Margins.top20} />

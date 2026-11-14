@@ -16,8 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Logger } from "@utils/Logger";
 import * as t from "@vencord/discord-types";
-import { _resolveReady, filters, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, waitFor } from "@webpack";
+import { _resolveReady, filters, findByCode, findByCodeLazy, findByPropsLazy, findLazy, mapMangledModuleLazy, proxyLazyWebpack, waitFor } from "@webpack";
 import type * as TSPattern from "ts-pattern";
 
 export let FluxDispatcher: t.FluxDispatcher;
@@ -70,21 +71,14 @@ waitFor("parseTopic", m => Parser = m);
 export let Alerts: t.Alerts;
 waitFor(["show", "close"], m => Alerts = m);
 
-// Discord rewrote its toast module: the function no longer contains ".currentToastMap.has(" (that search then finds nothing, and
-// every showToast call threw "apply was called on null", which silently stopped whatever called it). Both versions are tried.
-const showToastNew = findByCodeLazy("queuedToastsMap", ".toastKey");
-const showToastOld = findByCodeLazy(".currentToastMap.has(");
-export const showToast: t.showToast = ((...args: Parameters<t.showToast>) => {
-    let lastError: unknown;
-    for (const show of [showToastNew, showToastOld]) {
-        try {
-            return (show as t.showToast)(...args);
-        } catch (err) {
-            lastError = err; // not found in this Discord version: try the other one
-        }
-    }
-    console.error("[Vault] could not show a toast", lastError);
-}) as t.showToast;
+export const showToast: t.showToast = proxyLazyWebpack(() => {
+    const Toaster = findByCode(".currentToastMap.get(", "setState");
+    if (Toaster) return Toaster;
+
+    const logger = new Logger("Toast");
+    logger.error("Failed to find showToast! Falling back to logging");
+    return logger.log.bind(logger);
+});
 
 export const UserUtils = {
     getUser: findByCodeLazy(".USER(")

@@ -37,6 +37,7 @@ import { StartAt } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
 import { get as dsGet } from "./api/DataStore";
+import { showNotice } from "./api/Notices";
 import { showNotification } from "./api/Notifications";
 import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
 import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
@@ -128,8 +129,7 @@ let checkingForUpdates = false;
 let failedUpdate: string | undefined;
 
 async function runUpdateCheck() {
-    if (IS_UPDATER_DISABLED || checkingForUpdates) return;
-    checkingForUpdates = true;
+    if (IS_UPDATER_DISABLED) return;
 
     try {
         const isOutdated = await checkForUpdates();
